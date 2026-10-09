@@ -1,0 +1,29 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+	<!-- Row in the BGF result list. Children are built in BGFRowMixin:OnLoad (UI/List.lua). -->
+	<Button name="BGFRowTemplate" virtual="true" mixin="BGFRowMixin" registerForClicks="LeftButtonUp, RightButtonUp">
+		<Size x="300" y="22"/>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+			<OnClick method="OnClick"/>
+			<OnEnter method="OnEnter"/>
+			<OnLeave method="OnLeave"/>
+		</Scripts>
+	</Button>
+
+	<!-- Collapsible section header (Groups / Players / Sorted out). -->
+	<Button name="BGFHeaderTemplate" virtual="true" mixin="BGFHeaderMixin">
+		<Size x="300" y="26"/>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+			<OnClick method="OnClick"/>
+		</Scripts>
+	</Button>
+
+	<!-- Status message line (lockdown, everything sorted out). -->
+	<Frame name="BGFMessageTemplate" virtual="true" mixin="BGFMessageMixin">
+		<Size x="300" y="34"/>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</Frame>
+</Ui>

@@ -1,0 +1,12 @@
+Fonts shipped with Better Group Finder (all SIL Open Font License 1.1, see OFL-*.txt):
+
+Philosopher-Regular.ttf      Philosopher, (c) The Philosopher Project Authors.
+                             Subset to Latin/Greek/Cyrillic.
+RobotoCondensed-Regular.ttf  Roboto Condensed, (c) The Roboto Project Authors.
+                             Static Regular instance of the variable font, subset to Latin/Greek/Cyrillic.
+NotoSans-Regular.ttf         Noto Sans, (c) The Noto Project Authors.
+                             Static Regular instance of the variable font, subset to Latin/Greek/Cyrillic.
+PTSansNarrow-Regular.ttf     PT Sans Narrow, (c) ParaType Ltd. Unmodified original
+                             (Reserved Font Names "PT Sans" and "ParaType").
+
+Source: https://github.com/google/fonts
