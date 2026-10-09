@@ -25,3 +25,5 @@ Basis: BetterGroupFinder 0.5.0 (/home/claude/BetterGroupFinder, ZIP /home/claude
 7. Rollen-Chips: grauer Hinweis "automatisch, Klick ändert" weg aus der Leiste, stattdessen Tooltip der Rollen-Chips (Automatisch/Manuell gewählt, Klick ändert, "Filter zurücksetzen" in den Optionen).
 8. Profilanzeige in der Filterleiste entfällt.
 9. Punkte-Erklärung (11 Sprachen), README (Quelle talentsforever.com, CC BY 4.0 nennen; Hinweis Talente können sich bis Release 4.11. ändern), Tests anpassen. Version 0.6.0, ZIP bauen, prüfen, senden. Danach wieder warten.
+
+10. Nach 0.6.0: GitHub-Releases v0.1.0 bis v0.6.0 anlegen (ZIPs aus releases/ anhängen, kurze Änderungsliste aus README-Changelog). Danach releases/-Ordner wieder aus dem Repo entfernen.
