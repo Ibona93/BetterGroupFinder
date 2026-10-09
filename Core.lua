@@ -9,13 +9,14 @@ attached when that addon loads.
 local BLIZZ_ADDON = "Blizzard_GroupFinder_VanillaStyle"
 
 ns.DEFAULTS = {
-	schema = 4,
+	schema = 5,
 	enabled = true,         -- "BGF filter active": rating, sorting, sorting out
 	uiEnabled = true,       -- /bgf on|off: BGF list at all (off = Blizzard's original list)
 	showScores = true,
 	filterOpen = false,
 	font = "friz",
 	showAllAbilities = false,
+	showClasses = false,
 	autoSend = true,
 	showReasons = true,
 	abilityStates = ns.DEFAULT_ABILITY_STATES,
@@ -26,14 +27,12 @@ ns.DEFAULTS = {
 	debug = false,
 }
 
--- 0.4.0 combined two pairs of filters; keeps the stronger of the old settings.
-local RANK = { ignore = 0, pref = 1, need = 2 }
-function ns.MigrateAbilities(states)
+-- 0.6.0 replaced the class buff chips and "summon" by class chips: drop settings of
+-- abilities that no longer exist (class chips start as "ignore").
+function ns.CleanAbilityStates(states)
 	for _, profile in pairs(states or {}) do
-		for target, old in pairs({ summon = "healthstone", buff_stamina = "fearward" }) do
-			local a, b = profile[target] or "ignore", profile[old] or "ignore"
-			profile[target] = (RANK[b] or 0) > (RANK[a] or 0) and b or a
-			profile[old] = nil
+		for id in pairs(profile) do
+			if not ns.ABILITY_BY_ID[id] then profile[id] = nil end
 		end
 	end
 end
@@ -82,7 +81,11 @@ function ns.FormatReason(reason)
 	for i = 3, #reason do
 		local v = reason[i]
 		if type(v) == "string" then
-			if ns.ABILITY_BY_ID[v] then
+			if v:sub(1, 5) == "cond:" then
+				local keys = {}
+				for condKey in v:sub(6):gmatch("[^,]+") do keys[#keys + 1] = condKey end
+				v = ns.ConditionText({ cond = keys }) or ""
+			elseif ns.ABILITY_BY_ID[v] then
 				v = ns.AbilityName(v)
 			elseif v == "TANK" or v == "HEALER" or v == "DAMAGER" then
 				v = ns.RoleName(v)
@@ -175,12 +178,12 @@ frame:SetScript("OnEvent", function(_, event, arg1)
 			local oldSchema = BetterGroupFinderDB.schema or 0
 			ns.db = ns.MergeDefaults(BetterGroupFinderDB, ns.DEFAULTS)
 			ns.db.scale = nil -- removed in 0.2.0
-			if not isNew and oldSchema < 4 then
-				ns.MigrateAbilities(ns.db.abilityStates)
+			if not isNew and oldSchema < 5 then
 				ns.db.compact = nil  -- 0.4.0: only the two-line view
 				ns.db.fontSize = nil -- 0.4.0: fixed sizes like Blizzard (names 14, rest 12)
-				ns.db.schema = 4
+				ns.db.schema = 5
 			end
+			ns.CleanAbilityStates(ns.db.abilityStates)
 			if ns.Fonts then ns.Fonts.RegisterShared() end
 			if isBlizzLoaded() then attachUI() end
 		elseif arg1 == BLIZZ_ADDON then

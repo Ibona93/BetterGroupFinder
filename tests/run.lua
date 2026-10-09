@@ -215,37 +215,83 @@ do
 	local dps = S.GroupValue({ M("WARRIOR", 30, "DAMAGER") }, { roleTargets = targets, states = states })
 	check("13b the same warrior counts more as tank than as damage dealer", tank and dps and tank.percent > dps.percent,
 		(tank and tank.percent or "?") .. " vs " .. (dps and dps.percent or "?"))
-	check("13c abilities counted as covered/considered", tank.abilitiesTotal == 3 and tank.abilitiesCovered == 1,
-		tank.abilitiesCovered .. "/" .. tank.abilitiesTotal)
+	check("13c abilities counted as covered/considered (warrior 30: shield bash + talent possible)",
+		tank.abilitiesTotal == 2 and tank.abilitiesCovered == 2, tank.abilitiesCovered .. "/" .. tank.abilitiesTotal)
 	check("13d no role targets (quests) -> no group value", S.GroupValue({ M("MAGE", 30) }, { states = states }) == nil)
-	local lowLock = S.Coverage({ M("WARLOCK", 15) })
-	local lock = S.Coverage({ M("WARLOCK", 20) })
-	check("13e warlock 15: summon & healthstones only possible, from 20 sure", lowLock.summon == "possible" and lock.summon == "sure",
-		tostring(lowLock.summon) .. "/" .. tostring(lock.summon))
-	check("13f priest level 1 covers stamina & Fear Ward", S.Coverage({ M("PRIEST", 1) }).buff_stamina == "sure")
-	check("13g old ability ids are gone", ns.ABILITY_BY_ID.healthstone == nil and ns.ABILITY_BY_ID.fearward == nil)
-	local old = { dungeon = { summon = "pref", healthstone = "need", buff_stamina = "pref", fearward = "ignore" } }
-	ns.MigrateAbilities(old)
-	check("13h migration keeps the stronger setting", old.dungeon.summon == "need" and old.dungeon.buff_stamina == "pref"
-		and old.dungeon.healthstone == nil and old.dungeon.fearward == nil)
+	check("13e class chips: the member's class is always covered", S.Coverage({ M("DRUID", 5) }).class_DRUID == "sure"
+		and S.Coverage({ M("DRUID", 5) }).class_MAGE == nil)
+	check("13f class-only buffs are tooltip categories, not rated abilities", ns.ABILITY_BY_ID.buff == nil
+		and ns.ABILITY_BY_ID.summon == nil and ns.ABILITY_BY_ID.buff_stamina == nil and #ns.ABILITIES == 18)
+	check("13g all class chips start as 'ignore'", ns.DEFAULT_ABILITY_STATES.dungeon.class_WARLOCK == "ignore"
+		and ns.DEFAULT_ABILITY_STATES.raid.class_PRIEST == "ignore")
+	local old = { dungeon = { summon = "pref", buff_stamina = "need", cc = "need", class_DRUID = "pref" } }
+	ns.CleanAbilityStates(old)
+	check("13h old settings of removed chips are dropped", old.dungeon.summon == nil and old.dungeon.buff_stamina == nil
+		and old.dungeon.cc == "need" and old.dungeon.class_DRUID == "pref")
 	local hinted = false
 	for _, list in pairs(ns.INSTANCE_HINTS) do for _, id in ipairs(list) do
 		if not ns.ABILITY_BY_ID[id] then hinted = id end
 	end end
 	check("13i instance hints only use existing abilities", hinted == false, tostring(hinted))
-	check("13j mana: paladin from 14, shaman from 26", S.Coverage({ M("PALADIN", 13) }).buff_mana == nil
-		and S.Coverage({ M("PALADIN", 14) }).buff_mana == "sure" and S.Coverage({ M("SHAMAN", 25) }).buff_mana == nil
-		and S.Coverage({ M("SHAMAN", 26) }).buff_mana == "sure")
+	check("13j mana: paladin from 14, shaman talent from 25 (possible), totem from 26", S.Coverage({ M("PALADIN", 13) }).buff_mana == nil
+		and S.Coverage({ M("PALADIN", 14) }).buff_mana == "sure" and S.Coverage({ M("SHAMAN", 24) }).buff_mana == nil
+		and S.Coverage({ M("SHAMAN", 25) }).buff_mana == "possible" and S.Coverage({ M("SHAMAN", 26) }).buff_mana == "sure")
 	local missing = false
 	for class, list in pairs(ns.CLASS_ABILITIES) do
 		for _, e in ipairs(list) do
-			if not ns.SPELLS[e.sp] or not ns.ABILITY_BY_ID[e.a] or (e.cond and not ns.Locales.enUS["COND_" .. e.cond]) then
-				missing = class .. " " .. tostring(e.sp)
+			local known = ns.ABILITY_BY_ID[e.a] or e.a == "buff" or e.a == "utility"
+			local conds = type(e.cond) == "table" and e.cond or { e.cond }
+			for _, c in ipairs(conds) do
+				if not ns.Locales.enUS["COND_" .. c] then known = false end
 			end
+			if not ns.SPELLS[e.sp] or not known then missing = class .. " " .. tostring(e.sp) end
 		end
 	end
 	check("13k every class entry has a tooltip spell, a known ability and a condition text", missing == false, tostring(missing))
 	check("13l spell names fall back to the client language without game data", ns.SpellName("fear_ward") == "Furchtzauberschutz")
+end
+
+print("Class chips, talents and stricter 'required' (0.6.0)")
+do
+	local host = { M("WARRIOR", 30, "TANK"), M("PRIEST", 30, "HEALER") }
+	local ctx = dungeonCtx(host, { M("DRUID", 30, "DAMAGER") }, { activity = { minLevel = 25, minSuggest = 25, maxSuggest = 35 } })
+	local base = S.Evaluate(ctx)
+	ctx = dungeonCtx(host, { M("DRUID", 30, "DAMAGER") }, { activity = { minLevel = 25, minSuggest = 25, maxSuggest = 35 } })
+	ctx.states.class_DRUID = "pref"
+	local pref = S.Evaluate(ctx)
+	check("14a class chip 'preferred' adds its weight", pref.score - base.score == ns.CLASS_WEIGHT and hasReason(pref, "R_BRINGS", "class_DRUID"),
+		("%s -> %s"):format(base.score, pref.score))
+	ctx = dungeonCtx(host, { M("MAGE", 30, "DAMAGER") }, { activity = { minLevel = 25, minSuggest = 25, maxSuggest = 35 } })
+	ctx.states.class_DRUID = "need"
+	local noDruid = S.Evaluate(ctx)
+	check("14b class chip 'required' missing -> still missing note with free slots", hasReason(noDruid, "R_STILL_MISSING", "class_DRUID")
+		and not noDruid.excluded, reasonsText(noDruid))
+	-- Talent: a level 30 priest may bring Silence; another player only "possible" with the talent named.
+	local lone = { M("WARRIOR", 11, "TANK"), M("HUNTER", 30, "DAMAGER"), M("HUNTER", 30, "DAMAGER"), M("HUNTER", 30, "DAMAGER") }
+	ctx = dungeonCtx(lone, { M("PRIEST", 30, "HEALER") }, { activity = { minLevel = 25, minSuggest = 25, maxSuggest = 35 } })
+	ctx.states.interrupt = "need"
+	ctx.states.cc = "ignore"
+	local priest = S.Evaluate(ctx)
+	local maybe
+	for _, r in ipairs(priest.reasons) do if r[2] == "R_BRINGS_MAYBE" and r[3] == "interrupt" then maybe = r[4] end end
+	check("14c talent abilities count as 'possible' with the condition as reason", maybe == "cond:TALENT", tostring(maybe))
+	check("14d 'required' is not met by 'possible' only: last slot -> sorted out", priest.excluded
+		and hasReason(priest, "R_REQUIRED_MISSING", "interrupt"), reasonsText(priest))
+	check("14e reason text names the real condition", ns.FormatReason({ "plus", "R_BRINGS_MAYBE", "interrupt", "cond:TALENT" })
+		== "+ bringt evtl. Unterbrechen (Talent)", ns.FormatReason({ "plus", "R_BRINGS_MAYBE", "interrupt", "cond:TALENT" }))
+	check("14f several conditions are joined", ns.ConditionText({ cond = { "TALENT", "HUMANOID" } }) == "Talent, nur Humanoide")
+	-- Own character: a learned talent is sure, a shield-dependent ability stays possible.
+	local me = M("WARRIOR", 38, "TANK")
+	me.isSelf = true
+	local cov = S.Coverage({ me }, function() return true end)
+	check("14g own learned talent counts as sure", cov.cc == "sure" and cov.interrupt == "sure", tostring(cov.cc))
+	local lowMe = M("WARRIOR", 30, "TANK")
+	lowMe.isSelf = true
+	local onlyBash = S.Coverage({ lowMe }, function(e) return e.sp == "shield_bash" end)
+	check("14h own shield bash stays possible (needs a shield)", onlyBash.interrupt == "possible", tostring(onlyBash.interrupt))
+	check("14i hunter: Trueshot Aura possible from 25, Wyvern Sting gone", S.Coverage({ M("HUNTER", 25) }).buff_ap == "possible"
+		and S.Coverage({ M("HUNTER", 24) }).buff_ap == nil and ns.SPELLS.wyvern_sting == nil)
+	check("14j druid: Feral Charge from 20, Bash from 14", S.Coverage({ M("DRUID", 14) }).interrupt == "possible")
 end
 
 print("Abbreviations and template languages")

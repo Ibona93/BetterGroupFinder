@@ -388,31 +388,47 @@ check("... view row is gone", ns.FilterBar.frame.ViewNormal == nil and ns.Filter
 enableBox.__checked = true
 pcall(enableBox.__scripts.OnClick, enableBox)
 check("re-checking rates again", ns.List.sections.rated == true and ns.List.scrollBox.__shown == true)
-local summonChip
-for _, c in ipairs(ns.FilterBar.frame.AbilityChips) do if c.ability == "summon" then summonChip = c end end
-local tt = ns.FilterBar.AbilitySources("summon")
-check("summon tooltip: Hexenmeister – Gesundheitsstein herstellen ab 10, Ritual der Beschwörung ab 20", #tt == 2
-	and tt[1].text:find("Hexenmeister", 1, true) and tt[1].text:find("Gesundheitsstein herstellen ab Stufe 10", 1, true)
-	and tt[2].text:find("Ritual der Beschwörung ab Stufe 20", 1, true) and not tt[1].text:find("möglich", 1, true), tt[1] and tt[1].text)
-for _, l in ipairs(tt) do print("      summon: " .. l.text) end
-tt = ns.FilterBar.AbilitySources("interrupt")
-check("interrupt tooltip names spells with conditions", tt[1].text:find("Schildhieb ab Stufe 12 (nur mit Schild)", 1, true)
+local druidChip, roleChip1
+for _, c in ipairs(ns.FilterBar.frame.AbilityChips) do if c.ability == "class_DRUID" then druidChip = c end end
+roleChip1 = ns.FilterBar.frame.RoleChips[1]
+local tt = ns.FilterBar.AbilitySources("interrupt")
+check("interrupt tooltip names spells, conditions and talents", tt[1].text:find("Schildhieb ab Stufe 12 (nur mit Schild)", 1, true)
 	and tt[2].text:find("Zuschlagen ab Stufe 38", 1, true), tt[1] and tt[1].text)
-for _, l in ipairs(tt) do print("      interrupt: " .. l.text) end
-tt = ns.FilterBar.AbilitySources("buff_stamina")
-check("priest chip: no class prefix, Seelenstärke 1 + Furchtzauberschutz 20", #tt == 2
-	and tt[1].text == "Machtwort: Seelenstärke ab Stufe 1" and tt[2].text == "Furchtzauberschutz ab Stufe 20", tt[1] and tt[1].text)
+local silence = false
+for _, l in ipairs(tt) do
+	print("      interrupt: " .. l.text)
+	if l.text:find("Stille ab Stufe 30 (Talent)", 1, true) then silence = true end
+end
+check("... including Silence as a talent", silence)
 tt = ns.FilterBar.AbilitySources("buff_mana")
-check("mana chip: Paladin 14, Schamane 26", #tt == 2 and tt[1].text:find("Segen der Weisheit ab Stufe 14", 1, true)
-	and tt[2].text:find("Totem der Manaquelle ab Stufe 26", 1, true), tt[1] and tt[1].text)
-check("buff chips only one class brings are named after the class", ns.AbilityName("buff_stamina") == "Priester"
-	and ns.AbilityName("buff_int") == "Magier" and ns.AbilityName("buff_wild") == "Druide" and ns.AbilityName("buff_mana") == "Mana")
+check("mana chip: Paladin 14, Schamane talent 25 + totem 26", #tt == 3 and tt[1].text:find("Segen der Weisheit ab Stufe 14", 1, true)
+	and tt[2].text:find("Totem der Manaflut ab Stufe 25 (Talent)", 1, true) and tt[3].text:find("Totem der Manaquelle ab Stufe 26", 1, true),
+	tt[1] and tt[1].text)
+tt = ns.FilterBar.ClassSources("DRUID")
+for _, l in ipairs(tt) do print("      Druide: " .. l.text) end
+check("class tooltip groups what the class brings", tt[1].text:find("^Kontrolle: Wucherwurzeln ab Stufe 8, Winterschlaf ab Stufe 18 %(nur Wildtiere/Drachkin%)")
+	and tt[#tt].text == "Buffs: Mal der Wildnis ab Stufe 1", tt[1] and tt[1].text)
+tt = ns.FilterBar.ClassSources("WARLOCK")
+local util = tt[#tt].text
+check("warlock tooltip lists healthstones and summoning under utility", util == "Sonstiges: Gesundheitsstein herstellen ab Stufe 10, Ritual der Beschwörung ab Stufe 20", util)
+tt = ns.FilterBar.ClassSources("PALADIN")
+local kings = false
+for _, l in ipairs(tt) do if l.text:find("Buffs: Segen der Könige ab Stufe 20, Segen der Rettung ab Stufe 26", 1, true) then kings = true end end
+check("paladin tooltip has Kings and Salvation", kings)
+tt = ns.FilterBar.ClassSources("PRIEST")
+check("priest tooltip: Seelenstärke, Furchtzauberschutz, Göttlicher Willen", tt[#tt].text ==
+	"Buffs: Machtwort: Seelenstärke ab Stufe 1, Furchtzauberschutz ab Stufe 20, Göttlicher Willen ab Stufe 30", tt[#tt].text)
+check("class chips are named after the class", ns.AbilityName("class_WARLOCK") == "Hexenmeister" and ns.AbilityName("class_DRUID") == "Druide"
+	and ns.AbilityName("buff_mana") == "Mana")
 _G.C_Spell = { GetSpellName = function(id) if id == 6673 then return "Schlachtruf (Spiel)" end end }
 check("spell names come from the game when it knows the ID", ns.SpellName("battle_shout") == "Schlachtruf (Spiel)"
 	and ns.SpellName("pummel") == "Zuschlagen")
 _G.C_Spell = nil
-ok, err = pcall(function() summonChip.__scripts.OnEnter(summonChip) summonChip.__scripts.OnLeave(summonChip) end)
-check("ability chip tooltip shows and hides", ok, err)
+ok, err = pcall(function() druidChip.__scripts.OnEnter(druidChip) druidChip.__scripts.OnLeave(druidChip) end)
+check("class chip tooltip shows and hides", ok, err)
+ok, err = pcall(function() roleChip1.__scripts.OnEnter(roleChip1) roleChip1.__scripts.OnLeave(roleChip1) end)
+check("role chip tooltip shows and hides", ok, err)
+check("no profile display and no grey role hint any more", ns.FilterBar.frame.ProfileValue == nil and ns.FilterBar.frame.RolesHint == nil)
 pcall(ns.UI.filterButton.__scripts.OnClick)
 check("closing the bar restores the original height", parent.__size.h == 535 and not ns.UI.filterButton.pressed, parent.__size.h)
 
@@ -432,14 +448,34 @@ ns.clientLocale = "deDE"
 ns.Fonts.Set("friz")
 ns.db.filterOpen = false
 pcall(ns.UI.filterButton.__scripts.OnClick)
-local visible = 0
-for _, c in ipairs(ns.FilterBar.frame.AbilityChips) do if c.__shown then visible = visible + 1 end end
-check("only the usual abilities are visible", visible == 7, visible)
-pcall(ns.FilterBar.frame.More.__scripts.OnClick, ns.FilterBar.frame.More)
-visible = 0
-for _, c in ipairs(ns.FilterBar.frame.AbilityChips) do if c.__shown then visible = visible + 1 end end
-check("'+ more' shows all abilities", visible == #ns.ABILITIES, visible)
-pcall(ns.FilterBar.frame.More.__scripts.OnClick, ns.FilterBar.frame.More)
+local f = ns.FilterBar.frame
+local function shownGroups()
+	local count = { core = 0, more = 0, class = 0 }
+	for _, c in ipairs(f.AbilityChips) do
+		if c.__shown then local g = ns.ABILITY_BY_ID[c.ability].group count[g] = count[g] + 1 end
+	end
+	return count
+end
+local v = shownGroups()
+check("only the 5 main abilities are visible", v.core == 5 and v.more == 0 and v.class == 0, v.core .. "/" .. v.more .. "/" .. v.class)
+check("toggle chips '+ mehr' and '+ Klassen'", f.More.label == "+ mehr" and f.Classes.label == "+ Klassen", f.Classes.label)
+local profile = ns.FilterBar.CurrentProfile()
+ns.db.abilityStates[profile].class_DRUID = "pref"
+ns.db.abilityStates[profile].curse = "need"
+ns.UI.ApplyLayout()
+v = shownGroups()
+check("collapsed groups stay hidden even when active (variant B)", v.more == 0 and v.class == 0, v.more .. "/" .. v.class)
+check("... the toggle chip counts active chips", f.Classes.label == "+ Klassen (1)" and f.More.label == "+ mehr (1)", f.Classes.label .. " | " .. f.More.label)
+pcall(f.Classes.__scripts.OnClick, f.Classes)
+v = shownGroups()
+check("'+ Klassen' shows all 9 class chips", v.class == 9 and ns.db.showClasses == true and f.Classes.label == "- Klassen", v.class)
+pcall(f.More.__scripts.OnClick, f.More)
+v = shownGroups()
+check("'+ mehr' shows the 4 removal chips", v.more == 4 and f.More.label == "- weniger", v.more)
+pcall(f.More.__scripts.OnClick, f.More)
+pcall(f.Classes.__scripts.OnClick, f.Classes)
+ns.db.abilityStates[profile].class_DRUID = "ignore"
+ns.db.abilityStates[profile].curse = "ignore"
 pcall(ns.UI.filterButton.__scripts.OnClick)
 
 print("Request button")
@@ -516,7 +552,7 @@ if ok and helpWin then
 		if item.kind == "row" and item.tag == "weights" and item.value ~= "" then weights = weights + 1 end
 		if item.kind == "row" and item.tag == "plus" then plusRows = plusRows + 1 end
 	end
-	check("... with 7 sections, 8 generated weight rows and plus rows", headers == 7 and weights == 8 and plusRows == 5,
+	check("... with 7 sections, 5 generated weight rows (classes in one row) and plus rows", headers == 7 and weights == 5 and plusRows == 5,
 		headers .. "/" .. weights .. "/" .. plusRows)
 	for _, item in ipairs(helpWin.Items) do
 		if item.tag == "weights" and item.kind == "row" then print(("      %3s | %s"):format(item.value, item.text)) end

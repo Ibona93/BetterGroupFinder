@@ -296,13 +296,17 @@ function Options.ParseHelp(text)
 			if t == "weights" then
 				-- one row per weight, highest first: "10 | Kontrolle", "6 | Fluch entfernen, ..."
 				local byWeight, weights = {}, {}
-				for _, ability in ipairs(ns.ABILITIES) do
-					if not byWeight[ability.weight] then
-						byWeight[ability.weight] = {}
-						weights[#weights + 1] = ability.weight
+				local function add(weight, name)
+					if not byWeight[weight] then
+						byWeight[weight] = {}
+						weights[#weights + 1] = weight
 					end
-					table.insert(byWeight[ability.weight], ns.AbilityName(ability.id))
+					table.insert(byWeight[weight], name)
 				end
+				for _, ability in ipairs(ns.ABILITIES) do
+					if ability.group ~= "class" then add(ability.weight, ns.AbilityName(ability.id)) end
+				end
+				add(ns.CLASS_WEIGHT, ns.L.CLASS_WEIGHT_ROW)
 				table.sort(weights, function(x, y) return x > y end)
 				for _, w in ipairs(weights) do
 					items[#items + 1] = { kind = "row", tag = t, value = tostring(w), text = table.concat(byWeight[w], ", ") }

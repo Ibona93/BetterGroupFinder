@@ -3,7 +3,7 @@ local ADDON_NAME, ns = ...
 --[[
 Filter bar under the Group Finder header (style of the approved mockup): rounded "pill"
 chips, a dot for "required", a half dot for "preferred", a check mark on selected roles,
-rarely used abilities behind "+ more". Opens with the filter button next to Refresh; the
+rarely used abilities behind "+ more", class chips behind "+ Classes". Opens with the filter button next to Refresh; the
 window grows by the bar's height so the list keeps its size.
 ]]
 
@@ -21,8 +21,6 @@ end
 local CHIP_GAP = 5
 local ROW_GAP = 7
 local PADDING = 9
-
-local CORE_ABILITIES = { cc = true, interrupt = true, curse = true, magic = true, poison = true, battleres = true, summon = true }
 
 local C = {
 	gold = { 1, 0.82, 0 },
@@ -128,7 +126,11 @@ local function createChip(parent, onClick)
 	chip:SetScript("OnEnter", function(self)
 		self.hover = true
 		Bar.StyleChip(self)
-		if self.ability then Bar.ShowAbilityTooltip(self) end
+		if self.ability then
+			Bar.ShowAbilityTooltip(self)
+		elseif self.role then
+			Bar.ShowRoleTooltip(self)
+		end
 	end)
 	chip:SetScript("OnLeave", function(self)
 		self.hover = false
@@ -182,39 +184,66 @@ local function text(parent, color, sizeOffset)
 	return fs
 end
 
--- Tooltip: "Class – Spell from level N (condition)" per spell, sorted by class and level.
--- Chips named after a class leave out the class prefix.
+local function spellText(entry)
+	local L = ns.L
+	local line = L.CHIP_TT_SPELL:format(ns.SpellName(entry.sp), entry.level)
+	local cond = ns.ConditionText(entry)
+	if cond then
+		line = line .. " (" .. cond .. ")"
+	elseif entry.possible then
+		line = line .. " " .. L.CHIP_TT_POSSIBLE
+	end
+	return line
+end
+Bar.SpellText = spellText
+
+local function sortedEntries(class, filter)
+	local entries = {}
+	for _, e in ipairs(ns.CLASS_ABILITIES[class] or {}) do
+		if filter(e) then entries[#entries + 1] = e end
+	end
+	table.sort(entries, function(x, y) return x.level < y.level end)
+	return entries
+end
+
+local function coloredClass(class)
+	local name = ns.ClassName(class)
+	local c = RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
+	if not c then return name end
+	return ("|cff%02x%02x%02x%s|r"):format(math.floor(c.r * 255), math.floor(c.g * 255), math.floor(c.b * 255), name)
+end
+
+-- Ability chip tooltip: "Class – Spell from level N (condition)", sorted by class and level.
 function Bar.AbilitySources(id)
 	local L = ns.L
-	local ability = ns.ABILITY_BY_ID[id]
 	local lines = {}
 	for _, class in ipairs(ns.CLASS_ORDER) do
-		if not (ability and ability.class and ability.class ~= class) then
-			local entries = {}
-			for _, e in ipairs(ns.CLASS_ABILITIES[class] or {}) do
-				if e.a == id then entries[#entries + 1] = e end
-			end
-			table.sort(entries, function(x, y) return x.level < y.level end)
-			for _, e in ipairs(entries) do
-				local spell = ns.SpellName(e.sp)
-				local line
-				if ability and ability.class then
-					line = L.CHIP_TT_SPELL:format(spell, e.level)
-				else
-					local c = RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
-					local name = ns.ClassName(class)
-					if c then
-						name = ("|cff%02x%02x%02x%s|r"):format(math.floor(c.r * 255), math.floor(c.g * 255), math.floor(c.b * 255), name)
-					end
-					line = L.CHIP_TT_LINE:format(name, spell, e.level)
-				end
-				if e.cond then
-					line = line .. " (" .. L["COND_" .. e.cond] .. ")"
-				elseif e.possible and not e.partial then
-					line = line .. " " .. L.CHIP_TT_POSSIBLE
-				end
-				lines[#lines + 1] = { text = line, class = class, level = e.level }
-			end
+		for _, e in ipairs(sortedEntries(class, function(e) return e.a == id end)) do
+			lines[#lines + 1] = { text = L.CHIP_TT_LINE:format(coloredClass(class), ns.SpellName(e.sp), e.level)
+				.. (ns.ConditionText(e) and (" (" .. ns.ConditionText(e) .. ")") or (e.possible and (" " .. L.CHIP_TT_POSSIBLE) or "")),
+				class = class, level = e.level }
+		end
+	end
+	return lines
+end
+
+-- Class chip tooltip: what the class brings, grouped by area ("Kontrolle: Verwandlung ab Stufe 8").
+function Bar.ClassSources(class)
+	local L = ns.L
+	local categories = {}
+	for _, ability in ipairs(ns.ABILITIES) do
+		if ability.group ~= "class" then categories[#categories + 1] = ability.id end
+	end
+	for _, cat in ipairs(ns.TOOLTIP_CATEGORIES) do categories[#categories + 1] = cat end
+	local lines = {}
+	for _, cat in ipairs(categories) do
+		local parts = {}
+		for _, e in ipairs(sortedEntries(class, function(e) return e.a == cat end)) do
+			parts[#parts + 1] = spellText(e)
+		end
+		if #parts > 0 then
+			local label = ns.ABILITY_BY_ID[cat] and ns.AbilityName(cat) or L["CAT_" .. cat]
+			lines[#lines + 1] = { text = L.CHIP_TT_CAT:format(label, table.concat(parts, ", ")), category = cat }
 		end
 	end
 	return lines
@@ -223,10 +252,22 @@ end
 function Bar.ShowAbilityTooltip(chip)
 	GameTooltip:SetOwner(chip, "ANCHOR_TOP")
 	GameTooltip:SetText(ns.AbilityName(chip.ability), 1, 0.82, 0)
-	for _, line in ipairs(Bar.AbilitySources(chip.ability)) do
-		GameTooltip:AddLine(line.text, 1, 1, 1)
+	local ability = ns.ABILITY_BY_ID[chip.ability]
+	local lines = ability and ability.class and Bar.ClassSources(ability.class) or Bar.AbilitySources(chip.ability)
+	for _, line in ipairs(lines) do
+		GameTooltip:AddLine(line.text, 1, 1, 1, true)
 	end
 	GameTooltip:AddLine(ns.L.CHIP_TT_CLICK, 0.6, 0.6, 0.6, true)
+	GameTooltip:Show()
+end
+
+function Bar.ShowRoleTooltip(chip)
+	local L = ns.L
+	GameTooltip:SetOwner(chip, "ANCHOR_TOP")
+	GameTooltip:SetText(chip.label or "", 1, 0.82, 0)
+	local manual = next(ns.db.roleChips) ~= nil
+	GameTooltip:AddLine(manual and L.ROLE_TT_MANUAL or L.ROLE_TT_AUTO, 1, 1, 1, true)
+	GameTooltip:AddLine(L.ROLE_TT_CLICK:format(L.OPT_RESET_FILTERS), 0.6, 0.6, 0.6, true)
 	GameTooltip:Show()
 end
 
@@ -275,10 +316,6 @@ function Bar.Create(parent)
 	f.RatingLabel = text(f, C.grey)
 	f.RatingLabel:SetText(L.RATING_FOR)
 	f.RatingValue = text(f, C.green)
-	f.ProfileValue = text(f, C.white)
-	f.ProfileValue:SetJustifyH("RIGHT")
-	f.ProfileLabel = text(f, C.grey)
-	f.ProfileLabel:SetText(L.PROFILE)
 
 	-- Row 2: roles
 	f.RolesLabel = text(f, C.white)
@@ -291,9 +328,6 @@ function Bar.Create(parent)
 		chip.label = words.roles[role]:gsub("^%l", string.upper)
 		f.RoleChips[#f.RoleChips + 1] = chip
 	end
-	f.RolesHint = text(f, C.dim)
-	f.RolesHint:SetJustifyH("RIGHT")
-	f.RolesHint:SetText(L.ROLES_HINT)
 
 	-- Row 3: abilities
 	f.AbilitiesLabel = text(f, C.white)
@@ -310,6 +344,11 @@ function Bar.Create(parent)
 		ns.UI.ApplyLayout()
 	end)
 	f.More.state = "more"
+	f.Classes = createChip(f, function()
+		ns.db.showClasses = not ns.db.showClasses
+		ns.UI.ApplyLayout()
+	end)
+	f.Classes.state = "more"
 
 	-- Legend
 	f.LegendNeed = createMarker(f)
@@ -327,15 +366,24 @@ end
 function Bar.ApplyFonts()
 	local f = Bar.frame
 	if not f then return end
-	for _, fs in ipairs({ f.EnableText, f.Separator, f.RatingLabel, f.RatingValue, f.ProfileLabel, f.ProfileValue,
-		f.RolesLabel, f.RolesHint, f.AbilitiesLabel, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
+	for _, fs in ipairs({ f.EnableText, f.Separator, f.RatingLabel, f.RatingValue,
+		f.RolesLabel, f.AbilitiesLabel, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
 		fs:SetFontObject(font())
 	end
 end
 
-local function visibleAbility(chip, states)
-	if ns.db.showAllAbilities then return true end
-	return CORE_ABILITIES[chip.ability] or (states[chip.ability] or "ignore") ~= "ignore"
+-- Collapsed groups are hidden completely; the toggle chip shows how many are active.
+local function abilityGroup(chip)
+	local ability = ns.ABILITY_BY_ID[chip.ability]
+	return ability and ability.group or "core"
+end
+
+function Bar.ActiveCount(group, states)
+	local n = 0
+	for _, ability in ipairs(ns.ABILITIES) do
+		if ability.group == group and (states[ability.id] or "ignore") ~= "ignore" then n = n + 1 end
+	end
+	return n
 end
 
 -- Lays out all rows for the current width; returns the bar height.
@@ -359,15 +407,10 @@ function Bar.Layout()
 	f.Separator:SetPoint("LEFT", f.EnableText, "RIGHT", 7, 0)
 	f.RatingLabel:ClearAllPoints()
 	f.RatingLabel:SetPoint("LEFT", f.Separator, "RIGHT", 7, 0)
-	f.ProfileValue:ClearAllPoints()
-	f.ProfileValue:SetPoint("RIGHT", f, "TOPRIGHT", -PADDING, y - 9)
-	f.ProfileLabel:ClearAllPoints()
-	f.ProfileLabel:SetPoint("RIGHT", f.ProfileValue, "LEFT", -4, 0)
 	-- Not enough room (large font, long translation): drop the "Rating for:" label first.
 	local leftW = 24 + f.EnableText:GetStringWidth() + 14 + f.Separator:GetStringWidth()
 		+ f.RatingLabel:GetStringWidth() + 4 + f.RatingValue:GetStringWidth()
-	local rightW = f.ProfileLabel:GetStringWidth() + 4 + f.ProfileValue:GetStringWidth()
-	local tight = leftW + rightW + 2 * PADDING + 12 > width
+	local tight = leftW + 2 * PADDING + 12 > width
 	f.RatingLabel:SetShown(not tight)
 	f.RatingValue:ClearAllPoints()
 	if tight then
@@ -390,14 +433,10 @@ function Bar.Layout()
 		chip:SetPoint("TOPLEFT", x, y)
 		x = x + chip:GetWidth() + CHIP_GAP
 	end
-	f.RolesHint:ClearAllPoints()
-	f.RolesHint:SetPoint("LEFT", f, "TOPLEFT", x + 4, y - CHIP_HEIGHT / 2)
-	f.RolesHint:SetPoint("RIGHT", f, "TOPRIGHT", -PADDING, y - CHIP_HEIGHT / 2)
 	y = y - CHIP_HEIGHT - ROW_GAP
 
-	-- row 3: abilities, wrapping, with "+ more"
+	-- row 3: abilities, wrapping, with "+ more" and "+ Classes"; class chips in their own row
 	placeLabel(f.AbilitiesLabel)
-	local states = ns.db.abilityStates[Bar.CurrentProfile()] or {}
 	x = LABEL_WIDTH
 	local function place(chip)
 		local w = chip:GetWidth()
@@ -411,9 +450,18 @@ function Bar.Layout()
 		x = x + w + CHIP_GAP
 	end
 	for _, chip in ipairs(f.AbilityChips) do
-		if visibleAbility(chip, states) then place(chip) else chip:Hide() end
+		local group = abilityGroup(chip)
+		if group == "core" or (group == "more" and ns.db.showAllAbilities) then place(chip) else chip:Hide() end
 	end
 	place(f.More)
+	place(f.Classes)
+	if ns.db.showClasses then
+		x = LABEL_WIDTH
+		y = y - CHIP_HEIGHT - CHIP_GAP
+		for _, chip in ipairs(f.AbilityChips) do
+			if abilityGroup(chip) == "class" then place(chip) end
+		end
+	end
 	y = y - CHIP_HEIGHT - 6
 
 	-- legend, right aligned
@@ -493,17 +541,6 @@ function Bar.Update()
 	end
 
 	local profile = Bar.CurrentProfile()
-	local profileText
-	if profile == "dungeon" then
-		profileText = L.PROFILE_DUNGEON
-	elseif profile == "raid" then
-		profileText = _G.RAID or "Raid"
-	else
-		profileText = _G.GROUP or "Group"
-	end
-	f.ProfileLabel:SetText(L.PROFILE)
-	f.ProfileValue:SetText(profileText)
-
 	local auto, inGroup = autoRoles()
 	f.RolesLabel:SetText(inGroup and L.ROLES_GROUP or L.ROLES_SOLO)
 	local manual = next(ns.db.roleChips) ~= nil
@@ -513,7 +550,6 @@ function Bar.Update()
 		chip.state = on and "need" or "ignore"
 		Bar.StyleChip(chip)
 	end
-	f.RolesHint:SetShown(not manual)
 
 	local states = ns.db.abilityStates[profile] or {}
 	for _, chip in ipairs(f.AbilityChips) do
@@ -521,8 +557,15 @@ function Bar.Update()
 		chip.markerState = (chip.state == "need" or chip.state == "pref") and chip.state or nil
 		Bar.StyleChip(chip)
 	end
-	f.More.label = ns.db.showAllAbilities and L.LESS or L.MORE
+	local function toggleLabel(open, openText, closedText, group)
+		if open then return openText end
+		local n = Bar.ActiveCount(group, states)
+		return n > 0 and (closedText .. " (" .. n .. ")") or closedText
+	end
+	f.More.label = toggleLabel(ns.db.showAllAbilities, L.LESS, L.MORE, "more")
 	Bar.StyleChip(f.More)
+	f.Classes.label = toggleLabel(ns.db.showClasses, "- " .. L.CLASS_CHIPS, "+ " .. L.CLASS_CHIPS, "class")
+	Bar.StyleChip(f.Classes)
 
 
 	setMarker(f.LegendNeed, "need", C.dim, { 0.045, 0.035, 0.025 })
@@ -531,14 +574,14 @@ function Bar.Update()
 	-- Filter switched off: the bar stays open, everything except the switch is greyed out.
 	local enabled = ns.db.enabled
 	local alpha = enabled and 1 or 0.4
-	for _, list in ipairs({ f.RoleChips, f.AbilityChips, { f.More } }) do
+	for _, list in ipairs({ f.RoleChips, f.AbilityChips, { f.More, f.Classes } }) do
 		for _, chip in ipairs(list) do
 			chip:SetAlpha(alpha)
 			chip:SetEnabled(enabled)
 		end
 	end
-	for _, region in ipairs({ f.Separator, f.RatingLabel, f.RatingValue, f.ProfileLabel, f.ProfileValue, f.RolesLabel,
-		f.RolesHint, f.AbilitiesLabel, f.LegendNeed, f.LegendNeedText, f.LegendDot, f.LegendPref, f.LegendPrefText }) do
+	for _, region in ipairs({ f.Separator, f.RatingLabel, f.RatingValue, f.RolesLabel,
+		f.AbilitiesLabel, f.LegendNeed, f.LegendNeedText, f.LegendDot, f.LegendPref, f.LegendPrefText }) do
 		region:SetAlpha(alpha)
 	end
 end

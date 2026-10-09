@@ -36,26 +36,24 @@ function ns.GetRoleTargets(profileKey, maxPlayers)
 end
 
 -- Default state per ability and profile: "need", "pref" or "ignore".
+-- Class chips (class_*) start as "ignore" everywhere.
 ns.DEFAULT_ABILITY_STATES = {
 	dungeon = {
-		cc = "pref", interrupt = "pref", curse = "ignore", magic = "ignore", poison = "ignore",
-		disease = "ignore", battleres = "ignore", summon = "pref",
-		buff_stamina = "ignore", buff_int = "ignore", buff_wild = "ignore",
-		buff_ap = "ignore", buff_mana = "ignore",
+		cc = "pref", interrupt = "pref", battleres = "ignore", buff_ap = "ignore", buff_mana = "ignore",
+		curse = "ignore", magic = "ignore", poison = "ignore", disease = "ignore",
 	},
 	raid = {
-		cc = "pref", interrupt = "pref", curse = "pref", magic = "pref", poison = "pref",
-		disease = "pref", battleres = "pref", summon = "pref",
-		buff_stamina = "pref", buff_int = "pref", buff_wild = "pref",
-		buff_ap = "pref", buff_mana = "pref",
+		cc = "pref", interrupt = "pref", battleres = "pref", buff_ap = "pref", buff_mana = "pref",
+		curse = "pref", magic = "pref", poison = "pref", disease = "pref",
 	},
 	other = {
-		cc = "ignore", interrupt = "ignore", curse = "ignore", magic = "ignore", poison = "ignore",
-		disease = "ignore", battleres = "ignore", summon = "pref",
-		buff_stamina = "ignore", buff_int = "ignore", buff_wild = "ignore",
-		buff_ap = "ignore", buff_mana = "ignore",
+		cc = "ignore", interrupt = "ignore", battleres = "ignore", buff_ap = "ignore", buff_mana = "ignore",
+		curse = "ignore", magic = "ignore", poison = "ignore", disease = "ignore",
 	},
 }
+for _, states in pairs(ns.DEFAULT_ABILITY_STATES) do
+	for _, class in ipairs(ns.CLASS_ORDER) do states["class_" .. class] = "ignore" end
+end
 
 --[[
 Instance hints by instance map ID (activityInfo.mapID). Listed abilities get 1.5x weight
@@ -70,11 +68,11 @@ ns.INSTANCE_HINTS = {
 	[47]  = { "poison", "curse" },            -- Razorfen Kraul
 	[109] = { "curse", "magic" },             -- Sunken Temple
 	[349] = { "poison", "curse" },            -- Maraudon
-	[230] = { "buff_stamina", "magic" },          -- Blackrock Depths
+	[230] = { "class_PRIEST", "magic" },          -- Blackrock Depths (Fear Ward)
 	[329] = { "disease", "curse" },           -- Stratholme
 	[289] = { "curse", "disease", "magic" },  -- Scholomance
-	[409] = { "curse", "magic", "buff_stamina" }, -- Molten Core
-	[249] = { "buff_stamina" },                   -- Onyxia's Lair
-	[469] = { "magic", "buff_stamina" },          -- Blackwing Lair
+	[409] = { "curse", "magic", "class_PRIEST" }, -- Molten Core
+	[249] = { "class_PRIEST" },                   -- Onyxia's Lair (Fear Ward)
+	[469] = { "magic", "class_PRIEST" },          -- Blackwing Lair
 	[309] = { "poison", "curse" },            -- Zul'Gurub
 }

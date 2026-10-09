@@ -48,17 +48,34 @@ local function exclude(result, key, ...)
 	addReason(result, "exclude", key, ...)
 end
 
--- Ability coverage of one member: { [abilityId] = "sure" | "possible" }
+-- Ability coverage of one member: { [abilityId] = "sure" | "possible" }, plus the condition
+-- of each "possible" ability as a reason argument ("cond:TALENT,HUMANOID").
+-- Class chips: the member's class is always "sure".
+local function condArg(entry, unknownLevel)
+	if unknownLevel then return "cond:LEVEL" end
+	local cond = entry.cond
+	if type(cond) == "table" then cond = table.concat(cond, ",") end
+	return "cond:" .. (cond or "LEVEL")
+end
+
+-- A learned talent is sure; other conditions (shield, undead, pet ...) stay "possible".
+local function onlyTalent(entry)
+	local cond = entry.cond
+	if cond == "TALENT" then return true end
+	return type(cond) == "table" and #cond == 1 and cond[1] == "TALENT"
+end
+
 function S.MemberAbilities(member, selfKnown)
-	local out = {}
+	local out, conds = {}, {}
+	if member and member.class then out["class_" .. member.class] = "sure" end
 	local list = member and member.class and ns.CLASS_ABILITIES[member.class]
-	if not list then return out end
+	if not list then return out, conds end
 	for _, entry in ipairs(list) do
 		local state
 		local known = nil
 		if member.isSelf and selfKnown then known = selfKnown(entry) end
 		if known == true then
-			state = "sure"
+			state = (entry.possible and not onlyTalent(entry)) and "possible" or "sure"
 		elseif known == false then
 			state = nil
 		elseif member.level == nil then
@@ -68,20 +85,25 @@ function S.MemberAbilities(member, selfKnown)
 		end
 		if state and out[entry.a] ~= "sure" then
 			out[entry.a] = state
+			if state == "possible" and not conds[entry.a] then
+				conds[entry.a] = condArg(entry, member.level == nil)
+			end
 		end
 	end
-	return out
+	return out, conds
 end
 
 function S.Coverage(members, selfKnown)
-	local cov, classes = {}, {}
+	local cov, classes, conds = {}, {}, {}
 	for _, m in ipairs(members) do
-		for id, state in pairs(S.MemberAbilities(m, selfKnown)) do
+		local own, ownConds = S.MemberAbilities(m, selfKnown)
+		for id, state in pairs(own) do
 			if cov[id] ~= "sure" then cov[id] = state end
+			if state == "possible" and not conds[id] then conds[id] = ownConds[id] end
 		end
 		if m.class then classes[m.class] = (classes[m.class] or 0) + 1 end
 	end
-	return cov, classes
+	return cov, classes, conds
 end
 
 local function roleOptions(member)
@@ -242,7 +264,7 @@ function S.Evaluate(ctx)
 
 	-- 4. Abilities
 	local hostCov, hostClasses = S.Coverage(host, ctx.selfKnown)
-	local guestCov = S.Coverage(guest, ctx.selfKnown)
+	local guestCov, _, guestConds = S.Coverage(guest, ctx.selfKnown)
 	local hinted = {}
 	if ctx.hints then
 		for _, id in ipairs(ctx.hints) do hinted[id] = true end
@@ -262,15 +284,16 @@ function S.Evaluate(ctx)
 					addReason(result, "plus", "R_BRINGS", id)
 				elseif not h then
 					gain = w / 2
-					addReason(result, "plus", "R_BRINGS_MAYBE", id)
+					addReason(result, "plus", "R_BRINGS_MAYBE", id, guestConds[id] or "cond:LEVEL")
 				end
 				if gain then
 					abilityGain = abilityGain + gain
 					result.score = result.score + gain
 				end
 			end
+			-- "required" is only met by a sure ability; "possible" still counts as missing.
 			local combined = (h == "sure" or g == "sure") and "sure" or (h or g)
-			if not combined then
+			if combined ~= "sure" and (state == "need" or not combined) then
 				if state == "need" then
 					if total < maxPlayers then
 						result.score = result.score - w / 2

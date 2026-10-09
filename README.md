@@ -1,4 +1,4 @@
-# Better Group Finder (BGF) 0.5.0 – WoW Forever
+# Better Group Finder (BGF) 0.6.0 – WoW Forever
 
 Erweiterung für den Gruppenfinder von WoW Forever:
 - intelligente Filter
@@ -35,7 +35,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 | Punkte und Gruppenwert | Rechts der Nutzen („+30“). Bei Gruppen steht darunter in Grau der **Gruppenwert** („72 %“): wie vollständig die Gruppe schon ist. Bei Einzelspielern steht nur der Nutzen, mittig. Beides abschaltbar in den Optionen; dort erklärt „Wie entstehen die Punkte?“ die Berechnung. |
 | Schrift | Feste Größen wie bei Blizzard: Namen 14, alles andere 12. Schriftart wählbar (Standard: die WoW-Schrift). |
 | Abkürzungen | Passt ein Text nicht, kürzt BGF zuerst sinnvoll: „Höhlen d. Wehklagens“, „Ruinen v. Lordaeron“, „Aldarin S.“. Erst dann wird mit „…“ abgeschnitten. Der Tooltip zeigt immer die vollen Namen. |
-| Filterleiste | Filter-Button neben „Aktualisieren“ (bleibt eingedrückt, solange die Leiste offen ist). Abgerundete Chips, Punkt = benötigt, Halbkreis = bevorzugt, Häkchen = gewählte Rolle. Sieben übliche Fähigkeiten sind sichtbar (plus alle, die nicht auf „egal“ stehen), der Rest hinter „+ mehr“. |
+| Filterleiste | Filter-Button neben „Aktualisieren“ (bleibt eingedrückt, solange die Leiste offen ist). Abgerundete Chips, Punkt = benötigt, Halbkreis = bevorzugt, Häkchen = gewählte Rolle. Sichtbar sind Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft und Mana. Die Entfernen-Chips (Fluch, Magie, Gift, Krankheit) liegen hinter „+ mehr“, die neun Klassen-Chips hinter „+ Klassen“. Zugeklappt ist eine Gruppe ganz versteckt; die Zahl am Klappchip zeigt, wie viele davon aktiv sind, z. B. „+ Klassen (1)“. |
 | Filter aus | Haken „BGF-Filter aktiv“ entfernen: die BGF-Ansicht bleibt, aber ohne Punkte, ohne Aussortieren, in Blizzards Reihenfolge. Die Leiste bleibt offen (Filter ausgegraut). |
 | Notausgang | `/bgf off` zeigt Blizzards Originalliste (ohne Filterleiste und Filter-Button), `/bgf on` holt BGF zurück. |
 | Logo | Erscheint in der Addon-Liste. |
@@ -52,10 +52,11 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 ### Filterleiste
 - **BGF-Filter aktiv:** schaltet Bewertung, Sortierung und Aussortieren ein oder aus. Die BGF-Ansicht und die Leiste bleiben.
 - **Bewertung für:** deine Perspektive, z. B. „Jäger 22 · DPS“ oder „Deine Gruppe (3)“. Bei wenig Platz entfällt das Wort „Bewertung für:“.
-- **Profil:** folgt der Kategorie (Dungeons, Schlachtzüge, sonstige). Jedes Profil hat eigene Fähigkeiten-Einstellungen.
-- **Freier Platz für / Gesucht:** automatisch gesetzt (solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die fehlenden Rollen). Ein Klick wechselt auf manuelle Auswahl; „Filter zurücksetzen“ in den Optionen stellt wieder auf automatisch.
-- **Fähigkeiten:** ein Klick wechselt zwischen *egal* (grau), *bevorzugt* (weiß, Halbkreis) und *benötigt* (gold, Punkt). „+ mehr“ / „- weniger“ blendet die seltener genutzten ein und aus. Der Tooltip eines Chips zeigt Klasse, Zauber und Lernstufe, bei Bedingungen mit Hinweis (z. B. „Krieger – Schildhieb ab Stufe 12 (nur mit Schild)“). Die Zaubernamen kommen aus dem Spiel, also in deiner Clientsprache.
-- **Buffs:** Bringt nur eine Klasse den Buff, heißt der Chip wie die Klasse (**Priester**, **Magier**, **Druide**); der Tooltip listet deren Buffs („Machtwort: Seelenstärke ab Stufe 1“, „Furchtzauberschutz ab Stufe 20“). Buffs mehrerer Klassen heißen nach dem Zweck: **Angriffskraft** (Krieger, Paladin, Schamane) und **Mana** (Segen der Weisheit ab 14, Totem der Manaquelle ab 26).
+- **Profil:** wird nicht angezeigt, folgt aber der Kategorie oben im Fenster (Dungeons, Schlachtzüge, sonstige). Jede Kategorie hat eigene Chip-Einstellungen.
+- **Freier Platz für / Gesucht:** automatisch gesetzt (solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die fehlenden Rollen). Ein Klick wechselt auf manuelle Auswahl; „Filter zurücksetzen“ in den Optionen stellt wieder auf automatisch. Das erklärt auch der Tooltip der Rollen-Chips.
+- **Fähigkeiten:** ein Klick wechselt zwischen *egal* (grau), *bevorzugt* (weiß, Halbkreis) und *benötigt* (gold, Punkt). „+ mehr“ / „- weniger“ blendet die Entfernen-Chips ein und aus. Der Tooltip eines Chips zeigt Klasse, Zauber und Lernstufe, bei Bedingungen mit Hinweis (z. B. „Krieger – Schildhieb ab Stufe 12 (nur mit Schild)“, „Priester – Stille ab Stufe 30 (Talent)“). Die Zaubernamen kommen aus dem Spiel, also in deiner Clientsprache.
+- **Klassen:** „+ Klassen“ klappt einen Chip pro Klasse auf. Er bedeutet „diese Klasse in der Gruppe“: *bevorzugt* gibt Pluspunkte für einen Spieler dieser Klasse, *benötigt* sortiert aus, wenn sie fehlt und kein Platz mehr frei ist. Alle Klassen stehen von Haus aus auf *egal*. Der Tooltip zeigt, was die Klasse der Gruppe bringt, nach Bereichen sortiert, z. B. „Kontrolle: Wucherwurzeln ab Stufe 8, Winterschlaf ab Stufe 18 (nur Wildtiere/Drachkin)“ oder „Buffs: Segen der Könige ab Stufe 20, Segen der Rettung ab Stufe 26“.
+- **Buffs mehrerer Klassen** haben eigene Chips: **Angriffskraft** (Krieger, Paladin, Schamane; Jäger per Talent, nur Fernkampf) und **Mana** (Segen der Weisheit ab 14, Totem der Manaflut ab 25 per Talent, Totem der Manaquelle ab 26). Buffs einer einzigen Klasse (Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Könige …) stehen im Tooltip der Klasse.
 
 ### Vorlagen-Button
 | Auswahl | Was passiert | Menü-Überschrift |
@@ -123,14 +124,14 @@ Spieler mit mehreren angebotenen Rollen bekommen zuerst einen freien Tank- oder 
 | Füllt fehlenden Tank / Heiler | +40 |
 | Füllt fehlenden DPS-Platz | +20 |
 | Bringt fehlende Fähigkeit | + Gewicht (×1,5 bei „benötigt“, ×1,5 bei Instanz-Hinweis) |
-| Fähigkeit nur „möglich“ (Talent/Begleiter/Schild/Kreaturtyp) | + halbes Gewicht |
+| Fähigkeit nur „möglich“ (Talent/Begleiter/Schild/Kreaturtyp) | + halbes Gewicht; im Tooltip mit der echten Bedingung, z. B. „bringt evtl. Unterbrechen (Talent)“ |
 | Gruppe wäre vollständig | +10 |
 | Zusammenschluss möglich | +5 |
 | Weitere gleiche Klasse ohne neuen Nutzen | −10 (Schlachtzug −5) |
 | Kein neuer Nutzen | −5 (Schlachtzug −2) |
 | Stufe außerhalb der Empfehlung | −8 |
 | Überzählige Rolle im Schlachtzug | −8 |
-| „Benötigt“ fehlt noch, aber es sind Plätze frei | − halbes Gewicht |
+| „Benötigt“ fehlt noch oder ist nur „möglich“, aber es sind Plätze frei | − halbes Gewicht |
 
 **Gewichte der Fähigkeiten:**
 
@@ -138,18 +139,17 @@ Spieler mit mehreren angebotenen Rollen bekommen zuerst einen freien Tank- oder 
 |---|---|
 | Kontrolle | 10 |
 | Unterbrechen | 8 |
-| Beschwören & Gesundheitssteine (Hexenmeister: ab 10 „möglich“, ab 20 voll) | 7 (keine Versammlungssteine in Forever) |
-| Fluch entfernen, Magie bannen, Kampfwiederbelebung | 6 |
+| Fluch entfernen, Magie bannen, Kampfwiederbelebung, jede Klasse (Klassen-Chips) | 6 |
 | Gift heilen, Krankheit heilen | 5 |
-| Priester (Machtwort: Seelenstärke, Furchtzauberschutz) | 4 |
-| Druide (Mal der Wildnis) | 3 |
-| Magier (Arkane Intelligenz), Angriffskraft, Mana | 2 |
+| Angriffskraft, Mana | 2 |
+
+Im Schlachtzug zählt eine Klasse nur einmal: Ist schon ein Druide dabei, bringt ein zweiter für den Druiden-Chip nichts mehr.
 
 **Aussortiert** (in den Bereich „Aussortiert“, nie unsichtbar) werden:
 - zu viele Spieler zusammen
 - kein Platz für die Rolle (mit Angabe, welche Rolle noch gesucht wird)
 - Rolle nicht gesucht (manuelle Rollen-Auswahl)
-- eine *benötigte* Fähigkeit fehlt, und es ist kein Platz mehr frei
+- eine *benötigte* Fähigkeit oder Klasse fehlt (oder ist nur „möglich“), und es ist kein Platz mehr frei
 - Stufe unter der Mindeststufe der Aktivität
 - passt nicht zum Aktivitätsfilter, nicht mehr gelistet
 - **0 Punkte oder weniger** („Kein echter Mehrwert“)
@@ -163,10 +163,12 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
 
 **Fähigkeiten:**
 - Eigener Charakter: BGF prüft dein Zauberbuch. Das gilt aber nur, wenn die Klassik-Spell-IDs in Forever erkannt werden. Sonst fällt BGF auf Klasse + Stufe zurück, siehe `/bgf debug` → „spellbook check“.
-- Andere Spieler: Klasse + Stufe. Talentabhängiges gilt als „möglich“.
+- Andere Spieler: Klasse + Stufe. Talente, Begleiter, Schild oder Kreaturtyp machen eine Fähigkeit nur „möglich“.
+- Talente stammen aus den Talentbäumen der Forever-Beta (Build 1.60.1.70291): frühestens ab Stufe 10 + 5 × (Reihe − 1). Hast du selbst das Talent gelernt, zählt es bei dir als sicher.
+- Aufgenommene Talente: Erschütternder Schlag (Krieger), Buße (Paladin), Streuschuss, Einschüchterung und Aura des Volltreffers (Jäger), Stille (Priester), Totem der Manaflut (Schamane), Wilde Attacke (Druide).
 - Eine vorhandene Fähigkeit wird nicht noch einmal als fehlend oder als Vorteil gezählt.
 
-**Instanz-Hinweise** (`Data/Profiles.lua`): Für bekannte Instanzen werden bestimmte Fähigkeiten höher gewichtet und auch dann berücksichtigt, wenn sie auf „egal“ stehen. Beispiele sind Gift und Magie in den Höhlen des Wehklagens oder Krankheit und Fluch in Stratholme. Neue Forever-Instanzen kannst du dort ergänzen. Die `mapID` liefert `/bgf debug`.
+**Instanz-Hinweise** (`Data/Profiles.lua`): Für bekannte Instanzen werden bestimmte Fähigkeiten höher gewichtet und auch dann berücksichtigt, wenn sie auf „egal“ stehen. Beispiele sind Gift und Magie in den Höhlen des Wehklagens oder Krankheit und Fluch in Stratholme. Für Furcht-Instanzen (Schwarzfelstiefen, Geschmolzener Kern, Onyxias Hort, Pechschwingenhort) wird der Priester-Chip (Furchtzauberschutz) berücksichtigt. Neue Forever-Instanzen kannst du dort ergänzen. Die `mapID` liefert `/bgf debug`.
 
 **Unbekannte Daten:**
 - Fehlen Klasse oder Rolle, wird das als „? …“ gekennzeichnet und nicht geraten.
@@ -179,9 +181,10 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
 - **Nicht im Spiel getestet.** BGF wurde gegen Blizzards veröffentlichten Forever-UI-Code (1.60.1) und die offizielle API-Dokumentation gebaut, aber ohne Client. Siehe Abschnitt 6.
 - **Sprache des Gegenübers** liefert die API nicht. Darum wählst du im Menü zwischen deiner Sprache und Englisch.
 - **Spezialisierung und Talente** fremder Spieler sind nicht verfügbar. Talentabhängige Fähigkeiten zählen deshalb nur als „möglich“.
+- **Talentdaten** stammen aus [talentsforever.com](https://talentsforever.com/) (Daten aus dem Beta-Client, Build 1.60.1.70291, Lizenz CC BY 4.0), geprüft an einzelnen Wowhead-Forever-Zauberseiten. Bis zum Release (4. November 2026) können sich Talente noch ändern. Die Lernstufe von Hieb (Druide) ist aus Classic übernommen und nicht für Forever bestätigt.
 - **Fähigkeitentabelle** (`Data/Abilities.lua`): Lernstufen und Spell-IDs stammen aus WoW Classic.
   - Zaubernamen im Tooltip liefert das Spiel (`C_Spell.GetSpellName`). Kennt Forever eine ID nicht, zeigt BGF den Namen aus der Tabelle: auf Deutsch, in allen anderen Sprachen auf Englisch.
-  - Verifiziert für Forever ist nur: kein Kampfrausch/Heldentum, Furchtschutz für alle Priester ab 20. Weil nur Priester Seelenstärke und Furchtzauberschutz bringen, sind beide im Chip „Priester“ zusammengefasst (ebenso Beschwören und Gesundheitssteine beim Hexenmeister).
+  - Für Forever bestätigt: kein Kampfrausch/Heldentum, Furchtzauberschutz für alle Priester ab 20, Segen der Könige (20) und der Rettung (26) sowie Göttlicher Willen (30) ohne Talent, kein Stich des Flügeldrachen.
   - Nach Klassenpatches muss die Tabelle eventuell angepasst werden.
 - **Instanz-Hinweise** nutzen Klassik-`mapID`s. Ob Forever dieselben verwendet, zeigt `/bgf debug`.
 - **Sprachen außer Deutsch/Englisch** sind von mir übersetzt und sollten vor einer Veröffentlichung von Muttersprachlern geprüft werden.
@@ -199,8 +202,8 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
 | Test | Umfang | Ergebnis |
 |---|---|---|
 | `luacheck` (Lua 5.1) | alle 26 Lua-Dateien | 0 Warnungen, 0 Fehler |
-| `tests/run.lua` | Bewertungslogik, Szenarien 1–7 und 12, Pflicht-Fähigkeiten, Stufen, Rollenwahl, Instanz-Hinweise, fehlende/gesperrte API, Gruppenwert, zusammengefasste Fähigkeiten und Umstellung alter Einstellungen, Mana-Buffs, Zauber je Klasse vollständig, Abkürzungen, Vorlagensprachen und -namen; Vollständigkeit aller 11 Sprachdateien | 83/83 bestanden |
-| `tests/smoke.lua` | komplettes Addon in TOC-Reihenfolge mit nachgebildeter WoW-Oberfläche: Laden, Events, Liste mit Daten wie in den Beta-Screenshots, Spaltenbreiten und Abkürzungen bei Originalbreite (Schrift 12/14), Aussortieren, Filterleiste (Fenster nur höher, nicht breiter), Chips, „+ mehr“, Haken aus/an (BGF-Ansicht bleibt, keine Punkte, nichts aussortiert), Gruppenwert nur bei Gruppen, Chip-Tooltips (Klasse – Zauber ab Stufe, Bedingungen, Klassen-Chips ohne Präfix, Zaubernamen aus dem Spiel), Klassennamen für Buff-Chips, Erklärungsfenster mit Abschnitten, Option „Punkte anzeigen“, Erklärungsfenster, `/bgf off` ohne Leiste und Button, Schriftarten inkl. LibSharedMedia, Vorlagen-Menü (Überschrift, nur zwei Sprachen, eigene Namen), Platzhalter, automatisches Senden, Fallback bei Chat-Sperre, Einladen + Nachricht, Tooltip, `/bgf`-Befehle | alle bestanden |
+| `tests/run.lua` | Bewertungslogik, Szenarien 1–7 und 12, Pflicht-Fähigkeiten, Stufen, Rollenwahl, Instanz-Hinweise, fehlende/gesperrte API, Gruppenwert, zusammengefasste Fähigkeiten und Umstellung alter Einstellungen, Mana-Buffs, Zauber je Klasse vollständig, Klassen-Chips, Talente als „möglich“ (eigene gelernte sicher), strengeres „benötigt“, Bedingung in der Begründung, Abkürzungen, Vorlagensprachen und -namen; Vollständigkeit aller 11 Sprachdateien | 93/93 bestanden |
+| `tests/smoke.lua` | komplettes Addon in TOC-Reihenfolge mit nachgebildeter WoW-Oberfläche: Laden, Events, Liste mit Daten wie in den Beta-Screenshots, Spaltenbreiten und Abkürzungen bei Originalbreite (Schrift 12/14), Aussortieren, Filterleiste (Fenster nur höher, nicht breiter), Chips, „+ mehr“, Haken aus/an (BGF-Ansicht bleibt, keine Punkte, nichts aussortiert), Gruppenwert nur bei Gruppen, Chip-Tooltips (Klasse – Zauber ab Stufe, Bedingungen, Talente, Zaubernamen aus dem Spiel), Klassen-Tooltips nach Bereichen, „+ mehr“ und „+ Klassen“ zugeklappt komplett versteckt mit Zähler, Rollen-Tooltip, keine Profilanzeige, Erklärungsfenster mit Abschnitten, Option „Punkte anzeigen“, Erklärungsfenster, `/bgf off` ohne Leiste und Button, Schriftarten inkl. LibSharedMedia, Vorlagen-Menü (Überschrift, nur zwei Sprachen, eigene Namen), Platzhalter, automatisches Senden, Fallback bei Chat-Sperre, Einladen + Nachricht, Tooltip, `/bgf`-Befehle | alle bestanden |
 
 Die Tests lassen sich mit Lua 5.1 erneut ausführen: `lua tests/run.lua` und `lua tests/smoke.lua` aus dem Addon-Ordner.
 
@@ -214,7 +217,8 @@ Vorher `/console taintLog 1` eingeben. Nach dem Test liegt die Datei `Logs\taint
 | 2 | Filter-Button | Filterleiste klappt auf, Fenster wird länger, Liste gleich hoch, Button bleibt eingedrückt, Zahnrad frei |
 | 3 | Fähigkeit auf „benötigt“ stellen | Punkt im Chip; Treffer ohne diese Fähigkeit rutschen nach unten bzw. zu „Aussortiert“ |
 | 4 | Liste ansehen | Spielstil auf Höhe der Rollen-Icons; Gruppen: Nutzen + grauer Gruppenwert; Einzelspieler: Nutzen mittig; nichts überlappt |
-| 5 | Über Fähigkeiten-Chips fahren | Tooltip „Klasse – Zauber ab Stufe …“ mit Zaubernamen in deiner Sprache; bei Priester/Magier/Druide ohne Klassenname |
+| 5 | Über Fähigkeiten-Chips fahren | Tooltip „Klasse – Zauber ab Stufe …“ mit Zaubernamen in deiner Sprache, Talente mit „(Talent)“ |
+| 5a | „+ Klassen“ aufklappen, über einen Klassen-Chip fahren | eigene Zeile mit 9 Klassen; Tooltip nach Bereichen; zugeklappt mit aktivem Chip: „+ Klassen (1)“ |
 | 5b | Optionen → „Wie entstehen die Punkte?“ | Abschnitte mit goldenen Überschriften, Plus grün, Abzüge rot, Aussortiert orange; scrollbar, falls zu lang |
 | 6 | Optionen → Schriftart wechseln | Liste, Filterleiste und Tooltip übernehmen die Schrift |
 | 7 | Eintrag hovern | Blizzard-Tooltip + BGF-Begründung darunter |
@@ -259,6 +263,16 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.6.0**
+- Filterleiste: sichtbar sind nur noch Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft und Mana. „+ mehr“ (Fluch, Magie, Gift, Krankheit) und neu „+ Klassen“ klappen auf; zugeklappt ist alles versteckt, die Zahl am Klappchip zeigt aktive Chips.
+- Neue Klassen-Chips für alle 9 Klassen („diese Klasse in der Gruppe“, Gewicht 6, Standard *egal*). Der Tooltip zeigt, was die Klasse bringt. Die bisherigen Chips Priester/Magier/Druide (Buffs) und „Beschwören & Gesundheitssteine“ gehen darin auf; ihre alten Einstellungen werden nicht übernommen.
+- Paladin: Segen der Könige und der Rettung; Priester: Göttlicher Willen ergänzt.
+- Talente der Forever-Beta als „möglich (Talent)“: Erschütternder Schlag, Buße, Streuschuss, Einschüchterung, Aura des Volltreffers, Stille, Totem der Manaflut, Wilde Attacke. Dazu Zaubersperre und Verführung (Begleiter), Hieb (Bärform), Winterschlaf (Wildtiere/Drachkin).
+- Begründung im Tooltip nennt die echte Bedingung statt „Talent oder Begleiter“.
+- „Benötigt“ ist strenger: „möglich“ reicht nicht mehr.
+- Grauer Rollen-Hinweis und Profilanzeige aus der Filterleiste entfernt; der Hinweis steht jetzt im Tooltip der Rollen-Chips.
+- Quelle der Talentdaten: talentsforever.com (CC BY 4.0).
 
 **0.5.0**
 - Buff-Chips, die nur eine Klasse bringt, heißen wie die Klasse: Priester, Magier, Druide. Buffs mehrerer Klassen nach dem Zweck: Angriffskraft und neu **Mana** (Segen der Weisheit, Totem der Manaquelle; in Schlachtzügen bevorzugt, sonst egal).
