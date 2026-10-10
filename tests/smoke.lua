@@ -76,6 +76,7 @@ Frame.__index = function(self, key)
 	if key == "SetText" then return function(s, t) s.__text = t end end
 	if key == "GetText" then return function(s) return s.__text or "" end end
 	if key == "SetPoint" then return function(s, ...) s.__point = { ... } end end
+	if key == "SetAlpha" then return function(s, a) s.__alpha = a end end
 	if key == "GetPoint" then return function(s) if s.__point then return unpack(s.__point) end end end
 	if key == "SetWidth" then return function(s, w) s.__size.w = w end end
 	if key == "SetHeight" then return function(s, h) s.__size.h = h end end
@@ -705,6 +706,31 @@ do
 	e.profileKey = "other"
 	rowFrame:Init({ kind = "row", entry = e })
 	check("... no '/40' outside raids", not (rowFrame.Counts.__text or ""):find("/40", 1, true), rowFrame.Counts.__text)
+	-- own listing: members of your group, the missing role faded, activity in line 2
+	local origInfo = C_LFGList.GetSearchResultInfo
+	C_LFGList.GetSearchResultInfo = function(id)
+		local info = origInfo(id)
+		if info then
+			local copy = {}
+			for k, v in pairs(info) do copy[k] = v end
+			copy.hasSelf, copy.numMembers = true, 4
+			return copy
+		end
+	end
+	local mySide = { { class = "HUNTER", role = "DAMAGER", isSelf = true }, { class = "PRIEST", role = "HEALER" },
+		{ class = "MAGE", role = "DAMAGER" }, { class = "ROGUE", role = "DAMAGER" } }
+	local own = ns.Engine.EvaluateResult(rowFrame.entry.resultID, mySide, false)
+	C_LFGList.GetSearchResultInfo = origInfo
+	check("own listing reads your group and the missing tank", own and own.own and #own.members == 4
+		and own.missingRoles[1] == "TANK" and #own.missingRoles == 1, own and #(own.members or {}))
+	rowFrame:Init({ kind = "row", entry = own })
+	local rings, faded = 0, 0
+	for _, slot in ipairs(rowFrame.Slots) do
+		if slot.__shown and slot.Ring.__shown then rings = rings + 1 end
+		if slot.__shown and slot.Icon.__alpha and slot.Icon.__alpha < 1 then faded = faded + 1 end
+	end
+	check("... 4 class-coloured icons and 1 faded tank slot", rings == 4 and faded == 1, rings .. "/" .. faded)
+	check("... line 2 names the activity", (rowFrame.Activity.__text or ""):find("·", 1, true) ~= nil, rowFrame.Activity.__text)
 	check("no BGF window in Blizzard's Escape list (UISpecialFrames)", specialFrameInserts == 0, specialFrameInserts)
 end
 

@@ -260,7 +260,29 @@ function E.EvaluateResult(resultID, mySide, noRating)
 	entry.profileKey, entry.maxPlayers = E.ProfileFor(entry.activityInfo)
 
 	if info.hasSelf then
+		-- own listing: members come from your own group (the listing data is not read),
+		-- plus the roles still missing for the activity's role targets
 		entry.own = true
+		entry.members = {}
+		local counts = { TANK = 0, HEALER = 0, DAMAGER = 0 }
+		for _, m in ipairs(mySide or {}) do
+			local role = m.role
+			if not role and m.lfgRoles then
+				role = (m.lfgRoles.tank and "TANK") or (m.lfgRoles.healer and "HEALER") or "DAMAGER"
+			end
+			role = role or "DAMAGER"
+			counts[role] = (counts[role] or 0) + 1
+			entry.members[#entry.members + 1] = { class = m.class, level = m.level, role = role, name = m.name }
+		end
+		local targets = ns.GetRoleTargets(entry.profileKey, entry.maxPlayers)
+		entry.missingRoles = {}
+		if targets then
+			for _, role in ipairs({ "TANK", "HEALER", "DAMAGER" }) do
+				for _ = 1, math.max(0, (targets[role] or 0) - counts[role]) do
+					entry.missingRoles[#entry.missingRoles + 1] = role
+				end
+			end
+		end
 		return entry
 	end
 

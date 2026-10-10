@@ -144,8 +144,9 @@ local function CreateSlot(parent)
 	return slot
 end
 
-local function SetSlot(slot, size, role, class)
+local function SetSlot(slot, size, role, class, faded)
 	slot:SetSize(size, size)
+	slot.Icon:SetAlpha(faded and 0.35 or 1)
 	if role then
 		setAtlasSafe(slot.Icon, ROLE_ATLAS[role] or ROLE_ATLAS.DAMAGER)
 		slot.Icon:SetSize(size - 3, size - 3)
@@ -323,6 +324,9 @@ function BGFRowMixin:Init(data)
 	local activity = entry.activityName or ""
 	if entry.own then
 		activity = LFG_SELF_LISTING or ns.L.OWN_LISTING
+		if (entry.numActivities or 0) <= 1 and (entry.activityName or "") ~= "" then
+			activity = activity .. " · " .. entry.activityName
+		end
 	elseif (entry.numActivities or 0) > 1 and activity == "" and LFGBROWSE_ACTIVITY_COUNT then
 		activity = LFGBROWSE_ACTIVITY_COUNT:format(entry.numActivities)
 	end
@@ -354,9 +358,19 @@ function BGFRowMixin:Init(data)
 		local members = sortedMembers(entry.members)
 		local maxPlayers = math.min(entry.maxPlayers or MAX_SLOTS, MAX_SLOTS)
 		local offset = MAX_SLOTS - maxPlayers
+		local missing = entry.own and entry.missingRoles or {}
+		local nextMissing = 1
 		for i = 1, maxPlayers do
 			local member = members[i]
-			SetSlot(self.Slots[offset + i], m.slot, member and (member.role or "DAMAGER"), member and member.class)
+			if member then
+				SetSlot(self.Slots[offset + i], m.slot, member.role or "DAMAGER", member.class)
+			elseif missing[nextMissing] then
+				-- own listing: the role you still look for, faded
+				SetSlot(self.Slots[offset + i], m.slot, missing[nextMissing], nil, true)
+				nextMissing = nextMissing + 1
+			else
+				SetSlot(self.Slots[offset + i], m.slot, nil, nil)
+			end
 		end
 	elseif (info.numMembers or #(entry.members or {})) <= MAX_SLOTS then
 		-- large activity (quests report 40) but a small group: one icon per member, no empty slots

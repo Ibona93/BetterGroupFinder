@@ -1,4 +1,4 @@
-# Better Group Finder (BGF) 0.7.8
+# Better Group Finder (BGF) 0.7.9
 
 Autor: **Ibona93** · Kontakt über die Projektseite. – WoW Forever
 
@@ -36,6 +36,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 | Einträge | Zweizeilig: Name (+ Stufe, „Neue Spieler willkommen“) oben, Instanz darunter. Spielstil und Rollen-Icons mittig in der Zeile, jedes Rollen-Icon mit Ring in Klassenfarbe. Bei Schlachtzügen erscheinen Rollenzahlen statt Einzel-Icons. |
 | Punkte und Gruppenwert | Rechts der Nutzen („+30“). Bei Gruppen steht darunter in Grau der **Gruppenwert** („72 %“): wie vollständig die Gruppe schon ist. Bei Einzelspielern steht nur der Nutzen, mittig. Beides abschaltbar in den Optionen; dort erklärt „Wie entstehen die Punkte?“ die Berechnung. |
 | Schrift | Feste Größen wie bei Blizzard: Namen 14, alles andere 12. Schriftart wählbar (Standard: die WoW-Schrift). |
+| Eigener Eintrag | Zeigt die Mitglieder deiner Gruppe (Klassenfarbe, Rolle), die noch fehlende Rolle als blasses Symbol und in Zeile 2 „Eure Einträge · Aktivität“. Ohne Punkte. |
 | Abkürzungen | Passt ein Text nicht, kürzt BGF zuerst sinnvoll: „Höhlen d. Wehklagens“, „Ruinen v. Lordaeron“, „Aldarin S.“. Erst dann wird mit „…“ abgeschnitten. Der Tooltip zeigt immer die vollen Namen. |
 | Filterleiste | Filter-Button neben „Aktualisieren“ (bleibt eingedrückt, solange die Leiste offen ist). Abgerundete Chips, Punkt = benötigt, Halbkreis = bevorzugt, Häkchen = gewählte Rolle, Stern = Favorit, türkiser Rand = mit ausgewählt. Eine eigene Zeile **Favoriten**, darunter die Kategorien **Klassen**, **Buffs**, **Dispells** und **Kampf & Hilfsmittel** zum Aufklappen. Zugeklappte Kategorien stehen nebeneinander (grau), mit Zähler für aktive Chips („+ Buffs (2)“); eine geöffnete bekommt eigene Zeilen und einen goldenen Kategorie-Chip. |
 | Filter aus | Haken „BGF-Filter aktiv“ entfernen: die BGF-Ansicht bleibt, aber ohne Punkte, ohne Aussortieren, in Blizzards Reihenfolge. Die Leiste bleibt offen (Filter ausgegraut). |
@@ -238,7 +239,7 @@ Vorher `/console taintLog 1` eingeben. Nach dem Test liegt die Datei `Logs\taint
 | 8 | Gruppe wählen → Vorlagen → Freundlich | Flüsternachricht wird gesendet, Platzhalter korrekt |
 | 9 | Als Gruppenleiter Einzelspieler → Vorlagen | Einladung + Nachricht |
 | 10 | Haken „BGF-Filter aktiv“ aus/an | BGF-Ansicht bleibt, ohne Punkte/Aussortieren; nichts verschwindet hinter der Leiste. `/bgf off` → Originalliste |
-| 11 | Nach dem Test: Dungeon betreten, kämpfen, Aktionsleisten benutzen | keine „Aktion blockiert“-Meldungen. Ergebnis 0.7.7 (Stufe 2): keine blockierte Aktion; BGF nur beim Slash-Befehl, beim Öffnen der Optionen und über `UISpecialFrames` (in 0.7.8 entfernt) |
+| 11 | Nach dem Test: Dungeon betreten, kämpfen, Aktionsleisten benutzen | **Bestanden (0.7.8, 10.10.2026):** Dungeon mit Kampf, Taint-Log Stufe 1 ohne einen Eintrag zu BetterGroupFinder. Einladen + Nachricht über die Vorlagen im echten Einsatz bestätigt. |
 | 12 | `/bgf debug`, über Einträge fahren | Rohdaten erscheinen. Bitte prüfen, ob `spec` gefüllt ist und welche `mapID` die Forever-Instanzen haben |
 
 Fehlermeldungen (BugSack) und Auffälligkeiten bitte mit Screenshot melden.
@@ -278,6 +279,9 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.7.9**
+- Eigener Eintrag zeigt die Mitglieder deiner Gruppe, die fehlende Rolle blass und die Aktivität („Eure Einträge · Todesminen“).
 
 **0.7.8**
 - Rollenanzeige: bis 5 Mitglieder Icons (auch bei Quests, die 40 melden), Zahlen erst ab 6; „/40“ nur bei Schlachtzügen; Spielstil überlappt die Zahlen nicht mehr.
