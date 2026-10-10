@@ -144,7 +144,7 @@ ns.RegisterLocale("ptBR", {
 	CHIP_TT_POSSIBLE = "(possível)",
 	CHIP_TT_CLICK = "Clique: ignorado > preferido > necessário",
 	GROUP_VALUE = "Valor do grupo %d %%: funções %d/%d, habilidades %d/%d",
-	OPT_TITLE = "Better Group Finder",
+	OPT_TITLE = "Better Group Finder Forever",
 	OPT_AUTOSEND = "Enviar imediatamente ao escolher um modelo",
 	OPT_REASONS = "Mostrar a avaliação do BGF na dica",
 	OPT_TEMPLATES = "Modelos de mensagem",

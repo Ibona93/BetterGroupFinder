@@ -144,7 +144,7 @@ ns.RegisterLocale("zhTW", {
 	CHIP_TT_POSSIBLE = "（可能）",
 	CHIP_TT_CLICK = "點擊：忽略 > 優先 > 必要",
 	GROUP_VALUE = "隊伍評分 %d %%：職責 %d/%d，技能 %d/%d",
-	OPT_TITLE = "Better Group Finder",
+	OPT_TITLE = "Better Group Finder Forever",
 	OPT_AUTOSEND = "選擇範本後立即發送",
 	OPT_REASONS = "在滑鼠提示中顯示 BGF 評估",
 	OPT_TEMPLATES = "訊息範本",

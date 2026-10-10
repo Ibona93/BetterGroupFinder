@@ -144,7 +144,7 @@ ns.RegisterLocale("ruRU", {
 	CHIP_TT_POSSIBLE = "(возможно)",
 	CHIP_TT_CLICK = "Щелчок: неважно > желательно > нужно",
 	GROUP_VALUE = "Ценность группы %d %%: роли %d/%d, способности %d/%d",
-	OPT_TITLE = "Better Group Finder",
+	OPT_TITLE = "Better Group Finder Forever",
 	OPT_AUTOSEND = "Отправлять сразу при выборе шаблона",
 	OPT_REASONS = "Показывать оценку BGF в подсказке",
 	OPT_TEMPLATES = "Шаблоны сообщений",

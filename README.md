@@ -1,4 +1,4 @@
-# Better Group Finder (BGF) 0.8.0
+# Better Group Finder Forever (BGF) 0.8.0
 
 Autor: **Ibona93** · Kontakt über die Projektseite · Lizenz: MIT (siehe `LICENSE`; mitgelieferte Schriften: SIL OFL 1.1). – WoW Forever
 

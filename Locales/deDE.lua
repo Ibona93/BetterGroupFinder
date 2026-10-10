@@ -144,7 +144,7 @@ ns.RegisterLocale("deDE", {
 	CHIP_TT_POSSIBLE = "(möglich)",
 	CHIP_TT_CLICK = "Klick: egal > bevorzugt > benötigt",
 	GROUP_VALUE = "Gruppenwert %d %%: Rollen %d/%d, Fähigkeiten %d/%d",
-	OPT_TITLE = "Better Group Finder",
+	OPT_TITLE = "Better Group Finder Forever",
 	OPT_AUTOSEND = "Sofort senden, wenn eine Vorlage gewählt wird",
 	OPT_REASONS = "BGF-Bewertung im Tooltip anzeigen",
 	OPT_TEMPLATES = "Nachrichtenvorlagen",

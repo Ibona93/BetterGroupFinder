@@ -148,7 +148,7 @@ ns.RegisterLocale("enUS", {
 	CHIP_TT_POSSIBLE = "(possible)",
 	CHIP_TT_CLICK = "Click: ignored > preferred > required",
 	GROUP_VALUE = "Group value %d %%: roles %d/%d, abilities %d/%d",
-	OPT_TITLE = "Better Group Finder",
+	OPT_TITLE = "Better Group Finder Forever",
 	OPT_AUTOSEND = "Send immediately when a template is chosen",
 	OPT_REASONS = "Show the BGF rating in the tooltip",
 	OPT_TEMPLATES = "Message templates",
