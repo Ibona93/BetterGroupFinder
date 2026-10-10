@@ -399,6 +399,26 @@ function Bar.Create(parent)
 	f.RatingLabel = text(f, C.grey)
 	f.RatingLabel:SetText(L.RATING_FOR)
 	f.RatingValue = text(f, C.green)
+	-- "Reset" (current Group Finder category only), right in the first row
+	f.Reset = CreateFrame("Button", nil, f)
+	f.Reset.Text = text(f.Reset, C.grey)
+	f.Reset.Text:SetPoint("RIGHT")
+	f.Reset.Text:SetText(L.RESET_SHORT)
+	f.Reset:SetScript("OnEnter", function(self)
+		self.Text:SetTextColor(C.white[1], C.white[2], C.white[3])
+		GameTooltip:SetOwner(self, "ANCHOR_TOP")
+		GameTooltip:SetText(L.RESET_SHORT, 1, 0.82, 0)
+		GameTooltip:AddLine(L.RESET_TT, 1, 1, 1, true)
+		GameTooltip:Show()
+	end)
+	f.Reset:SetScript("OnLeave", function(self)
+		self.Text:SetTextColor(C.grey[1], C.grey[2], C.grey[3])
+		GameTooltip:Hide()
+	end)
+	f.Reset:SetScript("OnClick", function()
+		if PlaySound and SOUNDKIT then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON) end
+		Bar.ResetCurrent()
+	end)
 
 	-- Row 2: roles
 	f.RolesLabel = text(f, C.white)
@@ -466,7 +486,7 @@ function Bar.ApplyFonts()
 	local f = Bar.frame
 	if not f then return end
 	for _, fs in ipairs({ f.EnableText, f.Separator, f.RatingLabel, f.RatingValue,
-		f.RolesLabel, f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
+		f.RolesLabel, f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.Reset.Text, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
 		fs:SetFontObject(font())
 	end
 end
@@ -510,7 +530,11 @@ function Bar.Layout()
 	-- Not enough room (large font, long translation): drop the "Rating for:" label first.
 	local leftW = 24 + f.EnableText:GetStringWidth() + 14 + f.Separator:GetStringWidth()
 		+ f.RatingLabel:GetStringWidth() + 4 + f.RatingValue:GetStringWidth()
-	local tight = leftW + 2 * PADDING + 12 > width
+	local resetW = math.ceil(f.Reset.Text:GetStringWidth())
+	f.Reset:SetSize(resetW + 4, 18)
+	f.Reset:ClearAllPoints()
+	f.Reset:SetPoint("RIGHT", f, "TOPRIGHT", -PADDING, y - 9)
+	local tight = leftW + resetW + 12 + 2 * PADDING + 12 > width
 	f.RatingLabel:SetShown(not tight)
 	f.RatingValue:ClearAllPoints()
 	if tight then
@@ -747,6 +771,17 @@ function Bar.Update()
 		for _, chip in ipairs(f.RoleChips) do chip:SetAlpha(0.4) end
 		f.RolesLabel:SetAlpha(0.4)
 	end
+end
+
+-- Reset in the filter bar: chips of the current category, roles back to automatic,
+-- overrides lifted; favourites and the other categories stay.
+function Bar.ResetCurrent()
+	local profile = Bar.CurrentProfile()
+	ns.db.abilityStates[profile] = ns.CopyTable(ns.DEFAULT_ABILITY_STATES[profile])
+	ns.db.linkOverrides[profile] = nil
+	ns.db.roleChips = {}
+	if ns.UI and ns.UI.ApplyLayout then ns.UI.ApplyLayout() end
+	ns.RequestRefresh()
 end
 
 function Bar.ResetFilters()

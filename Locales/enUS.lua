@@ -98,6 +98,8 @@ ns.RegisterLocale("enUS", {
 	COND_SUCCUBUS = "Sayaad (Succubus)",
 	COND_LEVEL = "level unknown",
 	ROLE_TT_AUTO = "Chosen automatically: solo your roles from the group finder, in a group the roles it still needs.",
+	RESET_SHORT = "Reset",
+	RESET_TT = "Resets the chips of this Group Finder category and sets the roles back to automatic. Favourites and the other categories stay.",
 	ROLE_TT_NONE = "This category has no role distribution; the role chips do nothing here.",
 	ROLE_TT_MANUAL = "Chosen manually.",
 	ROLE_TT_CLICK = "A click changes the selection. \"%s\" in the options switches back to automatic.",

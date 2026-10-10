@@ -94,6 +94,8 @@ ns.RegisterLocale("deDE", {
 	COND_SUCCUBUS = "Sayaad (Sukkubus)",
 	COND_LEVEL = "Stufe unbekannt",
 	ROLE_TT_AUTO = "Automatisch gewählt: solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die Rollen, die noch fehlen.",
+	RESET_SHORT = "Zurücksetzen",
+	RESET_TT = "Setzt die Chips dieser Gruppenfinder-Kategorie zurück und stellt die Rollen wieder auf automatisch. Favoriten und die anderen Kategorien bleiben.",
 	ROLE_TT_NONE = "In dieser Kategorie gibt es keine Rollenverteilung; die Rollen-Chips wirken hier nicht.",
 	ROLE_TT_MANUAL = "Manuell gewählt.",
 	ROLE_TT_CLICK = "Ein Klick ändert die Auswahl. „%s“ in den Optionen stellt wieder auf automatisch.",

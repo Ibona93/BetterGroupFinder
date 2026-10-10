@@ -4,7 +4,7 @@
 ## Notes: Smart filters, group composition rating, favourites and message templates for the WoW Forever Group Finder.
 ## Notes-deDE: Intelligente Filter, Bewertung der Gruppenzusammensetzung, Favoriten und Nachrichtenvorlagen für den Gruppenfinder von WoW Forever.
 ## Author: Ibona93
-## Version: 0.7.4
+## Version: 0.7.5
 ## IconTexture: Interface\AddOns\BetterGroupFinder\Media\Logo
 ## SavedVariables: BetterGroupFinderDB
 ## Category: Group Finder
@@ -37,6 +37,7 @@ UI\List.lua
 UI\Templates.xml
 UI\Tooltip.lua
 UI\FilterBar.lua
+UI\Popup.lua
 UI\Contact.lua
 UI\Options.lua
 UI\Main.lua

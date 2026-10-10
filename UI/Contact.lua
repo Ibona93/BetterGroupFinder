@@ -104,25 +104,41 @@ function Contact.Execute(entry, lang, key)
 	sendWhisper(target, text)
 end
 
-local INDENT = "    "
-
-local function addTemplateButtons(root, entry, lang, prefix)
-	for _, tone in ipairs({ "friendly", "short" }) do
-		local key = prefix .. "_" .. tone
-		local label = ns.GetTemplateName(lang, key)
-		local button = root:CreateButton(INDENT .. label, function() Contact.Execute(entry, lang, key) end)
-		if button and button.SetTooltip then
-			button:SetTooltip(function(tooltip)
-				local preview = Contact.Fill(ns.GetTemplate(lang, key), entry, lang)
-				if GameTooltip_SetTitle then
-					GameTooltip_SetTitle(tooltip, label)
-					GameTooltip_AddNormalLine(tooltip, preview, true)
-				else
-					tooltip:SetText(preview, 1, 1, 1, 1, true)
-				end
-			end)
+-- Menu items for the template popup (own popup, not Blizzard's menu system: see UI/Popup.lua).
+function Contact.MenuItems(entry)
+	local L = ns.L
+	local mode = Contact.Mode(entry)
+	local target = entry.info.leaderName or "?"
+	local short = Ambiguate and Ambiguate(target, "short") or target
+	local titleKey = mode == "invite" and "MENU_INVITE" or (mode == "group" and "MENU_GROUP" or "MENU_JOIN")
+	local items = {
+		{ kind = "title", text = "|cffffffff" .. L[titleKey]:format(short) .. "|r" },
+		{ kind = "divider" },
+	}
+	for _, lang in ipairs(ns.TemplateLanguages()) do
+		items[#items + 1] = { kind = "header", text = ns.LANGUAGE_NAMES[lang] or lang }
+		for _, tone in ipairs({ "friendly", "short" }) do
+			local key = mode .. "_" .. tone
+			local label = ns.GetTemplateName(lang, key)
+			items[#items + 1] = {
+				kind = "button", indent = true, text = label,
+				fn = function() Contact.Execute(entry, lang, key) end,
+				tooltip = function(tooltip)
+					tooltip:SetText(label, 1, 0.82, 0)
+					tooltip:AddLine(Contact.Fill(ns.GetTemplate(lang, key), entry, lang), 1, 1, 1, true)
+				end,
+			}
 		end
 	end
+	items[#items + 1] = { kind = "divider" }
+	items[#items + 1] = { kind = "button", text = L.MENU_EMPTY_WHISPER, fn = function()
+		if mode == "invite" and C_PartyInfo and C_PartyInfo.InviteUnit then pcall(C_PartyInfo.InviteUnit, target) end
+		if ChatFrameUtil and ChatFrameUtil.SendTell then ChatFrameUtil.SendTell(target) end
+	end }
+	items[#items + 1] = { kind = "button", text = L.MENU_EDIT, fn = function()
+		if ns.Options and ns.Options.Open then ns.Options.Open() end
+	end }
+	return items
 end
 
 function Contact.OpenMenu(owner, entry)
@@ -130,32 +146,5 @@ function Contact.OpenMenu(owner, entry)
 		ns.Print(ns.L.NO_SELECTION)
 		return
 	end
-	if not MenuUtil or not MenuUtil.CreateContextMenu then
-		-- No menu API: use the default template directly.
-		Contact.Execute(entry, ns.TemplateLanguages()[1], Contact.Mode(entry) .. "_friendly")
-		return
-	end
-	local L = ns.L
-	local mode = Contact.Mode(entry)
-	local target = entry.info.leaderName or "?"
-	local short = Ambiguate and Ambiguate(target, "short") or target
-	local titleKey = mode == "invite" and "MENU_INVITE" or (mode == "group" and "MENU_GROUP" or "MENU_JOIN")
-
-	MenuUtil.CreateContextMenu(owner, function(_, root)
-		-- Main heading in white, languages as gold sub-headings, templates indented.
-		root:CreateTitle("|cffffffff" .. L[titleKey]:format(short) .. "|r")
-		root:CreateDivider()
-		for _, lang in ipairs(ns.TemplateLanguages()) do
-			root:CreateTitle(ns.LANGUAGE_NAMES[lang] or lang)
-			addTemplateButtons(root, entry, lang, mode)
-		end
-		root:CreateDivider()
-		root:CreateButton(L.MENU_EMPTY_WHISPER, function()
-			if mode == "invite" and C_PartyInfo and C_PartyInfo.InviteUnit then pcall(C_PartyInfo.InviteUnit, target) end
-			if ChatFrameUtil and ChatFrameUtil.SendTell then ChatFrameUtil.SendTell(target) end
-		end)
-		root:CreateButton(L.MENU_EDIT, function()
-			if ns.Options and ns.Options.Open then ns.Options.Open() end
-		end)
-	end)
+	ns.Popup.Open(owner, Contact.MenuItems(entry))
 end

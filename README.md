@@ -1,4 +1,4 @@
-# Better Group Finder (BGF) 0.7.4
+# Better Group Finder (BGF) 0.7.5
 
 Autor: **Ibona93** · Kontakt über die Projektseite. – WoW Forever
 
@@ -52,6 +52,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 ## 3. Bedienung
 
 ### Filterleiste
+- **Zurücksetzen** (rechts in der ersten Zeile): setzt die Chips der gerade angezeigten Gruppenfinder-Kategorie zurück und die Rollen auf automatisch; Favoriten und die anderen Kategorien bleiben. „Filter zurücksetzen“ in den Optionen setzt alle Kategorien zurück.
 - **BGF-Filter aktiv:** schaltet Bewertung, Sortierung und Aussortieren ein oder aus. Die BGF-Ansicht und die Leiste bleiben.
 - **Bewertung für:** deine Perspektive, z. B. „Jäger 22 · DPS“ oder „Deine Gruppe (3)“. Bei wenig Platz entfällt das Wort „Bewertung für:“.
 - **Profil:** wird nicht angezeigt, folgt aber der Kategorie oben im Fenster (Dungeons, Schlachtzüge, sonstige). Jede Kategorie hat eigene Chip-Einstellungen.
@@ -194,7 +195,7 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
   - Nach Klassenpatches muss die Tabelle eventuell angepasst werden.
 - **Schlachtzüge** gibt es in der Beta noch nicht; die Schlachtzug-Logik ist nur offline getestet.
 - **Karten-IDs:** Forever nutzt die Classic-IDs (geprüft: Burg Shadowfang 33, Todesminen 36, Höhlen des Wehklagens 43); Ruinen von Lordaeron hat 2999. Instanz-Hinweise und Namenstabelle bauen darauf auf. Flügel werden nur aus dem Deutschen übersetzt.
-- **Schriftarten-Auswahl in der eigenen Schrift:** Blizzards Menü verbietet `SetFont` auf seinen Texten; BGF setzt deshalb ein eigenes Schrift-Objekt pro Eintrag.
+- **Eigene Menüs:** Vorlagen-Menü und Schriftarten-Liste sind eigene, einfache Fenster (`UI/Popup.lua`), nicht Blizzards Menüsystem. Mit `/console taintLog 1` stürzte der Beta-Client (1.60.1.70291) ab, wenn ein Addon-Knopf ein Blizzard-Menü öffnete (Assertion in `ldebug.c`). Das Rechtsklick-Menü auf Einträgen bleibt Blizzards eigenes (Melden geht nur dort).
 - **Sprachen außer Deutsch/Englisch** sind von mir übersetzt und sollten vor einer Veröffentlichung von Muttersprachlern geprüft werden.
 - **Fensterhöhe:** Mit offener Filterleiste ändert BGF die Höhe von Blizzards Fenster, nur außerhalb des Kampfes, um Taint zu vermeiden. Siehe Taint-Test unten.
 - **Spaltenbreiten und Abkürzungen** sind gegen geschätzte Schriftbreiten getestet, nicht im Client gemessen.
@@ -260,6 +261,7 @@ UI/List.lua             BGF-Liste, Zeilen, Bereiche, Spaltenbreiten, Abkürzen
 UI/Templates.xml        Zeilen-/Kopf-Vorlagen
 UI/Tooltip.lua          Tooltip mit Begründung
 UI/FilterBar.lua        Filterleiste
+UI/Popup.lua            eigenes kleines Menü (Vorlagen, Schriftarten)
 UI/Contact.lua          Vorlagen-Button und -Menü, Platzhalter, Versand
 UI/Options.lua          Optionen und Vorlagen-Editor
 UI/Main.lua             Einbindung in Blizzards Fenster, Header-Buttons, Fensterhöhe
@@ -274,6 +276,10 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.7.5**
+- „Zurücksetzen“ direkt in der Filterleiste (nur die angezeigte Kategorie).
+- Vorlagen-Menü und Schriftarten-Liste als eigene Menüs statt Blizzards Menüsystem: behebt den Spielabsturz mit eingeschaltetem Taint-Log.
 
 **0.7.4**
 - Quests & Zonen / Benutzerdefiniert: keine Rollenprüfung (Rollen-Chips ausgegraut), keine Abzüge für gleiche Klasse, nichts wird wegen 0 Punkten aussortiert.

@@ -17,7 +17,7 @@ read_globals = {
 	"CreateScrollBoxListLinearView", "ScrollUtil", "CreateDataProvider", "ScrollBoxConstants",
 	"LFGBrowseFrame", "LFGParentFrame", "MenuUtil", "ChatFrameUtil", "ChatFrame_SendTell",
 	"GameTooltip_SetTitle", "GameTooltip_AddNormalLine", "Settings", "UISpecialFrames", "tinsert",
-	"tContains", "hooksecurefunc", "geterrorhandler", "unpack", "CreateFont", "GameFontHighlightSmall", "GameFontNormal", "LibStub", "STANDARD_TEXT_FONT",
+	"tContains", "hooksecurefunc", "geterrorhandler", "unpack", "CreateFont", "GameFontHighlightSmall", "GameFontNormal", "GameFontHighlight", "LibStub", "STANDARD_TEXT_FONT",
 }
 
 -- Test files mock the WoW API and set globals on purpose.

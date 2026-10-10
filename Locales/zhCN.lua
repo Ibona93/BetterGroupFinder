@@ -94,6 +94,8 @@ ns.RegisterLocale("zhCN", {
 	COND_SUCCUBUS = "萨亚德（魅魔）",
 	COND_LEVEL = "等级未知",
 	ROLE_TT_AUTO = "自动选择：单人时为队伍查找器中的职责，队伍中为仍缺少的职责。",
+	RESET_SHORT = "重置",
+	RESET_TT = "重置此分类的按钮，并将职责恢复为自动。收藏和其他分类保持不变。",
 	ROLE_TT_NONE = "此分类没有职责分配，职责按钮在此无效。",
 	ROLE_TT_MANUAL = "手动选择。",
 	ROLE_TT_CLICK = "点击可更改选择。选项中的“%s”可恢复自动。",

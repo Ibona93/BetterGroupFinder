@@ -104,47 +104,34 @@ local function build()
 	local function updatePreview()
 		preview:SetFontObject(ns.Fonts.Get(12))
 		-- the dropdown shows the chosen font's name in that font
-		local label = fontButtonRef and (fontButtonRef.Text or (fontButtonRef.GetFontString and fontButtonRef:GetFontString()))
-		if label and label.SetFontObject then pcall(label.SetFontObject, label, ns.Fonts.Get(12)) end
+		if fontButtonRef and fontButtonRef.SetNormalFontObject then
+			pcall(fontButtonRef.SetNormalFontObject, fontButtonRef, ns.Fonts.Get(12))
+			pcall(fontButtonRef.SetHighlightFontObject, fontButtonRef, ns.Fonts.Get(12))
+		end
 		preview:SetText("Höhlen des Wehklagens · Aldarin Schattentanz 26 · +46")
 		preview:SetTextColor(1, 0.82, 0)
 	end
-	local okDropdown, fontButton = pcall(CreateFrame, "DropdownButton", nil, panel, "WowStyle1DropdownTemplate")
-	if okDropdown and fontButton and fontButton.SetupMenu then
-		fontButton:SetWidth(200)
-		fontButton:SetupMenu(function(_, root)
-			for _, f in ipairs(ns.Fonts.List()) do
-				local radio = root:CreateRadio(f.name, function() return ns.db.font == f.key end, function()
+	-- Own font list (not Blizzard's dropdown menu, see UI/Popup.lua); every entry is written
+	-- in its own font.
+	local fontButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+	fontButton:SetSize(200, 22)
+	local function fontItems()
+		local items = {}
+		for _, f in ipairs(ns.Fonts.List()) do
+			items[#items + 1] = {
+				kind = "button", text = f.name, checked = ns.db.font == f.key, fontObject = ns.Fonts.GetFor(f.key, 12),
+				fn = function()
 					ns.Fonts.Set(f.key)
+					fontButton:SetText(ns.Fonts.Name())
 					updatePreview()
-				end)
-				-- every entry is written in its own font; the menu's font strings forbid
-				-- SetFont (Blizzard_Menu/Compositor.lua), so a font object is used instead
-				if radio and radio.AddInitializer then
-					radio:AddInitializer(function(button)
-						local fs = button and (button.fontString or button.Text)
-						if fs and fs.SetFontObject then
-							pcall(fs.SetFontObject, fs, ns.Fonts.GetFor(f.key, 12))
-							if fs.SetTextToFit and fs.GetText then pcall(fs.SetTextToFit, fs, fs:GetText()) end
-						end
-					end)
-				end
-			end
-		end)
-	else
-		-- Fallback: button that cycles through the fonts
-		fontButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-		fontButton:SetSize(200, 22)
-		fontButton:SetScript("OnClick", function(self)
-			local list = ns.Fonts.List()
-			local index = 1
-			for i, f in ipairs(list) do if f.key == ns.db.font then index = i end end
-			ns.Fonts.Set(list[index % #list + 1].key)
-			self:SetText(ns.Fonts.Name())
-			updatePreview()
-		end)
-		fontButton:SetText(ns.Fonts.Name())
+				end,
+			}
+		end
+		return items
 	end
+	fontButton:SetScript("OnClick", function(self) ns.Popup.Open(self, fontItems()) end)
+	fontButton:SetText(ns.Fonts.Name())
+	Options.FontItems = fontItems
 	fontButton:SetPoint("LEFT", fontLabel, "RIGHT", 10, 0)
 	fontButtonRef = fontButton
 

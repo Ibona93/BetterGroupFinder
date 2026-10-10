@@ -520,6 +520,16 @@ v = shownByCategory()
 check("several categories can be open", v.class == 9 and v.buff == 9, v.class)
 pcall(f.CategoryToggles.class.__scripts.OnClick, f.CategoryToggles.class)
 pcall(f.CategoryToggles.buff.__scripts.OnClick, f.CategoryToggles.buff)
+-- reset in the filter bar: only the shown category
+ns.db.abilityStates[profile].class_MAGE = "need"
+ns.db.abilityStates.other.class_MAGE = "pref"
+ns.db.roleChips = { DAMAGER = true }
+f.Reset.__scripts.OnClick(f.Reset)
+check("filter bar reset: shown category and roles reset, other categories kept", ns.db.abilityStates[profile].class_MAGE == "ignore"
+	and ns.db.abilityStates.other.class_MAGE == "pref" and next(ns.db.roleChips) == nil and ns.db.favorites.cc == true)
+ns.db.abilityStates.other.class_MAGE = "ignore"
+ok, err = pcall(function() f.Reset.__scripts.OnEnter(f.Reset) f.Reset.__scripts.OnLeave(f.Reset) end)
+check("reset tooltip", ok, err)
 -- favourites by right click
 local summonFav = f.FavChips.summon
 local summon
@@ -561,11 +571,26 @@ end
 check("row for Selune Selunar exists", row ~= nil)
 ok, err = pcall(row.OnClick, row, "LeftButton")
 check("clicking a row selects it", ok and ns.List.selectedID == 2, err)
-ok, err = pcall(ns.UI.requestButton.__scripts.OnClick, ns.UI.requestButton)
+-- The template menu is BGF's own popup now (UI/Popup.lua); read its items like a menu.
+local function openTemplateMenu()
+	ns.Popup.Close()
+	local okOpen, errOpen = pcall(ns.UI.requestButton.__scripts.OnClick, ns.UI.requestButton)
+	local items = ns.Popup.current
+	if not items then lastMenu = nil return okOpen, errOpen end
+	lastMenu = { title = items[1].text, buttons = {}, items = items }
+	for _, item in ipairs(items) do
+		if item.kind == "button" then lastMenu.buttons[#lastMenu.buttons + 1] = { text = item.text, fn = item.fn, tooltip = item.tooltip } end
+	end
+	return okOpen, errOpen
+end
+ok, err = openTemplateMenu()
 check("request menu opens", ok and lastMenu ~= nil, err)
 check("menu title names the leader", lastMenu and lastMenu.title and lastMenu.title:find("Selune", 1, true) ~= nil, lastMenu and lastMenu.title)
 check("menu title is white", lastMenu.title:find("|cffffffff", 1, true) == 1, lastMenu.title)
 check("menu has German + English templates only (4 + empty whisper + edit)", #lastMenu.buttons == 6, #lastMenu.buttons)
+check("menu is BGF's own popup, not Blizzard's menu system", ns.Popup.current ~= nil and lastMenu.items[3].kind == "header")
+ok, err = pcall(lastMenu.buttons[1].tooltip, GameTooltip)
+check("template preview tooltip works", ok, err)
 print("      menu: " .. lastMenu.title .. " | " .. lastMenu.buttons[1].text .. " | " .. lastMenu.buttons[2].text .. " | " .. lastMenu.buttons[3].text)
 local first = lastMenu.buttons[1]
 ok, err = pcall(first.fn)
@@ -575,7 +600,7 @@ check("placeholders filled (class, role, level, instance)", msg and msg.text:fin
 	and msg.text:find("22", 1, true) and msg.text:find("Höhlen des Wehklagens", 1, true) and not msg.text:find("{", 1, true), msg and msg.text)
 print("      -> " .. (msg and msg.text or "?"))
 ns.db.templateNames.deDE = { join_friendly = "Locker" }
-ns.UI.requestButton.__scripts.OnClick(ns.UI.requestButton)
+openTemplateMenu()
 check("custom template name appears in the menu", lastMenu.buttons[1].text:find("Locker", 1, true) ~= nil, lastMenu.buttons[1].text)
 ns.db.templateNames.deDE = nil
 local english = lastMenu.buttons[3]
@@ -599,7 +624,7 @@ for _, fr in ipairs(ns.List.scrollBox.__frames) do
 end
 if bear then
 	bear:OnClick("LeftButton")
-	ns.UI.requestButton.__scripts.OnClick(ns.UI.requestButton)
+	openTemplateMenu()
 	pcall(lastMenu.buttons[1].fn)
 	check("inviting a solo player invites and whispers", invited[#invited] == "Imogshaarig Bär" and sent[#sent].text:find("Imogshaarig", 1, true) ~= nil, sent[#sent].text)
 	print("      -> " .. sent[#sent].text)
@@ -620,6 +645,9 @@ ns.db.showScores = true
 local helpWin
 ok, helpWin = pcall(ns.Options.ShowScoreHelp)
 check("points explanation window opens", ok and helpWin, helpWin)
+local fontList = ns.Options.FontItems and ns.Options.FontItems()
+check("font list is BGF's own popup with one font object per entry", fontList and #fontList >= 8 and fontList[3].fontObject ~= fontList[1].fontObject
+	and fontList[1].checked ~= nil)
 if ok and helpWin then
 	local headers, weights, plusRows = 0, 0, 0
 	for _, item in ipairs(helpWin.Items) do

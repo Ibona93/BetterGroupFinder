@@ -94,6 +94,8 @@ ns.RegisterLocale("koKR", {
 	COND_SUCCUBUS = "사야드 (서큐버스)",
 	COND_LEVEL = "레벨 알 수 없음",
 	ROLE_TT_AUTO = "자동 선택: 혼자일 때는 파티 찾기의 내 역할, 파티일 때는 아직 부족한 역할.",
+	RESET_SHORT = "초기화",
+	RESET_TT = "이 분류의 버튼을 초기화하고 역할을 다시 자동으로 설정합니다. 즐겨찾기와 다른 분류는 유지됩니다.",
 	ROLE_TT_NONE = "이 분류에는 역할 분배가 없으므로 역할 버튼이 적용되지 않습니다.",
 	ROLE_TT_MANUAL = "수동 선택.",
 	ROLE_TT_CLICK = "클릭하면 선택이 바뀝니다. 설정의 \"%s\"로 다시 자동이 됩니다.",
