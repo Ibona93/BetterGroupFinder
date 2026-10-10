@@ -303,12 +303,12 @@ function UI.Setup()
 	keepHiddenWhileActive(LFGBrowseFrame.SendMessageButton)
 	keepHiddenWhileActive(LFGBrowseFrame.GroupInviteButton)
 
-	if LFGBrowseFrame.UpdateResults then
-		hooksecurefunc(LFGBrowseFrame, "UpdateResults", function() ns.RequestRefresh() end)
-	end
-	if LFGBrowseFrame.UpdateButtonState then
-		hooksecurefunc(LFGBrowseFrame, "UpdateButtonState", function() UI.UpdateButtons() end)
-	end
+	--[[
+	No hooks on Blizzard's functions (UpdateResults, UpdateButtonState, dropdown SetValue):
+	with /console taintLog 1 the 1.60.1 beta client broke Blizzard's call chain there. BGF
+	follows the Group Finder through events (Core.lua) and only hooks frame scripts.
+	The refresh runs a moment later, after Blizzard has stored the new results.
+	]]
 	LFGBrowseFrame:HookScript("OnShow", function()
 		UI.ApplyLayout()
 		ns.RequestRefresh()
@@ -317,8 +317,9 @@ function UI.Setup()
 		ns.Tooltip.Hide()
 		UI.ApplyLayout()
 	end)
-	if LFGBrowseFrame.CategoryDropdown then
-		pcall(hooksecurefunc, LFGBrowseFrame.CategoryDropdown, "SetValue", function() ns.FilterBar.Update() end)
+	if LFGBrowseFrame.RefreshButton then
+		-- a new search starts: show "searching" and clear the list
+		LFGBrowseFrame.RefreshButton:HookScript("OnClick", function() ns.RequestRefresh() end)
 	end
 
 	UI.ApplyEnabled()

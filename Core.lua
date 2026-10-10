@@ -210,6 +210,8 @@ for _, event in ipairs({
 	"ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED",
 	"PLAYER_LEVEL_UP", "SPELLS_CHANGED", "GROUP_ROSTER_UPDATE", "LFG_LIST_ROLE_UPDATE",
 	"LFG_LIST_SEARCH_RESULT_UPDATED", "LFG_LIST_ACTIVE_ENTRY_UPDATE",
+	-- the list follows the Group Finder through its events (no hooks on Blizzard functions)
+	"LFG_LIST_SEARCH_RESULTS_RECEIVED", "LFG_LIST_SEARCH_FAILED",
 }) do
 	pcall(frame.RegisterEvent, frame, event)
 end

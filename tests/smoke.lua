@@ -147,7 +147,9 @@ _G.SlashCmdList = {}
 _G.UISpecialFrames = {}
 _G.tinsert = table.insert
 _G.tContains = function(t, v) for _, x in ipairs(t) do if x == v then return true end end return false end
+local hookedBlizzard = {}
 _G.hooksecurefunc = function(tbl, name, fn)
+	if type(tbl) == "table" then hookedBlizzard[#hookedBlizzard + 1] = tostring(name) end
 	local old = tbl[name]
 	tbl[name] = function(...) local r = { old(...) } fn(...) return unpack(r) end
 end
@@ -362,6 +364,15 @@ end
 check("groups show their group value in percent", groupValueOK)
 check("solo players show no group value", soloValueOK)
 
+check("no hooks on Blizzard functions (taint log safe)", #hookedBlizzard == 0, table.concat(hookedBlizzard, ","))
+do
+	local refreshed = false
+	local orig = ns.UI.Refresh
+	ns.UI.Refresh = function() refreshed = true end
+	fire("LFG_LIST_SEARCH_RESULTS_RECEIVED")
+	ns.UI.Refresh = orig
+	check("search results event refreshes the BGF list", refreshed)
+end
 print("Filter bar and header buttons")
 ok, err = pcall(ns.UI.filterButton.__scripts.OnClick)
 check("filter button opens the bar", ok and ns.db.filterOpen and ns.FilterBar.frame.__shown, err)
