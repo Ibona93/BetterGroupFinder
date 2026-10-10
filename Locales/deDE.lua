@@ -95,6 +95,8 @@ ns.RegisterLocale("deDE", {
 	COND_LEVEL = "Stufe unbekannt",
 	ROLE_TT_AUTO = "Automatisch gewählt: solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die Rollen, die noch fehlen.",
 	CHOOSE_CATEGORY = "Wähle oben links eine Kategorie, z. B. Dungeons.",
+	MENU_REPORT = "Melden …",
+	REPORT_HINT = "Melden geht nur in Blizzards eigener Liste: mit /bgf off umschalten, Rechtsklick auf den Eintrag → Melden, danach /bgf on.",
 	RESET_SHORT = "Zurücksetzen",
 	RESET_TT = "Setzt die Chips dieser Gruppenfinder-Kategorie zurück und stellt die Rollen wieder auf automatisch. Favoriten und die anderen Kategorien bleiben.",
 	ROLE_TT_NONE = "In dieser Kategorie gibt es keine Rollenverteilung; die Rollen-Chips wirken hier nicht.",

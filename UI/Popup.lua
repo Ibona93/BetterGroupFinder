@@ -26,6 +26,26 @@ local function close()
 end
 Popup.Close = close
 
+-- Escape closes a BGF window without Blizzard's UISpecialFrames list (which Blizzard walks on
+-- every Escape and panel change, logging addon names in the taint log). Out of combat only:
+-- keyboard propagation may not be changed by addons in combat.
+function Popup.CloseOnEscape(f, onClose)
+	f:HookScript("OnShow", function(self)
+		local combat = InCombatLockdown and InCombatLockdown()
+		self:EnableKeyboard(not combat)
+		if not combat and self.SetPropagateKeyboardInput then self:SetPropagateKeyboardInput(true) end
+	end)
+	f:SetScript("OnKeyDown", function(self, key)
+		if InCombatLockdown and InCombatLockdown() then return end
+		if key == "ESCAPE" then
+			if self.SetPropagateKeyboardInput then self:SetPropagateKeyboardInput(false) end
+			if onClose then onClose() else self:Hide() end
+		elseif self.SetPropagateKeyboardInput then
+			self:SetPropagateKeyboardInput(true)
+		end
+	end)
+end
+
 local function create()
 	catcher = CreateFrame("Button", nil, UIParent)
 	catcher:SetAllPoints(UIParent)
@@ -49,7 +69,7 @@ local function create()
 		if catcher then catcher:Hide() end
 	end)
 	frame:Hide()
-	if UISpecialFrames then tinsert(UISpecialFrames, "BGFPopupMenu") end -- Escape closes it
+	Popup.CloseOnEscape(frame, close)
 end
 
 local function row(i)

@@ -145,7 +145,8 @@ _G.InCombatLockdown = function() return false end
 _G.C_Timer = { After = function(_, fn) fn() end }
 _G.SlashCmdList = {}
 _G.UISpecialFrames = {}
-_G.tinsert = table.insert
+local specialFrameInserts = 0
+_G.tinsert = function(t, ...) if t == _G.UISpecialFrames then specialFrameInserts = specialFrameInserts + 1 end return table.insert(t, ...) end
 _G.tContains = function(t, v) for _, x in ipairs(t) do if x == v then return true end end return false end
 local hookedBlizzard = {}
 _G.hooksecurefunc = function(tbl, name, fn)
@@ -670,6 +671,41 @@ if bear then
 	print("      -> " .. sent[#sent].text)
 else
 	check("solo tank listed for your group", false, "not in visible rows")
+end
+
+print("Entry menu and role display (0.7.8)")
+do
+	local rowFrame
+	for _, fr in ipairs(ns.List.scrollBox.__frames) do if fr.entry and fr.entry.info then rowFrame = fr break end end
+	ok, err = pcall(rowFrame.OnClick, rowFrame, "RightButton")
+	local items = ns.Popup.current
+	local labels = {}
+	for _, it in ipairs(items or {}) do if it.kind == "button" then labels[#labels + 1] = it.text end end
+	check("right click opens BGF's own entry menu (message, templates, report hint)", ok and items and #labels >= 3
+		and labels[#labels]:find("Melden", 1, true) ~= nil, err or table.concat(labels, " | "))
+	ns.Popup.Close()
+	-- quests report 40 players: a 2-member group shows two icons, no counts
+	local e = {}
+	for k, v in pairs(rowFrame.entry) do e[k] = v end
+	e.maxPlayers, e.profileKey, e.isSolo = 40, "other", false
+	e.info = setmetatable({ numMembers = 2 }, { __index = rowFrame.entry.info })
+	e.members = { { class = "MAGE", role = "DAMAGER" }, { class = "PRIEST", role = "HEALER" } }
+	rowFrame:Init({ kind = "row", entry = e })
+	local icons = 0
+	for _, slot in ipairs(rowFrame.Slots) do if slot.__shown then icons = icons + 1 end end
+	check("small group in a large activity: one icon per member, no counts", icons == 2 and not rowFrame.Counts.__shown, icons)
+	-- a real raid group: counts with /40, style placed left of them
+	e.profileKey = "raid"
+	e.info = setmetatable({ numMembers = 12 }, { __index = rowFrame.entry.info })
+	e.members = {}
+	for i = 1, 12 do e.members[i] = { class = "WARRIOR", role = i == 1 and "TANK" or "DAMAGER" } end
+	rowFrame:Init({ kind = "row", entry = e })
+	check("raid group: role counts with 12/40", rowFrame.Counts.__shown and (rowFrame.Counts.__text or ""):find("12/40", 1, true) ~= nil,
+		rowFrame.Counts.__text)
+	e.profileKey = "other"
+	rowFrame:Init({ kind = "row", entry = e })
+	check("... no '/40' outside raids", not (rowFrame.Counts.__text or ""):find("/40", 1, true), rowFrame.Counts.__text)
+	check("no BGF window in Blizzard's Escape list (UISpecialFrames)", specialFrameInserts == 0, specialFrameInserts)
 end
 
 print("Tooltip and toggles")

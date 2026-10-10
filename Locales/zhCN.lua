@@ -95,6 +95,8 @@ ns.RegisterLocale("zhCN", {
 	COND_LEVEL = "等级未知",
 	ROLE_TT_AUTO = "自动选择：单人时为队伍查找器中的职责，队伍中为仍缺少的职责。",
 	CHOOSE_CATEGORY = "请在左上方选择一个分类，例如地下城。",
+	MENU_REPORT = "举报 …",
+	REPORT_HINT = "只能在暴雪自带列表中举报：输入 /bgf off 切换，右键点击条目 → 举报，然后输入 /bgf on。",
 	RESET_SHORT = "重置",
 	RESET_TT = "重置此分类的按钮，并将职责恢复为自动。收藏和其他分类保持不变。",
 	ROLE_TT_NONE = "此分类没有职责分配，职责按钮在此无效。",

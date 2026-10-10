@@ -3,7 +3,7 @@
 local ADDON_NAME, ns = ...
 
 ns.ADDON_NAME = ADDON_NAME
-ns.VERSION = "0.7.7"
+ns.VERSION = "0.7.8"
 
 -- Locale registries, filled by Locales/*.lua.
 ns.Locales = {}           -- [locale] = { KEY = "UI string" }

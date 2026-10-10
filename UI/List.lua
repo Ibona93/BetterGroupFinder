@@ -358,6 +358,13 @@ function BGFRowMixin:Init(data)
 			local member = members[i]
 			SetSlot(self.Slots[offset + i], m.slot, member and (member.role or "DAMAGER"), member and member.class)
 		end
+	elseif (info.numMembers or #(entry.members or {})) <= MAX_SLOTS then
+		-- large activity (quests report 40) but a small group: one icon per member, no empty slots
+		local members = sortedMembers(entry.members)
+		local offset = MAX_SLOTS - #members
+		for i, member in ipairs(members) do
+			SetSlot(self.Slots[offset + i], m.slot, member.role or "DAMAGER", member.class)
+		end
 	else
 		local counts = { TANK = 0, HEALER = 0, DAMAGER = 0 }
 		for _, member in ipairs(entry.members or {}) do
@@ -369,8 +376,17 @@ function BGFRowMixin:Init(data)
 			local icon = CreateAtlasMarkup and CreateAtlasMarkup(ROLE_ATLAS[role], m.font + 2, m.font + 2) or role:sub(1, 1)
 			parts[#parts + 1] = icon .. counts[role]
 		end
-		self.Counts:SetText(table.concat(parts, " ") .. " " .. (info.numMembers or 0) .. "/" .. (entry.maxPlayers or 40))
+		local size = entry.profileKey == "raid" and ((info.numMembers or 0) .. "/" .. (entry.maxPlayers or 40)) or nil
+		self.Counts:SetText(table.concat(parts, " ") .. (size and (" " .. size) or ""))
 		self.Counts:Show()
+	end
+	-- play style left of the icons, or left of the (wider) role counts
+	self.Style:ClearAllPoints()
+	if self.Counts:IsShown() then
+		local w = math.ceil(self.Counts:GetStringWidth() or 0)
+		self.Style:SetPoint("RIGHT", self.ScoreAnchor, "LEFT", -(2 * GAP + w), 0)
+	else
+		self.Style:SetPoint("RIGHT", self.Slots[1], "LEFT", -GAP, 0)
 	end
 
 	-- Score / exclusion
@@ -414,9 +430,12 @@ function BGFRowMixin:OnClick(button)
 	local entry = self.entry
 	if not entry or entry.own then return end
 	if button == "RightButton" then
-		if LFGBrowseFrame and LFGBrowseFrame.CreateSearchEntryMenu then
-			pcall(LFGBrowseFrame.CreateSearchEntryMenu, LFGBrowseFrame, { resultID = entry.resultID })
-		end
+		-- own menu: Blizzard's entry menu runs through its protected menu system (crash with
+		-- taintLog in the 1.60.1 beta) and reporting is not allowed for addons anyway
+		List.selectedID = entry.resultID
+		List.UpdateSelections()
+		if ns.UI and ns.UI.UpdateButtons then ns.UI.UpdateButtons() end
+		if ns.Contact and ns.Contact.OpenEntryMenu then ns.Contact.OpenEntryMenu(self, entry) end
 		return
 	end
 	if entry.info and entry.info.isDelisted then return end

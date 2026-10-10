@@ -1,4 +1,4 @@
-# Better Group Finder (BGF) 0.7.7
+# Better Group Finder (BGF) 0.7.8
 
 Autor: **Ibona93** · Kontakt über die Projektseite. – WoW Forever
 
@@ -44,7 +44,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 | Bewertung | Automatisch aus deiner Sicht: solo „passe ich rein?“, in einer Gruppe „passt der zu uns?“. Zwei Gruppen werden auf einen Zusammenschluss geprüft. |
 | Tooltip | Blizzards Tooltip (Mitglieder, Voicechat, Aktivität) plus darunter die BGF-Begründung: grün = Vorteil, rot = Abzug, grau = Lücke, orange = Ausschlussgrund. |
 | Vorlagen-Button | Im Footer zwischen „Nachricht senden“ und „Gruppeneinladung“. Öffnet das Vorlagen-Menü; ein Klick auf eine Vorlage **sendet sofort**. |
-| Rechtsklick auf Eintrag | Blizzards eigenes Kontextmenü (Nachricht, Einladen, Melden). |
+| Rechtsklick auf Eintrag | Eigenes Kontextmenü: Nachricht senden, Einladen (wenn möglich), Vorlagen …, dazu „Melden …“ als Hinweis: Melden erlaubt Blizzard Addons nicht (`C_ReportSystem.SendReport` „Not allowed to be called by addons“), es geht in Blizzards Liste nach `/bgf off`. |
 | Sprachen | Oberfläche in allen 11 Clientsprachen. Vorlagen: deine Spielsprache plus Englisch. |
 
 ---
@@ -195,7 +195,7 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
   - Nach Klassenpatches muss die Tabelle eventuell angepasst werden.
 - **Schlachtzüge** gibt es in der Beta noch nicht; die Schlachtzug-Logik ist nur offline getestet.
 - **Karten-IDs:** Forever nutzt die Classic-IDs (geprüft: Burg Shadowfang 33, Todesminen 36, Höhlen des Wehklagens 43); Ruinen von Lordaeron hat 2999. Instanz-Hinweise und Namenstabelle bauen darauf auf. Flügel werden nur aus dem Deutschen übersetzt.
-- **Eigene Menüs:** Vorlagen-Menü und Schriftarten-Liste sind eigene, einfache Fenster (`UI/Popup.lua`), nicht Blizzards Menüsystem. Mit `/console taintLog 1` stürzte der Beta-Client (1.60.1.70291) ab, wenn ein Addon-Knopf ein Blizzard-Menü öffnete (Assertion in `ldebug.c`). Das Rechtsklick-Menü auf Einträgen bleibt Blizzards eigenes (Melden geht nur dort).
+- **Eigene Menüs:** Vorlagen-Menü und Schriftarten-Liste sind eigene, einfache Fenster (`UI/Popup.lua`), nicht Blizzards Menüsystem. Mit `/console taintLog 1` stürzte der Beta-Client (1.60.1.70291) ab, wenn ein Addon-Knopf ein Blizzard-Menü öffnete (Assertion in `ldebug.c`). Auch das Rechtsklick-Menü auf Einträgen ist ein eigenes Menü. Escape schließt BGF-Fenster über eine eigene Tastenabfrage (außerhalb des Kampfes), nicht über Blizzards Liste `UISpecialFrames`.
 - **Keine Kategorie vorausgewählt:** Blizzard startet ohne Kategorie, BGF zeigt dann den Hinweis „Wähle oben links eine Kategorie“. Vorauswählen kann BGF sie nicht: Die Suche ist geschützt und würde durch einen Addon-Wert blockiert.
 - **Keine Hooks auf Blizzard-Funktionen:** BGF folgt dem Gruppenfinder über dessen Ereignisse (Suchergebnisse empfangen, Suche fehlgeschlagen, Eintrag geändert) und hängt sich nur an Fenster-Skripte (Öffnen, Schließen, Aktualisieren-Knopf). Mit eingeschaltetem Taint-Log brach der Beta-Client sonst Blizzards Aufrufkette beim Öffnen des Reiters ab.
 - **Sprachen außer Deutsch/Englisch** sind von mir übersetzt und sollten vor einer Veröffentlichung von Muttersprachlern geprüft werden.
@@ -238,7 +238,7 @@ Vorher `/console taintLog 1` eingeben. Nach dem Test liegt die Datei `Logs\taint
 | 8 | Gruppe wählen → Vorlagen → Freundlich | Flüsternachricht wird gesendet, Platzhalter korrekt |
 | 9 | Als Gruppenleiter Einzelspieler → Vorlagen | Einladung + Nachricht |
 | 10 | Haken „BGF-Filter aktiv“ aus/an | BGF-Ansicht bleibt, ohne Punkte/Aussortieren; nichts verschwindet hinter der Leiste. `/bgf off` → Originalliste |
-| 11 | Nach dem Test: Dungeon betreten, kämpfen, Aktionsleisten benutzen | keine „Aktion blockiert“-Meldungen. `taint.log` nach `BetterGroupFinder` durchsuchen und mir schicken, falls Einträge auftauchen |
+| 11 | Nach dem Test: Dungeon betreten, kämpfen, Aktionsleisten benutzen | keine „Aktion blockiert“-Meldungen. Ergebnis 0.7.7 (Stufe 2): keine blockierte Aktion; BGF nur beim Slash-Befehl, beim Öffnen der Optionen und über `UISpecialFrames` (in 0.7.8 entfernt) |
 | 12 | `/bgf debug`, über Einträge fahren | Rohdaten erscheinen. Bitte prüfen, ob `spec` gefüllt ist und welche `mapID` die Forever-Instanzen haben |
 
 Fehlermeldungen (BugSack) und Auffälligkeiten bitte mit Screenshot melden.
@@ -278,6 +278,11 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.7.8**
+- Rollenanzeige: bis 5 Mitglieder Icons (auch bei Quests, die 40 melden), Zahlen erst ab 6; „/40“ nur bei Schlachtzügen; Spielstil überlappt die Zahlen nicht mehr.
+- Eigenes Kontextmenü beim Rechtsklick auf Einträge (Nachricht, Einladen, Vorlagen, Hinweis zum Melden) statt Blizzards Menü.
+- Escape ohne Blizzards `UISpecialFrames`-Liste: BGF erscheint im Taint-Log nur noch beim Slash-Befehl und beim Öffnen der Optionen.
 
 **0.7.7**
 - Hinweis in der leeren Liste, solange keine Kategorie gewählt ist.

@@ -13,7 +13,7 @@ read_globals = {
 	"UnitExists", "UnitClass", "UnitLevel", "UnitName", "UnitIsUnit", "UnitGroupRolesAssigned",
 	"UnitIsGroupLeader", "UnitIsGroupAssistant", "IsPlayerSpell", "GetCursorPosition", "Ambiguate",
 	"RAID_CLASS_COLORS", "LOCALIZED_CLASS_NAMES_MALE", "LEVEL_ABBR", "LFG_SELF_LISTING", "LFGBROWSE_ACTIVITY_COUNT",
-	"SEND_MESSAGE", "GROUP_INVITE", "SOUNDKIT", "PlaySound", "GetGeneralPlaystyleString", "CreateAtlasMarkup",
+	"SEND_MESSAGE", "GROUP_INVITE", "INVITE", "InCombatLockdown", "SOUNDKIT", "PlaySound", "GetGeneralPlaystyleString", "CreateAtlasMarkup",
 	"CreateScrollBoxListLinearView", "ScrollUtil", "CreateDataProvider", "ScrollBoxConstants",
 	"LFGBrowseFrame", "LFGParentFrame", "MenuUtil", "ChatFrameUtil", "ChatFrame_SendTell",
 	"GameTooltip_SetTitle", "GameTooltip_AddNormalLine", "Settings", "UISpecialFrames", "tinsert",

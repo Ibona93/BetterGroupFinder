@@ -99,6 +99,8 @@ ns.RegisterLocale("enUS", {
 	COND_LEVEL = "level unknown",
 	ROLE_TT_AUTO = "Chosen automatically: solo your roles from the group finder, in a group the roles it still needs.",
 	CHOOSE_CATEGORY = "Choose a category at the top left, e.g. Dungeons.",
+	MENU_REPORT = "Report ...",
+	REPORT_HINT = "Reporting is only possible in Blizzard's own list: switch with /bgf off, right-click the entry → Report, then /bgf on.",
 	RESET_SHORT = "Reset",
 	RESET_TT = "Resets the chips of this Group Finder category and sets the roles back to automatic. Favourites and the other categories stay.",
 	ROLE_TT_NONE = "This category has no role distribution; the role chips do nothing here.",

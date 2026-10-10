@@ -271,7 +271,7 @@ local function build()
 	bg:SetColorTexture(0.05, 0.04, 0.03, 0.95)
 	local close = CreateFrame("Button", nil, panel, "UIPanelCloseButton")
 	close:SetPoint("TOPRIGHT", -2, -2)
-	tinsert(UISpecialFrames, "BGFOptionsPanel")
+	ns.Popup.CloseOnEscape(panel)
 	panel:Hide()
 end
 
@@ -413,7 +413,7 @@ function Options.ShowScoreHelp()
 
 		local close = CreateFrame("Button", nil, helpFrame, "UIPanelCloseButton")
 		close:SetPoint("TOPRIGHT", -2, -2)
-		tinsert(UISpecialFrames, "BGFScoreHelp")
+		ns.Popup.CloseOnEscape(helpFrame)
 	end
 	helpFrame:Show()
 	return helpFrame

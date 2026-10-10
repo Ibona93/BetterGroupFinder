@@ -95,6 +95,8 @@ ns.RegisterLocale("koKR", {
 	COND_LEVEL = "레벨 알 수 없음",
 	ROLE_TT_AUTO = "자동 선택: 혼자일 때는 파티 찾기의 내 역할, 파티일 때는 아직 부족한 역할.",
 	CHOOSE_CATEGORY = "왼쪽 위에서 분류를 선택하세요 (예: 던전).",
+	MENU_REPORT = "신고 …",
+	REPORT_HINT = "신고는 블리자드 기본 목록에서만 가능합니다: /bgf off로 전환하고 항목을 오른쪽 클릭 → 신고, 그다음 /bgf on.",
 	RESET_SHORT = "초기화",
 	RESET_TT = "이 분류의 버튼을 초기화하고 역할을 다시 자동으로 설정합니다. 즐겨찾기와 다른 분류는 유지됩니다.",
 	ROLE_TT_NONE = "이 분류에는 역할 분배가 없으므로 역할 버튼이 적용되지 않습니다.",

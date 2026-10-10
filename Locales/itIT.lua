@@ -95,6 +95,8 @@ ns.RegisterLocale("itIT", {
 	COND_LEVEL = "livello sconosciuto",
 	ROLE_TT_AUTO = "Scelto automaticamente: da solo i tuoi ruoli dalla ricerca gruppo, in gruppo i ruoli che mancano ancora.",
 	CHOOSE_CATEGORY = "Scegli una categoria in alto a sinistra, ad es. Spedizioni.",
+	MENU_REPORT = "Segnala …",
+	REPORT_HINT = "La segnalazione è possibile solo nell'elenco di Blizzard: passa con /bgf off, clic destro sulla voce → Segnala, poi /bgf on.",
 	RESET_SHORT = "Ripristina",
 	RESET_TT = "Ripristina i pulsanti di questa categoria e riporta i ruoli su automatico. I preferiti e le altre categorie restano.",
 	ROLE_TT_NONE = "Questa categoria non ha una distribuzione dei ruoli; i pulsanti ruolo qui non hanno effetto.",

@@ -148,3 +148,38 @@ function Contact.OpenMenu(owner, entry)
 	end
 	ns.Popup.Open(owner, Contact.MenuItems(entry))
 end
+
+-- Right click on a list entry: message, invite, templates, and a hint how to report.
+function Contact.EntryMenuItems(entry, owner)
+	local L = ns.L
+	local target = entry.info and entry.info.leaderName or "?"
+	local short = Ambiguate and Ambiguate(target, "short") or target
+	local inviteOk = entry.isSolo and Contact.Mode(entry) == "invite"
+	local items = {
+		{ kind = "title", text = "|cffffffff" .. short .. "|r" },
+		{ kind = "divider" },
+		{ kind = "button", text = SEND_MESSAGE or L.MENU_EMPTY_WHISPER, fn = function()
+			if ChatFrameUtil and ChatFrameUtil.SendTell then ChatFrameUtil.SendTell(target) end
+		end },
+	}
+	if inviteOk then
+		items[#items + 1] = { kind = "button", text = INVITE or "Invite", fn = function()
+			if C_PartyInfo and C_PartyInfo.InviteUnit then pcall(C_PartyInfo.InviteUnit, target) end
+		end }
+	end
+	items[#items + 1] = { kind = "button", text = L.REQUEST .. " ...", fn = function()
+		if C_Timer then C_Timer.After(0, function() Contact.OpenMenu(owner, entry) end) else Contact.OpenMenu(owner, entry) end
+	end }
+	items[#items + 1] = { kind = "divider" }
+	items[#items + 1] = { kind = "button", text = "|cff9d9d9d" .. L.MENU_REPORT .. "|r", fn = function() ns.Print(L.REPORT_HINT) end,
+		tooltip = function(tooltip)
+			tooltip:SetText(L.MENU_REPORT, 1, 0.82, 0)
+			tooltip:AddLine(L.REPORT_HINT, 1, 1, 1, true)
+		end }
+	return items
+end
+
+function Contact.OpenEntryMenu(owner, entry)
+	if not entry or not entry.info then return end
+	ns.Popup.Open(owner, Contact.EntryMenuItems(entry, owner))
+end
