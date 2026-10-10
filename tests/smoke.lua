@@ -500,8 +500,9 @@ check("... counters on closed categories", f.CategoryToggles.class.label == "+ K
 ap.__scripts.OnClick(ap, "LeftButton")
 check("clicking the linked chip switches it off despite the warrior", ap.state == "ignore" and ap.overridden == "class_WARRIOR"
 	and ns.db.abilityStates[profile].class_WARRIOR == "need")
+check("... shown struck through, also in the favourites row", ap.Strike.__shown and f.FavChips.buff_ap.Strike.__shown)
 warrior.__scripts.OnClick(warrior, "LeftButton")
-check("warrior off: the override ends", next(ns.db.linkOverrides[profile]) == nil and ap.state == "ignore")
+check("warrior off: the override ends", next(ns.db.linkOverrides[profile]) == nil and ap.state == "ignore" and not ap.Strike.__shown)
 -- opening categories: each open category in its own rows
 pcall(f.CategoryToggles.buff.__scripts.OnClick, f.CategoryToggles.buff)
 v = shownByCategory()

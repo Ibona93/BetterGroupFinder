@@ -39,6 +39,7 @@ local STYLES = {
 }
 local NEXT_STATE = { ignore = "pref", pref = "need", need = "ignore" }
 local LINKED_BORDER = { 0.25, 0.62, 0.66, 1 }
+local OVERRIDDEN_BORDER = { 0.20, 0.42, 0.45, 1 }
 local STAR = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_1"
 
 local function font(sizeOffset)
@@ -127,6 +128,11 @@ local function createChip(parent, onClick)
 	chip.Star:SetTexture(STAR)
 	chip.Star:SetSize(10, 10)
 	chip.Star:Hide()
+	-- strike-through for chips switched off despite a link (the font cannot strike through)
+	chip.Strike = chip:CreateTexture(nil, "OVERLAY")
+	chip.Strike:SetColorTexture(LINKED_BORDER[1], LINKED_BORDER[2], LINKED_BORDER[3], 0.9)
+	chip.Strike:SetHeight(1)
+	chip.Strike:Hide()
 	chip:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	chip:SetScript("OnClick", function(self, button)
 		if PlaySound and SOUNDKIT then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON) end
@@ -176,7 +182,11 @@ function Bar.StyleChip(chip)
 	chip.Marker:SetPoint("LEFT", chip.Text, "RIGHT", 4, 0)
 	layoutPill(chip.Border, chip, 0)
 	layoutPill(chip.Fill, chip, 1)
-	local border = chip.linked and LINKED_BORDER or s.border
+	chip.Strike:ClearAllPoints()
+	chip.Strike:SetPoint("LEFT", chip.Text, "LEFT", -1, 0)
+	chip.Strike:SetPoint("RIGHT", chip.Text, "RIGHT", 1, 0)
+	chip.Strike:SetShown(chip.overridden and true or false)
+	local border = (chip.linked and LINKED_BORDER) or (chip.overridden and OVERRIDDEN_BORDER) or s.border
 	if chip.hover and chip:IsEnabled() then
 		border = { math.min(border[1] + 0.15, 1), math.min(border[2] + 0.13, 1), math.min(border[3] + 0.08, 1), 1 }
 	end

@@ -1,4 +1,4 @@
-# Better Group Finder (BGF) 0.7.1 – WoW Forever
+# Better Group Finder (BGF) 0.7.2 – WoW Forever
 
 Erweiterung für den Gruppenfinder von WoW Forever:
 - intelligente Filter
@@ -56,7 +56,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 - **Freier Platz für / Gesucht:** automatisch gesetzt (solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die fehlenden Rollen). Ein Klick wechselt auf manuelle Auswahl; „Filter zurücksetzen“ in den Optionen stellt wieder auf automatisch. Das erklärt auch der Tooltip der Rollen-Chips.
 - **Chips:** Linksklick wechselt zwischen *egal* (grau), *bevorzugt* (weiß, Halbkreis) und *benötigt* (gold, Punkt). **Rechtsklick** macht einen Chip zum Favoriten (Stern) oder entfernt ihn wieder; Favoriten stehen zusätzlich in der Favoriten-Zeile, es ist derselbe Chip. Start-Favoriten: Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft, Mana. Der Tooltip eines Chips zeigt Klasse, Zauber und Lernstufe, bei Bedingungen mit Hinweis (z. B. „Krieger – Schildhieb ab Stufe 12 (nur mit Schild)“, „Priester – Stille ab Stufe 30 (Talent)“). Die Zaubernamen kommen aus dem Spiel, also in deiner Clientsprache.
 - **Kategorien:** *Klassen* (9 Chips, „diese Klasse in der Gruppe“, von Haus aus *egal*), *Buffs* (Angriffskraft, Mana, Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Segen der Könige, Segen der Rettung, Göttlicher Willen, Furchtzauberschutz), *Dispells* (Fluch, Magie, Gift, Krankheit), *Kampf & Hilfsmittel* (Kontrolle, Unterbrechen, Kampfwiederbelebung, Gesundheitsstein, Beschwören). Der Tooltip eines Klassen-Chips zeigt, was die Klasse der Gruppe bringt: Bereiche Kampf & Hilfsmittel, Dispells, Buffs (goldene Überschriften), ein Zauber pro Zeile, Name weiß, Stufe grau, Bedingung orange, dahinter der Chip („– Kontrolle“) oder bei Buffs der Effekt in Hellblau („· Ausdauer +“). Am Ende steht türkis, was die Klasse mit auswählt.
-- **Verknüpfung:** Ein Klassen-Chip wählt die Buffs seiner Klasse im gleichen Zustand mit aus (Krieger *benötigt* → Angriffskraft *benötigt*; Hexenmeister → Gesundheitsstein und Beschwören). Ein Chip, den nur eine Klasse bringt, wählt die Klasse mit aus (Seelenstärke → Priester). Keine Kettenreaktion. Mit ausgewählte Chips haben einen türkisen Rand; ein Klick darauf schaltet sie trotzdem ab („abgewählt trotz …“), bis der auslösende Chip wieder aus ist. Mit ausgewählte Chips geben Punkte und Abzüge, sortieren aber nicht allein aus.
+- **Verknüpfung:** Ein Klassen-Chip wählt die Buffs seiner Klasse im gleichen Zustand mit aus (Krieger *benötigt* → Angriffskraft *benötigt*; Hexenmeister → Gesundheitsstein und Beschwören). Ein Chip, den nur eine Klasse bringt, wählt die Klasse mit aus (Seelenstärke → Priester). Keine Kettenreaktion. Mit ausgewählte Chips haben einen türkisen Rand; ein Klick darauf schaltet sie trotzdem ab („abgewählt trotz …“, gedämpft türkiser Rand und durchgestrichen), bis der auslösende Chip wieder aus ist. Mit ausgewählte Chips geben Punkte und Abzüge, sortieren aber nicht allein aus.
 - **Vorrang:** Einträge, die alle Chips erfüllen, die du selbst auf *benötigt* gestellt hast, stehen in Gruppen und Spielern immer oben; die übrigen folgen mit dem Hinweis „Nachrangig“.
 
 ### Vorlagen-Button
@@ -271,6 +271,9 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.7.2**
+- Chips, die trotz Verknüpfung abgewählt sind, haben einen gedämpft türkisen Rand und sind durchgestrichen.
 
 **0.7.1**
 - Geöffnete Kategorie-Chips sind golden statt grau.
