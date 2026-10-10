@@ -3,7 +3,8 @@ local ADDON_NAME, ns = ...
 --[[
 Filter bar under the Group Finder header (style of the approved mockup): rounded "pill"
 chips, a dot for "required", a half dot for "preferred", a check mark on selected roles,
-rarely used abilities behind "+ more", class chips behind "+ Classes". Opens with the filter button next to Refresh; the
+a favourites row (right click on a chip) and four categories that open in their own rows,
+linked chips with a teal border. Opens with the filter button next to Refresh; the
 window grows by the bar's height so the list keeps its size.
 ]]
 
@@ -36,6 +37,8 @@ local STYLES = {
 	more   = { bg = { 0.07, 0.055, 0.04, 1 }, border = { 0.30, 0.25, 0.18, 0.7 }, text = C.grey },
 }
 local NEXT_STATE = { ignore = "pref", pref = "need", need = "ignore" }
+local LINKED_BORDER = { 0.25, 0.62, 0.66, 1 }
+local STAR = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_1"
 
 local function font(sizeOffset)
 	return ns.Fonts.Get(12 + (sizeOffset or 0))
@@ -119,9 +122,14 @@ local function createChip(parent, onClick)
 	chip.Check:SetTexture(CHECK)
 	chip.Check:SetSize(14, 14)
 	chip.Check:Hide()
-	chip:SetScript("OnClick", function(self)
+	chip.Star = chip:CreateTexture(nil, "ARTWORK")
+	chip.Star:SetTexture(STAR)
+	chip.Star:SetSize(10, 10)
+	chip.Star:Hide()
+	chip:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+	chip:SetScript("OnClick", function(self, button)
 		if PlaySound and SOUNDKIT then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON) end
-		onClick(self)
+		onClick(self, button)
 	end)
 	chip:SetScript("OnEnter", function(self)
 		self.hover = true
@@ -154,7 +162,11 @@ function Bar.StyleChip(chip)
 		chip.Check:Show()
 	end
 	if chip.markerState then extra = 12 end
-	chip:SetWidth(textW + 20 + extra)
+	local starW = chip.favorite and 12 or 0
+	chip:SetWidth(textW + 20 + extra + starW)
+	chip.Star:ClearAllPoints()
+	chip.Star:SetPoint("RIGHT", -7, 0)
+	chip.Star:SetShown(chip.favorite and true or false)
 	chip.Text:ClearAllPoints()
 	chip.Text:SetPoint("LEFT", 10, 0)
 	chip.Check:ClearAllPoints()
@@ -163,7 +175,7 @@ function Bar.StyleChip(chip)
 	chip.Marker:SetPoint("LEFT", chip.Text, "RIGHT", 4, 0)
 	layoutPill(chip.Border, chip, 0)
 	layoutPill(chip.Fill, chip, 1)
-	local border = s.border
+	local border = chip.linked and LINKED_BORDER or s.border
 	if chip.hover and chip:IsEnabled() then
 		border = { math.min(border[1] + 0.15, 1), math.min(border[2] + 0.13, 1), math.min(border[3] + 0.08, 1), 1 }
 	end
@@ -227,24 +239,49 @@ function Bar.AbilitySources(id)
 	return lines
 end
 
--- Class chip tooltip: what the class brings, grouped by area ("Kontrolle: Verwandlung ab Stufe 8").
+-- Class chip tooltip: what the class brings, grouped ("Kontrolle: Verwandlung ab Stufe 8",
+-- "Buffs: Arkane Intelligenz ab Stufe 1", "Hilfsmittel: Gesundheitsstein herstellen ...").
+local function tooltipGroup(chip)
+	if chip.category == "buff" then return "buff" end
+	if chip.sole then return "utility" end
+	return chip.id
+end
+
 function Bar.ClassSources(class)
 	local L = ns.L
-	local categories = {}
-	for _, ability in ipairs(ns.ABILITIES) do
-		if ability.group ~= "class" then categories[#categories + 1] = ability.id end
+	local order, groups = {}, {}
+	local ranks = { combat = 1, dispel = 2, buff = 3 }
+	local chips = {}
+	for _, chip in ipairs(ns.ABILITIES) do
+		if not chip.class then chips[#chips + 1] = chip end
 	end
-	for _, cat in ipairs(ns.TOOLTIP_CATEGORIES) do categories[#categories + 1] = cat end
+	table.sort(chips, function(x, y)
+		local rx = (x.sole and x.category == "combat") and 4 or ranks[x.category]
+		local ry = (y.sole and y.category == "combat") and 4 or ranks[y.category]
+		if rx ~= ry then return rx < ry end
+		return x.order < y.order
+	end)
+	for _, chip in ipairs(chips) do
+		local key = tooltipGroup(chip)
+		for _, e in ipairs(sortedEntries(class, function(e) return e.a == chip.id end)) do
+			if not groups[key] then
+				groups[key] = {}
+				order[#order + 1] = key
+			end
+			table.insert(groups[key], { level = e.level, text = spellText(e), n = #groups[key] })
+		end
+	end
 	local lines = {}
-	for _, cat in ipairs(categories) do
-		local parts = {}
-		for _, e in ipairs(sortedEntries(class, function(e) return e.a == cat end)) do
-			parts[#parts + 1] = spellText(e)
-		end
-		if #parts > 0 then
-			local label = ns.ABILITY_BY_ID[cat] and ns.AbilityName(cat) or L["CAT_" .. cat]
-			lines[#lines + 1] = { text = L.CHIP_TT_CAT:format(label, table.concat(parts, ", ")), category = cat }
-		end
+	for _, key in ipairs(order) do
+		local label = ns.ABILITY_BY_ID[key] and ns.AbilityName(key) or L["CAT_" .. key]
+		local parts = groups[key]
+		table.sort(parts, function(x, y)
+			if x.level ~= y.level then return x.level < y.level end
+			return x.n < y.n
+		end)
+		local texts = {}
+		for i, part in ipairs(parts) do texts[i] = part.text end
+		lines[#lines + 1] = { text = L.CHIP_TT_CAT:format(label, table.concat(texts, ", ")), category = key }
 	end
 	return lines
 end
@@ -257,7 +294,14 @@ function Bar.ShowAbilityTooltip(chip)
 	for _, line in ipairs(lines) do
 		GameTooltip:AddLine(line.text, 1, 1, 1, true)
 	end
-	GameTooltip:AddLine(ns.L.CHIP_TT_CLICK, 0.6, 0.6, 0.6, true)
+	local L = ns.L
+	if chip.linked then
+		GameTooltip:AddLine(L.LINKED_BY:format(ns.AbilityName(chip.linked)), LINKED_BORDER[1], LINKED_BORDER[2] + 0.15, LINKED_BORDER[3] + 0.15, true)
+	elseif chip.overridden then
+		GameTooltip:AddLine(L.OVERRIDDEN:format(ns.AbilityName(chip.overridden)), LINKED_BORDER[1], LINKED_BORDER[2] + 0.15, LINKED_BORDER[3] + 0.15, true)
+	end
+	GameTooltip:AddLine(L.CHIP_TT_CLICK, 0.6, 0.6, 0.6, true)
+	GameTooltip:AddLine(ns.db.favorites[chip.ability] and L.FAV_REMOVE or L.FAV_ADD, 0.6, 0.6, 0.6, true)
 	GameTooltip:Show()
 end
 
@@ -333,22 +377,38 @@ function Bar.Create(parent)
 	f.AbilitiesLabel = text(f, C.white)
 	f.AbilitiesLabel:SetText(L.ABILITIES)
 	f.AbilityChips = {}
+	local function onAbilityClick(id)
+		return function(_, button)
+			if button == "RightButton" then Bar.ToggleFavorite(id) else Bar.CycleAbility(id) end
+		end
+	end
+	f.FavChips = {}
 	for _, ability in ipairs(ns.ABILITIES) do
-		local chip = createChip(f, function() Bar.CycleAbility(ability.id) end)
+		local chip = createChip(f, onAbilityClick(ability.id))
 		chip.ability = ability.id
 		chip.label = ns.AbilityName(ability.id)
 		f.AbilityChips[#f.AbilityChips + 1] = chip
+		local fav = createChip(f, onAbilityClick(ability.id))
+		fav.ability = ability.id
+		fav.label = chip.label
+		fav.inFavorites = true
+		fav:Hide()
+		f.FavChips[ability.id] = fav
 	end
-	f.More = createChip(f, function()
-		ns.db.showAllAbilities = not ns.db.showAllAbilities
-		ns.UI.ApplyLayout()
-	end)
-	f.More.state = "more"
-	f.Classes = createChip(f, function()
-		ns.db.showClasses = not ns.db.showClasses
-		ns.UI.ApplyLayout()
-	end)
-	f.Classes.state = "more"
+	f.FavLabel = text(f, C.white)
+	f.FavLabel:SetText(L.CAT_favorites)
+	f.FavEmpty = text(f, C.dim)
+	f.FavEmpty:SetText(L.FAV_EMPTY)
+	f.CategoryToggles = {}
+	for _, cat in ipairs(ns.CATEGORY_ORDER) do
+		local toggle = createChip(f, function()
+			ns.db.openCategories[cat] = not ns.db.openCategories[cat]
+			ns.UI.ApplyLayout()
+		end)
+		toggle.state = "more"
+		toggle.category = cat
+		f.CategoryToggles[cat] = toggle
+	end
 
 	-- Legend
 	f.LegendNeed = createMarker(f)
@@ -367,21 +427,21 @@ function Bar.ApplyFonts()
 	local f = Bar.frame
 	if not f then return end
 	for _, fs in ipairs({ f.EnableText, f.Separator, f.RatingLabel, f.RatingValue,
-		f.RolesLabel, f.AbilitiesLabel, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
+		f.RolesLabel, f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
 		fs:SetFontObject(font())
 	end
 end
 
--- Collapsed groups are hidden completely; the toggle chip shows how many are active.
-local function abilityGroup(chip)
+-- Collapsed categories are hidden completely; the toggle chip shows how many are active.
+local function chipCategory(chip)
 	local ability = ns.ABILITY_BY_ID[chip.ability]
-	return ability and ability.group or "core"
+	return ability and ability.category
 end
 
-function Bar.ActiveCount(group, states)
+function Bar.ActiveCount(category, states)
 	local n = 0
 	for _, ability in ipairs(ns.ABILITIES) do
-		if ability.group == group and (states[ability.id] or "ignore") ~= "ignore" then n = n + 1 end
+		if ability.category == category and (states[ability.id] or "ignore") ~= "ignore" then n = n + 1 end
 	end
 	return n
 end
@@ -393,7 +453,8 @@ function Bar.Layout()
 	updateSizes()
 	Bar.ApplyFonts()
 	Bar.Update()
-	LABEL_WIDTH = PADDING + 12 + math.ceil(math.max(f.RolesLabel:GetStringWidth(), f.AbilitiesLabel:GetStringWidth()))
+	LABEL_WIDTH = PADDING + 12 + math.ceil(math.max(f.RolesLabel:GetStringWidth(), f.AbilitiesLabel:GetStringWidth(),
+		f.FavLabel:GetStringWidth()))
 	local width = f:GetWidth()
 	if not width or width < 100 then width = 442 end
 	local y = -PADDING + 1
@@ -435,9 +496,6 @@ function Bar.Layout()
 	end
 	y = y - CHIP_HEIGHT - ROW_GAP
 
-	-- row 3: abilities, wrapping, with "+ more" and "+ Classes"; class chips in their own row
-	placeLabel(f.AbilitiesLabel)
-	x = LABEL_WIDTH
 	local function place(chip)
 		local w = chip:GetWidth()
 		if x + w > width - PADDING and x > LABEL_WIDTH then
@@ -449,19 +507,49 @@ function Bar.Layout()
 		chip:Show()
 		x = x + w + CHIP_GAP
 	end
-	for _, chip in ipairs(f.AbilityChips) do
-		local group = abilityGroup(chip)
-		if group == "core" or (group == "more" and ns.db.showAllAbilities) then place(chip) else chip:Hide() end
-	end
-	place(f.More)
-	place(f.Classes)
-	if ns.db.showClasses then
-		x = LABEL_WIDTH
-		y = y - CHIP_HEIGHT - CHIP_GAP
-		for _, chip in ipairs(f.AbilityChips) do
-			if abilityGroup(chip) == "class" then place(chip) end
+
+	-- row 3: favourites, a row of their own
+	placeLabel(f.FavLabel)
+	x = LABEL_WIDTH
+	local anyFavorite = false
+	for _, ability in ipairs(ns.ABILITIES) do
+		local fav = f.FavChips[ability.id]
+		if ns.db.favorites[ability.id] then
+			place(fav)
+			anyFavorite = true
+		else
+			fav:Hide()
 		end
 	end
+	f.FavEmpty:ClearAllPoints()
+	f.FavEmpty:SetPoint("LEFT", f, "TOPLEFT", LABEL_WIDTH + 2, y - CHIP_HEIGHT / 2)
+	f.FavEmpty:SetShown(not anyFavorite)
+	y = y - CHIP_HEIGHT - ROW_GAP
+
+	-- rows 4+: categories; closed ones side by side, an open one gets rows of its own
+	placeLabel(f.AbilitiesLabel)
+	x = LABEL_WIDTH
+	local function newLine()
+		if x > LABEL_WIDTH then
+			x = LABEL_WIDTH
+			y = y - CHIP_HEIGHT - CHIP_GAP
+		end
+	end
+	for _, chip in ipairs(f.AbilityChips) do chip:Hide() end
+	for _, cat in ipairs(ns.CATEGORY_ORDER) do
+		local toggle = f.CategoryToggles[cat]
+		if ns.db.openCategories[cat] then
+			newLine()
+			place(toggle)
+			for _, chip in ipairs(f.AbilityChips) do
+				if chipCategory(chip) == cat then place(chip) end
+			end
+			newLine()
+		else
+			place(toggle)
+		end
+	end
+	if x == LABEL_WIDTH then y = y + CHIP_HEIGHT + CHIP_GAP end -- undo the last line break
 	y = y - CHIP_HEIGHT - 6
 
 	-- legend, right aligned
@@ -511,12 +599,32 @@ function Bar.ToggleRole(role)
 	ns.RequestRefresh()
 end
 
+-- Left click: cycle ignore -> preferred -> required. On a chip that is only selected through
+-- a link, the click switches it off anyway (until the linking chip is switched off).
 function Bar.CycleAbility(id)
 	local profile = Bar.CurrentProfile()
-	local states = ns.db.abilityStates[profile]
-	states[id] = NEXT_STATE[states[id] or "ignore"]
+	local own = ns.db.abilityStates[profile]
+	ns.db.linkOverrides[profile] = ns.db.linkOverrides[profile] or {}
+	local overrides = ns.db.linkOverrides[profile]
+	local _, info = ns.Engine.ProfileStates(profile)
+	if info.linked[id] then
+		overrides[id] = true
+	else
+		own[id] = NEXT_STATE[own[id] or "ignore"]
+	end
+	local _, after = ns.Engine.ProfileStates(profile)
+	for chip in pairs(overrides) do
+		if not after.implied[chip] then overrides[chip] = nil end
+	end
 	ns.UI.ApplyLayout()
 	ns.RequestRefresh()
+end
+
+-- Right click: add to or remove from the favourites row (false, not nil, so the saved
+-- variables do not bring a removed default favourite back).
+function Bar.ToggleFavorite(id)
+	ns.db.favorites[id] = not ns.db.favorites[id]
+	ns.UI.ApplyLayout()
 end
 
 function Bar.Update()
@@ -551,22 +659,29 @@ function Bar.Update()
 		Bar.StyleChip(chip)
 	end
 
-	local states = ns.db.abilityStates[profile] or {}
-	for _, chip in ipairs(f.AbilityChips) do
-		chip.state = states[chip.ability] or "ignore"
+	local states, info = ns.Engine.ProfileStates(profile)
+	local function styleAbility(chip)
+		local id = chip.ability
+		chip.state = states[id] or "ignore"
 		chip.markerState = (chip.state == "need" or chip.state == "pref") and chip.state or nil
+		chip.linked = info.linked[id]
+		chip.overridden = info.overridden[id]
+		chip.favorite = not chip.inFavorites and ns.db.favorites[id] and true or false
 		Bar.StyleChip(chip)
 	end
-	local function toggleLabel(open, openText, closedText, group)
-		if open then return openText end
-		local n = Bar.ActiveCount(group, states)
-		return n > 0 and (closedText .. " (" .. n .. ")") or closedText
+	for _, chip in ipairs(f.AbilityChips) do styleAbility(chip) end
+	for _, chip in pairs(f.FavChips) do styleAbility(chip) end
+	for _, cat in ipairs(ns.CATEGORY_ORDER) do
+		local toggle = f.CategoryToggles[cat]
+		local name = L["CAT_" .. cat]
+		if ns.db.openCategories[cat] then
+			toggle.label = "- " .. name
+		else
+			local n = Bar.ActiveCount(cat, states)
+			toggle.label = "+ " .. name .. (n > 0 and (" (" .. n .. ")") or "")
+		end
+		Bar.StyleChip(toggle)
 	end
-	f.More.label = toggleLabel(ns.db.showAllAbilities, L.LESS, L.MORE, "more")
-	Bar.StyleChip(f.More)
-	f.Classes.label = toggleLabel(ns.db.showClasses, "- " .. L.CLASS_CHIPS, "+ " .. L.CLASS_CHIPS, "class")
-	Bar.StyleChip(f.Classes)
-
 
 	setMarker(f.LegendNeed, "need", C.dim, { 0.045, 0.035, 0.025 })
 	setMarker(f.LegendPref, "pref", C.dim, { 0.045, 0.035, 0.025 })
@@ -574,14 +689,17 @@ function Bar.Update()
 	-- Filter switched off: the bar stays open, everything except the switch is greyed out.
 	local enabled = ns.db.enabled
 	local alpha = enabled and 1 or 0.4
-	for _, list in ipairs({ f.RoleChips, f.AbilityChips, { f.More, f.Classes } }) do
+	local favList, toggles = {}, {}
+	for _, chip in pairs(f.FavChips) do favList[#favList + 1] = chip end
+	for _, chip in pairs(f.CategoryToggles) do toggles[#toggles + 1] = chip end
+	for _, list in ipairs({ f.RoleChips, f.AbilityChips, favList, toggles }) do
 		for _, chip in ipairs(list) do
 			chip:SetAlpha(alpha)
 			chip:SetEnabled(enabled)
 		end
 	end
 	for _, region in ipairs({ f.Separator, f.RatingLabel, f.RatingValue, f.RolesLabel,
-		f.AbilitiesLabel, f.LegendNeed, f.LegendNeedText, f.LegendDot, f.LegendPref, f.LegendPrefText }) do
+		f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.LegendNeed, f.LegendNeedText, f.LegendDot, f.LegendPref, f.LegendPrefText }) do
 		region:SetAlpha(alpha)
 	end
 end
@@ -589,6 +707,7 @@ end
 function Bar.ResetFilters()
 	ns.db.roleChips = {}
 	ns.db.abilityStates = ns.CopyTable(ns.DEFAULT_ABILITY_STATES)
+	ns.db.linkOverrides = {}
 	Bar.Update()
 	if ns.UI and ns.UI.ApplyLayout then ns.UI.ApplyLayout() end
 	ns.RequestRefresh()

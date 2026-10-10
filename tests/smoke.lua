@@ -75,6 +75,8 @@ Frame.__index = function(self, key)
 	if key == "IsShown" then return function(s) return s.__shown end end
 	if key == "SetText" then return function(s, t) s.__text = t end end
 	if key == "GetText" then return function(s) return s.__text or "" end end
+	if key == "SetPoint" then return function(s, ...) s.__point = { ... } end end
+	if key == "GetPoint" then return function(s) if s.__point then return unpack(s.__point) end end end
 	if key == "SetWidth" then return function(s, w) s.__size.w = w end end
 	if key == "SetHeight" then return function(s, h) s.__size.h = h end end
 	if key == "SetSize" then return function(s, w, h) s.__size.w, s.__size.h = w, h end end
@@ -410,10 +412,10 @@ check("class tooltip groups what the class brings", tt[1].text:find("^Kontrolle:
 	and tt[#tt].text == "Buffs: Mal der Wildnis ab Stufe 1", tt[1] and tt[1].text)
 tt = ns.FilterBar.ClassSources("WARLOCK")
 local util = tt[#tt].text
-check("warlock tooltip lists healthstones and summoning under utility", util == "Sonstiges: Gesundheitsstein herstellen ab Stufe 10, Ritual der Beschwörung ab Stufe 20", util)
+check("warlock tooltip lists healthstones and summoning under utility", util == "Hilfsmittel: Gesundheitsstein herstellen ab Stufe 10, Ritual der Beschwörung ab Stufe 20", util)
 tt = ns.FilterBar.ClassSources("PALADIN")
 local kings = false
-for _, l in ipairs(tt) do if l.text:find("Buffs: Segen der Könige ab Stufe 20, Segen der Rettung ab Stufe 26", 1, true) then kings = true end end
+for _, l in ipairs(tt) do if l.text:find("Buffs: Segen der Macht ab Stufe 4, Segen der Weisheit ab Stufe 14, Segen der Könige ab Stufe 20, Segen der Rettung ab Stufe 26", 1, true) then kings = true end end
 check("paladin tooltip has Kings and Salvation", kings)
 tt = ns.FilterBar.ClassSources("PRIEST")
 check("priest tooltip: Seelenstärke, Furchtzauberschutz, Göttlicher Willen", tt[#tt].text ==
@@ -449,33 +451,86 @@ ns.Fonts.Set("friz")
 ns.db.filterOpen = false
 pcall(ns.UI.filterButton.__scripts.OnClick)
 local f = ns.FilterBar.frame
-local function shownGroups()
-	local count = { core = 0, more = 0, class = 0 }
+local function shownByCategory()
+	local count = { class = 0, buff = 0, dispel = 0, combat = 0 }
 	for _, c in ipairs(f.AbilityChips) do
-		if c.__shown then local g = ns.ABILITY_BY_ID[c.ability].group count[g] = count[g] + 1 end
+		if c.__shown then local g = ns.ABILITY_BY_ID[c.ability].category count[g] = count[g] + 1 end
 	end
 	return count
 end
-local v = shownGroups()
-check("only the 5 main abilities are visible", v.core == 5 and v.more == 0 and v.class == 0, v.core .. "/" .. v.more .. "/" .. v.class)
-check("toggle chips '+ mehr' and '+ Klassen'", f.More.label == "+ mehr" and f.Classes.label == "+ Klassen", f.Classes.label)
+local function shownFavorites()
+	local n = 0
+	for _, c in pairs(f.FavChips) do if c.__shown then n = n + 1 end end
+	return n
+end
+local v = shownByCategory()
+check("all categories closed: no category chips, 5 default favourites", v.class + v.buff + v.dispel + v.combat == 0 and shownFavorites() == 5,
+	shownFavorites())
+check("category toggles", f.CategoryToggles.class.label == "+ Klassen" and f.CategoryToggles.buff.label == "+ Buffs"
+	and f.CategoryToggles.dispel.label == "+ Dispells" and f.CategoryToggles.combat.label == "+ Kampf & Hilfsmittel (2)", f.CategoryToggles.combat.label)
 local profile = ns.FilterBar.CurrentProfile()
-ns.db.abilityStates[profile].class_DRUID = "pref"
-ns.db.abilityStates[profile].curse = "need"
-ns.UI.ApplyLayout()
-v = shownGroups()
-check("collapsed groups stay hidden even when active (variant B)", v.more == 0 and v.class == 0, v.more .. "/" .. v.class)
-check("... the toggle chip counts active chips", f.Classes.label == "+ Klassen (1)" and f.More.label == "+ mehr (1)", f.Classes.label .. " | " .. f.More.label)
-pcall(f.Classes.__scripts.OnClick, f.Classes)
-v = shownGroups()
-check("'+ Klassen' shows all 9 class chips", v.class == 9 and ns.db.showClasses == true and f.Classes.label == "- Klassen", v.class)
-pcall(f.More.__scripts.OnClick, f.More)
-v = shownGroups()
-check("'+ mehr' shows the 4 removal chips", v.more == 4 and f.More.label == "- weniger", v.more)
-pcall(f.More.__scripts.OnClick, f.More)
-pcall(f.Classes.__scripts.OnClick, f.Classes)
-ns.db.abilityStates[profile].class_DRUID = "ignore"
-ns.db.abilityStates[profile].curse = "ignore"
+-- link: warrior required -> attack power required (teal border)
+local warrior, ap
+for _, c in ipairs(f.AbilityChips) do
+	if c.ability == "class_WARRIOR" then warrior = c end
+	if c.ability == "buff_ap" then ap = c end
+end
+warrior.__scripts.OnClick(warrior, "LeftButton")
+warrior.__scripts.OnClick(warrior, "LeftButton")
+check("warrior 'required' selects attack power along", ns.db.abilityStates[profile].class_WARRIOR == "need" and ap.state == "need" and ap.linked == "class_WARRIOR"
+	and f.FavChips.buff_ap.linked == "class_WARRIOR", tostring(ap.state))
+check("... counters on closed categories", f.CategoryToggles.class.label == "+ Klassen (1)" and f.CategoryToggles.buff.label == "+ Buffs (1)",
+	f.CategoryToggles.buff.label)
+ap.__scripts.OnClick(ap, "LeftButton")
+check("clicking the linked chip switches it off despite the warrior", ap.state == "ignore" and ap.overridden == "class_WARRIOR"
+	and ns.db.abilityStates[profile].class_WARRIOR == "need")
+warrior.__scripts.OnClick(warrior, "LeftButton")
+check("warrior off: the override ends", next(ns.db.linkOverrides[profile]) == nil and ap.state == "ignore")
+-- opening categories: each open category in its own rows
+pcall(f.CategoryToggles.buff.__scripts.OnClick, f.CategoryToggles.buff)
+v = shownByCategory()
+check("'+ Buffs' shows the 9 buffs", v.buff == 9 and f.CategoryToggles.buff.label == "- Buffs", v.buff)
+local _, _, buffY = f.CategoryToggles.buff:GetPoint()
+local _, _, classY = f.CategoryToggles.class:GetPoint()
+local _, _, dispelY = f.CategoryToggles.dispel:GetPoint()
+check("open category starts a new row and the next category another one", buffY and classY and dispelY and buffY < classY and dispelY < buffY,
+	tostring(classY) .. "/" .. tostring(buffY) .. "/" .. tostring(dispelY))
+pcall(f.CategoryToggles.class.__scripts.OnClick, f.CategoryToggles.class)
+v = shownByCategory()
+check("several categories can be open", v.class == 9 and v.buff == 9, v.class)
+pcall(f.CategoryToggles.class.__scripts.OnClick, f.CategoryToggles.class)
+pcall(f.CategoryToggles.buff.__scripts.OnClick, f.CategoryToggles.buff)
+-- favourites by right click
+local summonFav = f.FavChips.summon
+local summon
+for _, c in ipairs(f.AbilityChips) do if c.ability == "summon" then summon = c end end
+summon.__scripts.OnClick(summon, "RightButton")
+check("right click adds a favourite (star on the chip, shown in the favourites row)", ns.db.favorites.summon == true and summonFav.__shown
+	and summon.favorite and shownFavorites() == 6)
+summonFav.__scripts.OnClick(summonFav, "LeftButton")
+check("favourite and original are the same chip", summon.state == "pref" and ns.db.abilityStates[profile].summon == "pref")
+do
+	ns.UI.Refresh()
+	local players = ns.List.sections.players
+	local mine = ns.Engine.GetMySide()[1].class
+	local last, cls
+	for i = #players, 2, -1 do
+		local c = players[i].members and players[i].members[1] and players[i].members[1].class
+		if c and c ~= mine and c ~= players[1].members[1].class then last, cls = players[i], c break end
+	end
+	ns.db.abilityStates[profile]["class_" .. tostring(cls)] = "need"
+	ns.UI.Refresh()
+	local first = ns.List.sections.players[1]
+	check("entries that bring everything required come first", cls and first and first.resultID == last.resultID,
+		tostring(cls) .. " " .. tostring(first and first.info.leaderName))
+	ns.db.abilityStates[profile]["class_" .. tostring(cls)] = "ignore"
+	ns.UI.Refresh()
+end
+check("summoning selects the warlock (only class with it)", ns.Engine.ProfileStates(profile).class_WARLOCK == "pref")
+summonFav.__scripts.OnClick(summonFav, "LeftButton")
+summonFav.__scripts.OnClick(summonFav, "LeftButton")
+summon.__scripts.OnClick(summon, "RightButton")
+check("right click again removes it (stored as false)", ns.db.favorites.summon == false and not summonFav.__shown)
 pcall(ns.UI.filterButton.__scripts.OnClick)
 
 print("Request button")
@@ -552,7 +607,7 @@ if ok and helpWin then
 		if item.kind == "row" and item.tag == "weights" and item.value ~= "" then weights = weights + 1 end
 		if item.kind == "row" and item.tag == "plus" then plusRows = plusRows + 1 end
 	end
-	check("... with 7 sections, 5 generated weight rows (classes in one row) and plus rows", headers == 7 and weights == 5 and plusRows == 5,
+	check("... with 7 sections, generated weight rows (classes in one row) and plus rows", headers == 7 and weights == 8 and plusRows == 5,
 		headers .. "/" .. weights .. "/" .. plusRows)
 	for _, item in ipairs(helpWin.Items) do
 		if item.tag == "weights" and item.kind == "row" then print(("      %3s | %s"):format(item.value, item.text)) end

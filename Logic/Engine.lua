@@ -273,6 +273,7 @@ function E.EvaluateResult(resultID, mySide, noRating)
 		result = { score = 0, excluded = false, reasons = { { "note", "R_DATA_MISSING" } } }
 	else
 		local host, guest, swapped = ns.Scoring.ChooseSides(mySide, members)
+		local states, info2 = E.ProfileStates(entry.profileKey)
 		local targets, strict = ns.GetRoleTargets(entry.profileKey, entry.maxPlayers)
 		local act = entry.activityInfo
 		result = ns.Scoring.Evaluate({
@@ -284,7 +285,8 @@ function E.EvaluateResult(resultID, mySide, noRating)
 			profileKey = entry.profileKey,
 			roleTargets = targets,
 			strictRoles = strict,
-			states = ns.db.abilityStates[entry.profileKey],
+			states = states,
+			explicitNeed = info2.explicitNeed,
 			hints = act and ns.INSTANCE_HINTS[act.mapID],
 			allowedGuestRoles = E.AllowedRoles(),
 			activity = act and {
@@ -298,7 +300,7 @@ function E.EvaluateResult(resultID, mySide, noRating)
 		if not entry.isSolo then
 			entry.groupValue = ns.Scoring.GroupValue(members, {
 				roleTargets = targets,
-				states = ns.db.abilityStates[entry.profileKey],
+				states = states,
 				hints = act and ns.INSTANCE_HINTS[act.mapID],
 			})
 		end
@@ -308,6 +310,12 @@ function E.EvaluateResult(resultID, mySide, noRating)
 	end
 	entry.result = result
 	return entry
+end
+
+-- Effective chip states of a profile (own settings + links), see Scoring.ResolveStates.
+function E.ProfileStates(profileKey)
+	local overrides = ns.db.linkOverrides and ns.db.linkOverrides[profileKey]
+	return ns.Scoring.ResolveStates(ns.db.abilityStates[profileKey], overrides)
 end
 
 -- Builds the sections shown in the BGF list from Blizzard's (already sorted) results.
@@ -332,7 +340,11 @@ function E.BuildSections(resultIDs, rate)
 			end
 		end
 	end
+	-- Entries that bring everything you marked "required" come first, then by points.
 	local function byScore(a, b)
+		local ma = a.result and a.result.needMissing and #a.result.needMissing > 0 and 1 or 0
+		local mb = b.result and b.result.needMissing and #b.result.needMissing > 0 and 1 or 0
+		if ma ~= mb then return ma < mb end
 		local sa, sb = a.result and a.result.score or 0, b.result and b.result.score or 0
 		if sa ~= sb then return sa > sb end
 		return a.resultID < b.resultID

@@ -9,14 +9,15 @@ attached when that addon loads.
 local BLIZZ_ADDON = "Blizzard_GroupFinder_VanillaStyle"
 
 ns.DEFAULTS = {
-	schema = 5,
+	schema = 6,
 	enabled = true,         -- "BGF filter active": rating, sorting, sorting out
 	uiEnabled = true,       -- /bgf on|off: BGF list at all (off = Blizzard's original list)
 	showScores = true,
 	filterOpen = false,
 	font = "friz",
-	showAllAbilities = false,
-	showClasses = false,
+	favorites = ns.DEFAULT_FAVORITES,  -- chips shown in the favourites row (right click)
+	openCategories = {},               -- expanded chip categories in the filter bar
+	linkOverrides = {},                -- [profile][chip] = true: switched off despite a link
 	autoSend = true,
 	showReasons = true,
 	abilityStates = ns.DEFAULT_ABILITY_STATES,
@@ -27,8 +28,7 @@ ns.DEFAULTS = {
 	debug = false,
 }
 
--- 0.6.0 replaced the class buff chips and "summon" by class chips: drop settings of
--- abilities that no longer exist (class chips start as "ignore").
+-- Drops settings of chips that no longer exist (renamed or removed in an update).
 function ns.CleanAbilityStates(states)
 	for _, profile in pairs(states or {}) do
 		for id in pairs(profile) do
@@ -178,10 +178,12 @@ frame:SetScript("OnEvent", function(_, event, arg1)
 			local oldSchema = BetterGroupFinderDB.schema or 0
 			ns.db = ns.MergeDefaults(BetterGroupFinderDB, ns.DEFAULTS)
 			ns.db.scale = nil -- removed in 0.2.0
-			if not isNew and oldSchema < 5 then
-				ns.db.compact = nil  -- 0.4.0: only the two-line view
-				ns.db.fontSize = nil -- 0.4.0: fixed sizes like Blizzard (names 14, rest 12)
-				ns.db.schema = 5
+			if not isNew and oldSchema < 6 then
+				ns.db.compact = nil          -- 0.4.0: only the two-line view
+				ns.db.fontSize = nil         -- 0.4.0: fixed sizes like Blizzard (names 14, rest 12)
+				ns.db.showAllAbilities = nil -- 0.7.0: categories instead of "+ more"
+				ns.db.showClasses = nil
+				ns.db.schema = 6
 			end
 			ns.CleanAbilityStates(ns.db.abilityStates)
 			if ns.Fonts then ns.Fonts.RegisterShared() end

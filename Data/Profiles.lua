@@ -35,24 +35,21 @@ function ns.GetRoleTargets(profileKey, maxPlayers)
 	return nil, false
 end
 
--- Default state per ability and profile: "need", "pref" or "ignore".
--- Class chips (class_*) start as "ignore" everywhere.
+-- Default state per chip and profile: "need", "pref" or "ignore". Everything not listed
+-- starts as "ignore" (class chips and the buffs only one class brings, because those
+-- would select their class via the links).
 ns.DEFAULT_ABILITY_STATES = {
-	dungeon = {
-		cc = "pref", interrupt = "pref", battleres = "ignore", buff_ap = "ignore", buff_mana = "ignore",
-		curse = "ignore", magic = "ignore", poison = "ignore", disease = "ignore",
-	},
+	dungeon = { cc = "pref", interrupt = "pref" },
 	raid = {
 		cc = "pref", interrupt = "pref", battleres = "pref", buff_ap = "pref", buff_mana = "pref",
 		curse = "pref", magic = "pref", poison = "pref", disease = "pref",
 	},
-	other = {
-		cc = "ignore", interrupt = "ignore", battleres = "ignore", buff_ap = "ignore", buff_mana = "ignore",
-		curse = "ignore", magic = "ignore", poison = "ignore", disease = "ignore",
-	},
+	other = {},
 }
 for _, states in pairs(ns.DEFAULT_ABILITY_STATES) do
-	for _, class in ipairs(ns.CLASS_ORDER) do states["class_" .. class] = "ignore" end
+	for _, chip in ipairs(ns.ABILITIES) do
+		states[chip.id] = states[chip.id] or "ignore"
+	end
 end
 
 --[[
@@ -68,11 +65,11 @@ ns.INSTANCE_HINTS = {
 	[47]  = { "poison", "curse" },            -- Razorfen Kraul
 	[109] = { "curse", "magic" },             -- Sunken Temple
 	[349] = { "poison", "curse" },            -- Maraudon
-	[230] = { "class_PRIEST", "magic" },          -- Blackrock Depths (Fear Ward)
+	[230] = { "buff_fearward", "magic" },          -- Blackrock Depths
 	[329] = { "disease", "curse" },           -- Stratholme
 	[289] = { "curse", "disease", "magic" },  -- Scholomance
-	[409] = { "curse", "magic", "class_PRIEST" }, -- Molten Core
-	[249] = { "class_PRIEST" },                   -- Onyxia's Lair (Fear Ward)
-	[469] = { "magic", "class_PRIEST" },          -- Blackwing Lair
+	[409] = { "curse", "magic", "buff_fearward" }, -- Molten Core
+	[249] = { "buff_fearward" },                   -- Onyxia's Lair
+	[469] = { "magic", "buff_fearward" },          -- Blackwing Lair
 	[309] = { "poison", "curse" },            -- Zul'Gurub
 }

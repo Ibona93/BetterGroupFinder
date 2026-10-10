@@ -100,8 +100,12 @@ local function build()
 	fontLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -14)
 	fontLabel:SetText(L.OPT_FONT)
 	local preview = panel:CreateFontString(nil, "ARTWORK")
+	local fontButtonRef
 	local function updatePreview()
 		preview:SetFontObject(ns.Fonts.Get(12))
+		-- the dropdown shows the chosen font's name in that font
+		local label = fontButtonRef and (fontButtonRef.Text or (fontButtonRef.GetFontString and fontButtonRef:GetFontString()))
+		if label and label.SetFont then pcall(label.SetFont, label, ns.Fonts.Path(), 12, "") end
 		preview:SetText("Höhlen des Wehklagens · Aldarin Schattentanz 26 · +46")
 		preview:SetTextColor(1, 0.82, 0)
 	end
@@ -110,10 +114,19 @@ local function build()
 		fontButton:SetWidth(200)
 		fontButton:SetupMenu(function(_, root)
 			for _, f in ipairs(ns.Fonts.List()) do
-				root:CreateRadio(f.name, function() return ns.db.font == f.key end, function()
+				local radio = root:CreateRadio(f.name, function() return ns.db.font == f.key end, function()
 					ns.Fonts.Set(f.key)
 					updatePreview()
 				end)
+				-- every entry is written in its own font
+				if radio and radio.AddInitializer then
+					radio:AddInitializer(function(button)
+						local fs = button and (button.fontString or button.Text)
+						if fs and fs.SetFont then
+							pcall(fs.SetFont, fs, ns.Fonts.PathFor(f.key), 12, "")
+						end
+					end)
+				end
 			end
 		end)
 	else
@@ -131,6 +144,7 @@ local function build()
 		fontButton:SetText(ns.Fonts.Name())
 	end
 	fontButton:SetPoint("LEFT", fontLabel, "RIGHT", 10, 0)
+	fontButtonRef = fontButton
 
 	preview:SetPoint("TOPLEFT", fontLabel, "BOTTOMLEFT", 0, -14)
 	panel.updateFontControls = function()
@@ -304,7 +318,7 @@ function Options.ParseHelp(text)
 					table.insert(byWeight[weight], name)
 				end
 				for _, ability in ipairs(ns.ABILITIES) do
-					if ability.group ~= "class" then add(ability.weight, ns.AbilityName(ability.id)) end
+					if not ability.class then add(ability.weight, ns.AbilityName(ability.id)) end
 				end
 				add(ns.CLASS_WEIGHT, ns.L.CLASS_WEIGHT_ROW)
 				table.sort(weights, function(x, y) return x > y end)

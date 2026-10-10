@@ -190,6 +190,69 @@ local function missingRoles(counts, targets)
 	return out
 end
 
+-- Does `class` bring chip `id` for sure (class chip or a non-"possible" spell)?
+local function classBrings(class, id)
+	local chip = ns.ABILITY_BY_ID[id]
+	if chip and chip.class then return chip.class == class end
+	for _, e in ipairs(ns.CLASS_ABILITIES[class] or {}) do
+		if e.a == id and not e.possible then return true end
+	end
+	return false
+end
+
+-- Can a missing "required" chip still join? Needs a free slot, and with strict role targets
+-- (dungeons) a class that brings it must be able to play one of the roles still open.
+function S.CanStillJoin(id, counts, targets, strict, total, maxPlayers)
+	if total >= maxPlayers then return false end
+	if not (targets and strict) then return true end
+	for _, role in ipairs(ROLE_ORDER) do
+		if gap(counts, targets, role) > 0 then
+			for _, class in ipairs(ns.CLASS_ORDER) do
+				if ns.CLASS_ROLES[class][role] and classBrings(class, id) then return true end
+			end
+		end
+	end
+	return false
+end
+
+-- Effective chip states: own settings plus linked chips (one level, no chain reaction).
+-- A linked chip takes the state of the chip that selects it unless it was switched off
+-- on purpose (overrides). Returns states and { explicitNeed, linked = { [id] = sourceId } }.
+local RANK = { ignore = 0, pref = 1, need = 2 }
+function S.ResolveStates(own, overrides)
+	own, overrides = own or {}, overrides or {}
+	local implied, impliedBy = {}, {}
+	for _, chip in ipairs(ns.ABILITIES) do
+		local state = own[chip.id] or "ignore"
+		if state ~= "ignore" then
+			for _, target in ipairs(ns.LINKS[chip.id] or {}) do
+				if RANK[state] > RANK[implied[target] or "ignore"] then
+					implied[target], impliedBy[target] = state, chip.id
+				end
+			end
+		end
+	end
+	local states, explicitNeed, linked, overridden = {}, {}, {}, {}
+	for _, chip in ipairs(ns.ABILITIES) do
+		local id = chip.id
+		local o = own[id] or "ignore"
+		local i = implied[id]
+		if i and RANK[i] > RANK[o] then
+			if overrides[id] then
+				overridden[id] = impliedBy[id]
+				states[id] = o
+			else
+				states[id] = i
+				linked[id] = impliedBy[id]
+			end
+		else
+			states[id] = o
+		end
+		if o == "need" then explicitNeed[id] = true end
+	end
+	return states, { explicitNeed = explicitNeed, linked = linked, overridden = overridden, implied = implied }
+end
+
 --[[
 ctx = {
   host, guest            -- member lists
@@ -198,7 +261,8 @@ ctx = {
   maxPlayers             -- activity size
   profileKey             -- "dungeon" | "raid" | "other"
   roleTargets, strictRoles
-  states                 -- { [abilityId] = "need"|"pref"|"ignore" }
+  states                 -- { [abilityId] = "need"|"pref"|"ignore" } (effective, see ResolveStates)
+  explicitNeed           -- { [abilityId] = true } chips set to "need" by the user (nil = all)
   hints                  -- { abilityId, ... } from the instance, or nil
   allowedGuestRoles      -- { TANK = true, ... } or nil (filter chips)
   activity               -- { minLevel, minSuggest, maxSuggest } or nil
@@ -270,6 +334,8 @@ function S.Evaluate(ctx)
 		for _, id in ipairs(ctx.hints) do hinted[id] = true end
 	end
 	local abilityGain = 0
+	local needMissing = {}
+	result.needMissing = needMissing
 	for _, ability in ipairs(ns.ABILITIES) do
 		local id = ability.id
 		local state = ctx.states and ctx.states[id] or "ignore"
@@ -295,17 +361,26 @@ function S.Evaluate(ctx)
 			local combined = (h == "sure" or g == "sure") and "sure" or (h or g)
 			if combined ~= "sure" and (state == "need" or not combined) then
 				if state == "need" then
-					if total < maxPlayers then
+					-- Only chips you set yourself sort out; linked ones just lower the score.
+					local explicit = not ctx.explicitNeed or ctx.explicitNeed[id]
+					if not explicit or S.CanStillJoin(id, counts, targets, ctx.strictRoles, total, maxPlayers) then
 						result.score = result.score - w / 2
 						addReason(result, "note", "R_STILL_MISSING", id)
+					elseif total < maxPlayers then
+						exclude(result, "R_REQUIRED_NO_SLOT", id)
 					else
 						exclude(result, "R_REQUIRED_MISSING", id)
 					end
+					if explicit then needMissing[#needMissing + 1] = id end
 				else
 					addReason(result, "note", "R_STILL_MISSING", id)
 				end
 			end
 		end
+	end
+
+	if #needMissing > 0 and not result.excluded then
+		addReason(result, "note", "R_LOWER_PRIORITY")
 	end
 
 	-- 5. Duplicates without new value

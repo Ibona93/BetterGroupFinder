@@ -64,7 +64,7 @@ function Contact.Fill(template, entry, lang)
 		class = className(me.class, lang),
 		role = roleWord(myRole(entry), lang),
 		level = tostring(me.level or ""),
-		instance = entry.activityName or "",
+		instance = ns.InstanceName(entry, lang),
 		group = table.concat(groupParts, wordsFor(lang).listJoin or ", "),
 	}
 	local text = template:gsub("{(%w+)}", function(key)

@@ -15,31 +15,44 @@ Source status (October 2026, beta build 1.60.1):
   * Verified Forever changes: no Bloodlust/Heroism for shamans (only a personal
     talent), Fear Ward for all priests at level 20, Blessing of Kings/Salvation and Divine
     Spirit baseline, no Wyvern Sting.
-  * Class chips (0.6.0) mean "this class in the group"; buffs only one class brings
-    (Fortitude, Kings, Healthstones ...) appear in that class's tooltip only. Buffs several
-    classes bring keep their own chips (attack power, mana).
+  * Chips (0.7.0) in four categories: classes ("this class in the group"), buffs,
+    dispels, combat & utility. Class chips select their buffs; chips only one class brings
+    select that class (ns.LINKS at the end of this file).
   * Everything here is meant to be edited when Blizzard changes classes.
 ]]
 
--- Ability ids and default weight (points when a group gains it). `group` decides where the
--- chip sits in the filter bar: "core" always visible, "more" behind "+ more", "class"
--- behind "+ Classes". Class chips mean "this class in the group".
+-- Chips: id, weight (points when a group gains it), category in the filter bar
+-- ("class", "buff", "dispel", "combat"), `class` for class chips ("this class in the
+-- group") and `sole` when only one class brings it (linked both ways with that class).
 ns.CLASS_ORDER = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }
 ns.CLASS_WEIGHT = 6
+ns.CATEGORY_ORDER = { "class", "buff", "dispel", "combat" }
 
-ns.ABILITIES = {
-	{ id = "cc",        weight = 10, group = "core" },
-	{ id = "interrupt", weight = 8,  group = "core" },
-	{ id = "battleres", weight = 6,  group = "core" },
-	{ id = "buff_ap",   weight = 2,  group = "core" },  -- attack power: warrior, paladin, shaman, hunter (talent)
-	{ id = "buff_mana", weight = 2,  group = "core" },  -- mana: paladin, shaman
-	{ id = "curse",     weight = 6,  group = "more" },
-	{ id = "magic",     weight = 6,  group = "more" },
-	{ id = "poison",    weight = 5,  group = "more" },
-	{ id = "disease",   weight = 5,  group = "more" },
-}
+ns.ABILITIES = {}
 for _, class in ipairs(ns.CLASS_ORDER) do
-	ns.ABILITIES[#ns.ABILITIES + 1] = { id = "class_" .. class, weight = ns.CLASS_WEIGHT, group = "class", class = class }
+	ns.ABILITIES[#ns.ABILITIES + 1] = { id = "class_" .. class, weight = ns.CLASS_WEIGHT, category = "class", class = class }
+end
+for _, a in ipairs({
+	{ id = "buff_ap",        weight = 2, category = "buff" },   -- warrior, paladin, shaman; hunter talent (ranged)
+	{ id = "buff_mana",      weight = 2, category = "buff" },   -- paladin, shaman
+	{ id = "buff_stamina",   weight = 4, category = "buff", sole = "PRIEST" },  -- Power Word: Fortitude
+	{ id = "buff_int",       weight = 2, category = "buff", sole = "MAGE" },    -- Arcane Intellect
+	{ id = "buff_wild",      weight = 3, category = "buff", sole = "DRUID" },   -- Mark of the Wild
+	{ id = "buff_kings",     weight = 3, category = "buff", sole = "PALADIN" },
+	{ id = "buff_salvation", weight = 2, category = "buff", sole = "PALADIN" },
+	{ id = "buff_spirit",    weight = 2, category = "buff", sole = "PRIEST" },  -- Divine Spirit
+	{ id = "buff_fearward",  weight = 4, category = "buff", sole = "PRIEST" },
+	{ id = "curse",          weight = 6, category = "dispel" },
+	{ id = "magic",          weight = 6, category = "dispel" },
+	{ id = "poison",         weight = 5, category = "dispel" },
+	{ id = "disease",        weight = 5, category = "dispel" },
+	{ id = "cc",             weight = 10, category = "combat" },
+	{ id = "interrupt",      weight = 8, category = "combat" },
+	{ id = "battleres",      weight = 6, category = "combat" },
+	{ id = "healthstone",    weight = 3, category = "combat", sole = "WARLOCK" },
+	{ id = "summon",         weight = 7, category = "combat", sole = "WARLOCK" },  -- no meeting stones in Forever
+}) do
+	ns.ABILITIES[#ns.ABILITIES + 1] = a
 end
 
 ns.ABILITY_BY_ID = {}
@@ -48,8 +61,21 @@ for i, ability in ipairs(ns.ABILITIES) do
 	ns.ABILITY_BY_ID[ability.id] = ability
 end
 
--- Categories that only appear in the class tooltips (not rated on their own).
-ns.TOOLTIP_CATEGORIES = { "buff", "utility" }
+-- Starting favourites (right click on a chip adds or removes one).
+ns.DEFAULT_FAVORITES = { cc = true, interrupt = true, battleres = true, buff_ap = true, buff_mana = true }
+
+-- Roles a class can play (for "required": can the missing class still join on a free slot?).
+ns.CLASS_ROLES = {
+	WARRIOR = { TANK = true, DAMAGER = true },
+	PALADIN = { TANK = true, HEALER = true, DAMAGER = true },
+	HUNTER  = { DAMAGER = true },
+	ROGUE   = { DAMAGER = true },
+	PRIEST  = { HEALER = true, DAMAGER = true },
+	SHAMAN  = { HEALER = true, DAMAGER = true },
+	MAGE    = { DAMAGER = true },
+	WARLOCK = { DAMAGER = true },
+	DRUID   = { TANK = true, HEALER = true, DAMAGER = true },
+}
 
 --[[
 Spells shown in the tooltips. The name comes from the game (C_Spell.GetSpellName, so it is in
@@ -112,7 +138,7 @@ ns.SPELLS = {
 }
 
 --[[
-Per class: `a` ability id (or "buff"/"utility" = shown only in the class tooltip), `level`,
+Per class: `a` chip id, `level`,
 `sp` tooltip spell, `spells` rank-1 IDs for YOUR OWN spellbook check (none for pet spells),
 `possible` = BGF can only say "may bring", `cond` = condition(s) shown in the tooltip
 (locale keys COND_*).
@@ -134,8 +160,8 @@ ns.CLASS_ABILITIES = {
 		{ a = "disease",   level = 8,  sp = "purify", spells = { 1152 } },
 		{ a = "interrupt", level = 8,  sp = "hammer_justice", spells = { 853 }, cond = "STUN" },
 		{ a = "buff_mana", level = 14, sp = "blessing_wisdom", spells = { 19742 } },
-		{ a = "buff",      level = 20, sp = "blessing_kings", spells = { 20217 } },     -- baseline in Forever
-		{ a = "buff",      level = 26, sp = "blessing_salvation", spells = { 1038 } },  -- baseline in Forever
+		{ a = "buff_kings", level = 20, sp = "blessing_kings", spells = { 20217 } },     -- baseline in Forever
+		{ a = "buff_salvation", level = 26, sp = "blessing_salvation", spells = { 1038 } },  -- baseline in Forever
 		{ a = "cc",        level = 24, sp = "turn_undead", spells = { 2878 }, possible = true, cond = "UNDEAD" },
 		{ a = "cc",        level = 30, sp = "repentance", spells = { 20066 }, possible = true, cond = { "TALENT", "HUMANOID" } },
 		{ a = "magic",     level = 42, sp = "cleanse", spells = { 4987 } },
@@ -151,12 +177,12 @@ ns.CLASS_ABILITIES = {
 		{ a = "interrupt", level = 12, sp = "kick", spells = { 1766 } },
 	},
 	PRIEST = {
-		{ a = "buff",      level = 1,  sp = "fortitude", spells = { 1243 } },
+		{ a = "buff_stamina", level = 1, sp = "fortitude", spells = { 1243 } },
 		{ a = "disease",   level = 14, sp = "cure_disease", spells = { 528 } },
 		{ a = "magic",     level = 18, sp = "dispel_magic", spells = { 527 } },
-		{ a = "buff",      level = 20, sp = "fear_ward", spells = { 6346 } },          -- all priests in Forever
+		{ a = "buff_fearward", level = 20, sp = "fear_ward", spells = { 6346 } },          -- all priests in Forever
 		{ a = "cc",        level = 20, sp = "shackle_undead", spells = { 9484 }, possible = true, cond = "UNDEAD" },
-		{ a = "buff",      level = 30, sp = "divine_spirit", spells = { 14752 } },     -- baseline in Forever
+		{ a = "buff_spirit", level = 30, sp = "divine_spirit", spells = { 14752 } },     -- baseline in Forever
 		{ a = "interrupt", level = 30, sp = "silence", spells = { 15487 }, possible = true, cond = "TALENT" },
 	},
 	SHAMAN = {
@@ -168,23 +194,23 @@ ns.CLASS_ABILITIES = {
 		{ a = "buff_mana", level = 26, sp = "mana_spring", spells = { 5675 } },
 	},
 	MAGE = {
-		{ a = "buff",      level = 1,  sp = "arcane_intellect", spells = { 1459 } },
+		{ a = "buff_int",  level = 1,  sp = "arcane_intellect", spells = { 1459 } },
 		{ a = "cc",        level = 8,  sp = "polymorph", spells = { 118 } },
 		{ a = "curse",     level = 18, sp = "remove_lesser_curse", spells = { 475 } },
 		{ a = "interrupt", level = 24, sp = "counterspell", spells = { 2139 } },
 	},
 	WARLOCK = {
 		{ a = "cc",        level = 8,  sp = "fear", spells = { 5782 }, possible = true, cond = "RISKY" },
-		{ a = "utility",   level = 10, sp = "healthstone", spells = { 6201 } },
+		{ a = "healthstone", level = 10, sp = "healthstone", spells = { 6201 } },
 		{ a = "battleres", level = 18, sp = "soulstone", spells = { 693 } },
-		{ a = "utility",   level = 20, sp = "summoning", spells = { 698 } },
+		{ a = "summon",    level = 20, sp = "summoning", spells = { 698 } },
 		{ a = "cc",        level = 20, sp = "seduction", possible = true, cond = "SUCCUBUS" },  -- pet spell
 		{ a = "cc",        level = 28, sp = "banish", spells = { 710 }, cond = "DEMON" },
 		{ a = "magic",     level = 30, sp = "devour_magic", possible = true, cond = "PET" },    -- Felhunter
 		{ a = "interrupt", level = 36, sp = "spell_lock", possible = true, cond = "PET" },      -- Felhunter
 	},
 	DRUID = {
-		{ a = "buff",      level = 1,  sp = "mark_wild", spells = { 1126 } },
+		{ a = "buff_wild", level = 1,  sp = "mark_wild", spells = { 1126 } },
 		{ a = "cc",        level = 8,  sp = "roots", spells = { 339 } },   -- indoors in Forever
 		{ a = "poison",    level = 14, sp = "cure_poison_druid", spells = { 8946 } },
 		{ a = "interrupt", level = 14, sp = "bash", spells = { 5211 }, possible = true, cond = "BEAR" }, -- classic level, not verified
@@ -215,4 +241,30 @@ function ns.SpellName(key)
 		if ok and type(name) == "string" and name ~= "" then return name end
 	end
 	return spell[ns.clientLocale or "enUS"] or spell.enUS
+end
+
+--[[
+Links between chips (one level, no chain reaction):
+  * class chip -> every buff it brings for sure, plus chips only this class brings
+    (warlock: healthstone, summoning)
+  * chip only one class brings -> that class
+]]
+ns.LINKS = {}
+local function link(from, to)
+	ns.LINKS[from] = ns.LINKS[from] or {}
+	ns.LINKS[from][#ns.LINKS[from] + 1] = to
+end
+for _, class in ipairs(ns.CLASS_ORDER) do
+	local seen = {}
+	for _, e in ipairs(ns.CLASS_ABILITIES[class]) do
+		local chip = ns.ABILITY_BY_ID[e.a]
+		if chip and not seen[e.a] and not e.possible
+			and (chip.category == "buff" or chip.sole == class) then
+			seen[e.a] = true
+			link("class_" .. class, e.a)
+		end
+	end
+end
+for _, chip in ipairs(ns.ABILITIES) do
+	if chip.sole then link(chip.id, "class_" .. chip.sole) end
 end

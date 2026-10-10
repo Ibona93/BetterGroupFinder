@@ -28,6 +28,7 @@ end
 load("Data/Abilities.lua")
 load("Data/Profiles.lua")
 load("Data/Abbreviations.lua")
+load("Data/Instances.lua")
 load("Logic/Scoring.lua")
 load("Logic/Engine.lua")
 load("Core.lua")
@@ -220,13 +221,13 @@ do
 	check("13d no role targets (quests) -> no group value", S.GroupValue({ M("MAGE", 30) }, { states = states }) == nil)
 	check("13e class chips: the member's class is always covered", S.Coverage({ M("DRUID", 5) }).class_DRUID == "sure"
 		and S.Coverage({ M("DRUID", 5) }).class_MAGE == nil)
-	check("13f class-only buffs are tooltip categories, not rated abilities", ns.ABILITY_BY_ID.buff == nil
-		and ns.ABILITY_BY_ID.summon == nil and ns.ABILITY_BY_ID.buff_stamina == nil and #ns.ABILITIES == 18)
+	check("13f 0.7.0 chips: 9 classes, 9 buffs, 4 dispels, 5 combat", #ns.ABILITIES == 27 and ns.ABILITY_BY_ID.healthstone
+		and ns.ABILITY_BY_ID.summon and ns.ABILITY_BY_ID.buff_fearward and ns.ABILITY_BY_ID.healthstone.category == "combat", #ns.ABILITIES)
 	check("13g all class chips start as 'ignore'", ns.DEFAULT_ABILITY_STATES.dungeon.class_WARLOCK == "ignore"
-		and ns.DEFAULT_ABILITY_STATES.raid.class_PRIEST == "ignore")
-	local old = { dungeon = { summon = "pref", buff_stamina = "need", cc = "need", class_DRUID = "pref" } }
+		and ns.DEFAULT_ABILITY_STATES.raid.class_PRIEST == "ignore" and ns.DEFAULT_ABILITY_STATES.dungeon.summon == "ignore")
+	local old = { dungeon = { buff = "pref", utility = "need", cc = "need", class_DRUID = "pref" } }
 	ns.CleanAbilityStates(old)
-	check("13h old settings of removed chips are dropped", old.dungeon.summon == nil and old.dungeon.buff_stamina == nil
+	check("13h settings of unknown chips are dropped", old.dungeon.buff == nil and old.dungeon.utility == nil
 		and old.dungeon.cc == "need" and old.dungeon.class_DRUID == "pref")
 	local hinted = false
 	for _, list in pairs(ns.INSTANCE_HINTS) do for _, id in ipairs(list) do
@@ -292,6 +293,64 @@ do
 	check("14i hunter: Trueshot Aura possible from 25, Wyvern Sting gone", S.Coverage({ M("HUNTER", 25) }).buff_ap == "possible"
 		and S.Coverage({ M("HUNTER", 24) }).buff_ap == nil and ns.SPELLS.wyvern_sting == nil)
 	check("14j druid: Feral Charge from 20, Bash from 14", S.Coverage({ M("DRUID", 14) }).interrupt == "possible")
+end
+
+print("Links, favourites, open roles and priority (0.7.0)")
+do
+	local function has(list, v) for _, x in ipairs(list or {}) do if x == v then return true end end return false end
+	check("15a warrior links to attack power only", #ns.LINKS.class_WARRIOR == 1 and ns.LINKS.class_WARRIOR[1] == "buff_ap")
+	check("15b priest links to Fortitude, Fear Ward, Divine Spirit", #ns.LINKS.class_PRIEST == 3 and has(ns.LINKS.class_PRIEST, "buff_stamina")
+		and has(ns.LINKS.class_PRIEST, "buff_fearward") and has(ns.LINKS.class_PRIEST, "buff_spirit"))
+	check("15c warlock links to healthstone and summoning", has(ns.LINKS.class_WARLOCK, "healthstone") and has(ns.LINKS.class_WARLOCK, "summon"))
+	check("15d hunter's talent aura is not linked", ns.LINKS.class_HUNTER == nil)
+	check("15e sole-class chips link back to their class", ns.LINKS.buff_stamina[1] == "class_PRIEST" and ns.LINKS.summon[1] == "class_WARLOCK"
+		and ns.LINKS.buff_ap == nil)
+	local states, info = S.ResolveStates({ class_WARRIOR = "need" }, {})
+	check("15f warrior 'required' -> attack power 'required' (linked)", states.buff_ap == "need" and info.linked.buff_ap == "class_WARRIOR"
+		and info.explicitNeed.class_WARRIOR and not info.explicitNeed.buff_ap)
+	states = S.ResolveStates({}, {})
+	check("15g switching the warrior off removes the linked state", states.buff_ap == "ignore")
+	states, info = S.ResolveStates({ class_WARRIOR = "need" }, { buff_ap = true })
+	check("15h override: attack power off despite the warrior", states.buff_ap == "ignore" and info.overridden.buff_ap == "class_WARRIOR"
+		and states.class_WARRIOR == "need")
+	states = S.ResolveStates({ class_WARRIOR = "pref", buff_ap = "need" }, {})
+	check("15i an own stronger setting wins over the link", states.buff_ap == "need")
+	states, info = S.ResolveStates({ buff_stamina = "pref" }, {})
+	check("15j no chain reaction: Fortitude -> priest, but not Fear Ward", states.class_PRIEST == "pref" and states.buff_fearward == "ignore")
+	-- Screenshot case: tank + 2 dps, a hunter joins as dps, only the healer slot is left.
+	local host = { M("WARRIOR", 22, "TANK"), M("ROGUE", 22, "DAMAGER"), M("PALADIN", 22, "DAMAGER") }
+	local ctx = dungeonCtx(host, { M("HUNTER", 22, "DAMAGER") })
+	ctx.states.class_MAGE = "need"
+	ctx.explicitNeed = { class_MAGE = true }
+	local r = S.Evaluate(ctx)
+	check("15k mage required, only a healer slot left -> sorted out", r.excluded and hasReason(r, "R_REQUIRED_NO_SLOT", "class_MAGE"), reasonsText(r))
+	ctx = dungeonCtx(host, { M("HUNTER", 22, "DAMAGER") })
+	ctx.states.class_PRIEST = "need"
+	ctx.explicitNeed = { class_PRIEST = true }
+	r = S.Evaluate(ctx)
+	check("15l priest required, healer slot left -> stays (priest can heal)", not r.excluded and hasReason(r, "R_STILL_MISSING", "class_PRIEST")
+		and hasReason(r, "R_LOWER_PRIORITY"), reasonsText(r))
+	ctx = dungeonCtx(host, { M("HUNTER", 22, "DAMAGER") })
+	ctx.states.buff_ap = "need"
+	ctx.explicitNeed = {}
+	r = S.Evaluate(ctx)
+	check("15m a linked 'required' chip never sorts out alone", not r.excluded, reasonsText(r))
+	ctx = dungeonCtx({ M("WARRIOR", 22, "TANK") }, { M("HUNTER", 22, "DAMAGER") })
+	ctx.states.class_MAGE = "need"
+	ctx.explicitNeed = { class_MAGE = true }
+	r = S.Evaluate(ctx)
+	check("15n with dps slots left the mage can still join", not r.excluded and #r.needMissing == 1, reasonsText(r))
+	-- Instance names for templates
+	ns.clientLocale = "deDE"
+	local entry = { activityName = "Burg Shadowfang", activityInfo = { mapID = 33 } }
+	check("15o English template gets the English name", ns.InstanceName(entry, "enUS") == "Shadowfang Keep", ns.InstanceName(entry, "enUS"))
+	check("15p German template keeps the client name", ns.InstanceName(entry, "deDE") == "Burg Shadowfang")
+	check("15q Ruins of Lordaeron (Forever map 2999)", ns.InstanceName({ activityName = "Ruinen von Lordaeron", activityInfo = { mapID = 2999 } }, "enUS")
+		== "Ruins of Lordaeron")
+	check("15r unknown map ID: found by the German name, wing translated",
+		ns.InstanceName({ activityName = "Scharlachrotes Kloster - Bibliothek", activityInfo = { mapID = 99999 } }, "enUS") == "Scarlet Monastery - Library",
+		ns.InstanceName({ activityName = "Scharlachrotes Kloster - Bibliothek", activityInfo = { mapID = 99999 } }, "enUS"))
+	check("15s unknown instance keeps the client name", ns.InstanceName({ activityName = "Neue Instanz", activityInfo = { mapID = 4242 } }, "enUS") == "Neue Instanz")
 end
 
 print("Abbreviations and template languages")

@@ -78,7 +78,12 @@ end
 
 -- Path of the selected font, respecting the client's alphabet.
 function Fonts.Path()
-	local key = ns.db and ns.db.font or "friz"
+	return Fonts.PathFor(ns.db and ns.db.font or "friz")
+end
+
+-- Path of any font key (used to write each font's name in its own font).
+function Fonts.PathFor(key)
+	key = key or "friz"
 	if CJK[ns.clientLocale] then return gameFont() end
 	if key == "friz" then return gameFont() end
 	if key:sub(1, 4) == "lsm:" then
