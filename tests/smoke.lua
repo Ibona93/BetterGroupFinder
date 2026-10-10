@@ -460,6 +460,8 @@ ok, err = pcall(ns.Fonts.Set, fontNames["Expressway"])
 check("switching to a LibSharedMedia font", ok and ns.Fonts.Path():find("Expressway", 1, true) ~= nil, err or ns.Fonts.Path())
 ok, err = pcall(ns.Fonts.Set, "philosopher")
 check("switching to Philosopher", ok and ns.Fonts.Path():find("Philosopher", 1, true) ~= nil, err)
+check("each font key gets its own font object (font menu entries)", ns.Fonts.GetFor("morpheus", 12) ~= ns.Fonts.GetFor("friz", 12)
+	and ns.Fonts.GetFor("morpheus", 12).__fontSize == 12)
 ns.clientLocale = "koKR"
 check("Korean client always uses the game font", ns.Fonts.Path() == "Fonts\\FRIZQT__.TTF", ns.Fonts.Path())
 ns.clientLocale = "deDE"

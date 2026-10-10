@@ -115,7 +115,15 @@ local cache = {}
 
 -- Font object for a size (and optional flags), rebuilt when the font changes.
 function Fonts.Get(size, flags)
-	local path = Fonts.Path()
+	return Fonts.GetPath(Fonts.Path(), size, flags)
+end
+
+-- Font object for any font key (the font menu writes each entry in its own font).
+function Fonts.GetFor(key, size)
+	return Fonts.GetPath(Fonts.PathFor(key), size)
+end
+
+function Fonts.GetPath(path, size, flags)
 	local id = path .. "|" .. size .. "|" .. (flags or "")
 	if cache[id] then return cache[id] end
 	local font = CreateFont("BGFFont" .. (#Fonts.objects + 1))

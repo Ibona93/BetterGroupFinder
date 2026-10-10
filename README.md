@@ -1,4 +1,4 @@
-# Better Group Finder (BGF) 0.7.2 – WoW Forever
+# Better Group Finder (BGF) 0.7.3 – WoW Forever
 
 Erweiterung für den Gruppenfinder von WoW Forever:
 - intelligente Filter
@@ -191,7 +191,7 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
   - Für Forever bestätigt: kein Kampfrausch/Heldentum, Furchtzauberschutz für alle Priester ab 20, Segen der Könige (20) und der Rettung (26) sowie Göttlicher Willen (30) ohne Talent, kein Stich des Flügeldrachen.
   - Nach Klassenpatches muss die Tabelle eventuell angepasst werden.
 - **Karten-IDs:** Forever nutzt die Classic-IDs (geprüft: Burg Shadowfang 33, Todesminen 36, Höhlen des Wehklagens 43); Ruinen von Lordaeron hat 2999. Instanz-Hinweise und Namenstabelle bauen darauf auf. Flügel werden nur aus dem Deutschen übersetzt.
-- **Schriftarten-Auswahl in der eigenen Schrift** nutzt Blizzards Menü-Initialisierer; ob das im Forever-Menü greift, ist nicht im Spiel getestet.
+- **Schriftarten-Auswahl in der eigenen Schrift:** Blizzards Menü verbietet `SetFont` auf seinen Texten; BGF setzt deshalb ein eigenes Schrift-Objekt pro Eintrag.
 - **Sprachen außer Deutsch/Englisch** sind von mir übersetzt und sollten vor einer Veröffentlichung von Muttersprachlern geprüft werden.
 - **Fensterhöhe:** Mit offener Filterleiste ändert BGF die Höhe von Blizzards Fenster, nur außerhalb des Kampfes, um Taint zu vermeiden. Siehe Taint-Test unten.
 - **Spaltenbreiten und Abkürzungen** sind gegen geschätzte Schriftbreiten getestet, nicht im Client gemessen.
@@ -271,6 +271,9 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.7.3**
+- Schriftarten-Auswahl zeigt jeden Eintrag jetzt wirklich in seiner eigenen Schrift (0.7.0 nutzte eine Funktion, die Blizzards Menü verbietet).
 
 **0.7.2**
 - Chips, die trotz Verknüpfung abgewählt sind, haben einen gedämpft türkisen Rand und sind durchgestrichen.

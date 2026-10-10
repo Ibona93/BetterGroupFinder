@@ -105,7 +105,7 @@ local function build()
 		preview:SetFontObject(ns.Fonts.Get(12))
 		-- the dropdown shows the chosen font's name in that font
 		local label = fontButtonRef and (fontButtonRef.Text or (fontButtonRef.GetFontString and fontButtonRef:GetFontString()))
-		if label and label.SetFont then pcall(label.SetFont, label, ns.Fonts.Path(), 12, "") end
+		if label and label.SetFontObject then pcall(label.SetFontObject, label, ns.Fonts.Get(12)) end
 		preview:SetText("Höhlen des Wehklagens · Aldarin Schattentanz 26 · +46")
 		preview:SetTextColor(1, 0.82, 0)
 	end
@@ -118,12 +118,14 @@ local function build()
 					ns.Fonts.Set(f.key)
 					updatePreview()
 				end)
-				-- every entry is written in its own font
+				-- every entry is written in its own font; the menu's font strings forbid
+				-- SetFont (Blizzard_Menu/Compositor.lua), so a font object is used instead
 				if radio and radio.AddInitializer then
 					radio:AddInitializer(function(button)
 						local fs = button and (button.fontString or button.Text)
-						if fs and fs.SetFont then
-							pcall(fs.SetFont, fs, ns.Fonts.PathFor(f.key), 12, "")
+						if fs and fs.SetFontObject then
+							pcall(fs.SetFontObject, fs, ns.Fonts.GetFor(f.key, 12))
+							if fs.SetTextToFit and fs.GetText then pcall(fs.SetTextToFit, fs, fs:GetText()) end
 						end
 					end)
 				end
