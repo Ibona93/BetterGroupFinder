@@ -94,6 +94,7 @@ ns.RegisterLocale("itIT", {
 	COND_SUCCUBUS = "Sayaad (succube)",
 	COND_LEVEL = "livello sconosciuto",
 	ROLE_TT_AUTO = "Scelto automaticamente: da solo i tuoi ruoli dalla ricerca gruppo, in gruppo i ruoli che mancano ancora.",
+	ROLE_TT_NONE = "Questa categoria non ha una distribuzione dei ruoli; i pulsanti ruolo qui non hanno effetto.",
 	ROLE_TT_MANUAL = "Scelto manualmente.",
 	ROLE_TT_CLICK = "Un clic cambia la selezione. \"%s\" nelle opzioni torna alla scelta automatica.",
 	CAT_favorites = "Preferiti",

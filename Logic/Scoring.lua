@@ -276,6 +276,9 @@ function S.Evaluate(ctx)
 	local isRaid = ctx.profileKey == "raid"
 	local maxPlayers = ctx.maxPlayers or 5
 	local total = #host + #guest
+	-- Quests & zones / custom (no role targets): no role checks, no class penalties,
+	-- nothing sorted out for low points.
+	local relaxed = not ctx.roleTargets
 
 	-- 1. Size
 	if total > maxPlayers then
@@ -295,7 +298,7 @@ function S.Evaluate(ctx)
 	local counts = { TANK = 0, HEALER = 0, DAMAGER = 0 }
 	assignRoles(host, counts, targets, nil, result)
 	local hostMissingBefore = missingRoles(counts, targets)
-	local assigned, notWanted, gains = assignRoles(guest, counts, targets, ctx.allowedGuestRoles, result)
+	local assigned, notWanted, gains = assignRoles(guest, counts, targets, (not relaxed) and ctx.allowedGuestRoles or nil, result)
 	if not assigned then
 		exclude(result, "R_ROLE_NOT_WANTED", notWanted)
 		gains = {}
@@ -385,7 +388,7 @@ function S.Evaluate(ctx)
 
 	-- 5. Duplicates without new value
 	local filledRole = gains and #gains > 0
-	if #guest == 1 and not filledRole and abilityGain <= 0 then
+	if not relaxed and #guest == 1 and not filledRole and abilityGain <= 0 then
 		local cls = guest[1].class
 		if cls and hostClasses[cls] then
 			result.score = result.score - (isRaid and P.dupClass / 2 or P.dupClass)
@@ -430,7 +433,7 @@ function S.Evaluate(ctx)
 	end
 
 	-- 9. No benefit -> sorted out, with reason
-	if not result.excluded and result.score <= 0 then
+	if not relaxed and not result.excluded and result.score <= 0 then
 		result.excluded = true
 		result.soft = true
 		result.excludeReason = { "exclude", "R_NO_VALUE" }

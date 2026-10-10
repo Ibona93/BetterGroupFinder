@@ -346,6 +346,9 @@ function Bar.ShowRoleTooltip(chip)
 	GameTooltip:SetOwner(chip, "ANCHOR_TOP")
 	GameTooltip:SetText(chip.label or "", 1, 0.82, 0)
 	local manual = next(ns.db.roleChips) ~= nil
+	if Bar.CurrentProfile() == "other" then
+		GameTooltip:AddLine(L.ROLE_TT_NONE, 1, 0.6, 0.2, true)
+	end
 	GameTooltip:AddLine(manual and L.ROLE_TT_MANUAL or L.ROLE_TT_AUTO, 1, 1, 1, true)
 	GameTooltip:AddLine(L.ROLE_TT_CLICK:format(L.OPT_RESET_FILTERS), 0.6, 0.6, 0.6, true)
 	GameTooltip:Show()
@@ -738,6 +741,11 @@ function Bar.Update()
 	for _, region in ipairs({ f.Separator, f.RatingLabel, f.RatingValue, f.RolesLabel,
 		f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.LegendNeed, f.LegendNeedText, f.LegendDot, f.LegendPref, f.LegendPrefText }) do
 		region:SetAlpha(alpha)
+	end
+	-- Quests & zones / custom: no role distribution, the role chips do nothing there
+	if profile == "other" then
+		for _, chip in ipairs(f.RoleChips) do chip:SetAlpha(0.4) end
+		f.RolesLabel:SetAlpha(0.4)
 	end
 end
 

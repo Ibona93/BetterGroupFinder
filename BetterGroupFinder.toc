@@ -1,10 +1,10 @@
 ## Interface: 16001
 ## Title: Better Group Finder
 ## Title-deDE: Better Group Finder
-## Notes: Smart filters, group composition rating, message templates and a compact view for the WoW Forever Group Finder.
-## Notes-deDE: Intelligente Filter, Bewertung der Gruppenzusammensetzung, Nachrichtenvorlagen und eine kompakte Ansicht für den Gruppenfinder von WoW Forever.
-## Author: Felix
-## Version: 0.7.3
+## Notes: Smart filters, group composition rating, favourites and message templates for the WoW Forever Group Finder.
+## Notes-deDE: Intelligente Filter, Bewertung der Gruppenzusammensetzung, Favoriten und Nachrichtenvorlagen für den Gruppenfinder von WoW Forever.
+## Author: Ibona93
+## Version: 0.7.4
 ## IconTexture: Interface\AddOns\BetterGroupFinder\Media\Logo
 ## SavedVariables: BetterGroupFinderDB
 ## Category: Group Finder

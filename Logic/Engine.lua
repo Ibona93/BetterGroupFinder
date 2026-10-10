@@ -226,6 +226,14 @@ function E.AllowedRoles()
 	return any and allowed or { NONE = true }
 end
 
+-- Role chips depend on the point of view: solo and joining a group they are your own
+-- roles; solo next to another solo player you would open a group together, so the other
+-- player may take any free role; in a group they are the roles your group looks for.
+function E.AllowedRolesFor(selfIsGuest, mySideSize)
+	if not selfIsGuest and (mySideSize or 1) <= 1 then return nil end
+	return E.AllowedRoles()
+end
+
 --[[
 Evaluates one search result. Returns an entry table for the list:
 { resultID, info, members, isSolo, activityID, activityInfo, activityName,
@@ -288,7 +296,7 @@ function E.EvaluateResult(resultID, mySide, noRating)
 			states = states,
 			explicitNeed = info2.explicitNeed,
 			hints = act and ns.INSTANCE_HINTS[act.mapID],
-			allowedGuestRoles = E.AllowedRoles(),
+			allowedGuestRoles = E.AllowedRolesFor(swapped, #mySide),
 			activity = act and {
 				minLevel = act.minLevel,
 				minSuggest = act.minLevelSuggestion,

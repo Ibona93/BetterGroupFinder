@@ -362,6 +362,30 @@ do
 	check("15s unknown instance keeps the client name", ns.InstanceName({ activityName = "Neue Instanz", activityInfo = { mapID = 4242 } }, "enUS") == "Neue Instanz")
 end
 
+print("Quests & zones and role chips (0.7.4)")
+do
+	local function otherCtx(host, guest)
+		return { host = host, guest = guest, maxPlayers = 5, profileKey = "other", states = ns.CopyTable(ns.DEFAULT_ABILITY_STATES.other) }
+	end
+	local r = S.Evaluate(otherCtx({ M("HUNTER", 22, "DAMAGER") }, { M("HUNTER", 21, "DAMAGER") }))
+	check("16a quests: another hunter is not sorted out", not r.excluded and not hasReason(r, "R_DUP_CLASS"), reasonsText(r))
+	local ctx = otherCtx({ M("HUNTER", 22, "DAMAGER") }, { M("PRIEST", 21, "HEALER") })
+	ctx.allowedGuestRoles = { DAMAGER = true }
+	r = S.Evaluate(ctx)
+	check("16b quests: role chips are ignored", not r.excluded, reasonsText(r))
+	check("16c solo next to a solo player: no role restriction", ns.Engine.AllowedRolesFor(false, 1) == nil)
+	ns.db.roleChips = { DAMAGER = true, TANK = false, HEALER = false }
+	local own = ns.Engine.AllowedRolesFor(true, 1)
+	local group = ns.Engine.AllowedRolesFor(false, 3)
+	check("16d solo joining a group: chips are your roles; in a group: roles you look for", own and own.DAMAGER and not own.HEALER
+		and group and group.DAMAGER)
+	ns.db.roleChips = {}
+	ctx = dungeonCtx({ M("HUNTER", 22, "DAMAGER") }, { M("PRIEST", 21, nil, { healer = true }) })
+	ctx.allowedGuestRoles = ns.Engine.AllowedRolesFor(false, 1)
+	r = S.Evaluate(ctx)
+	check("16e screenshot case: solo hunter opening a group gets the healer", not r.excluded and (hasReason(r, "R_FILLS_ROLE", "HEALER") or hasReason(r, "R_SLOT_FREE", "HEALER")), reasonsText(r))
+end
+
 print("Abbreviations and template languages")
 do
 	local function contains(list, value) for _, v in ipairs(list) do if v == value then return true end end return false end

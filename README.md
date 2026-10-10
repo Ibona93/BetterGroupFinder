@@ -1,4 +1,6 @@
-# Better Group Finder (BGF) 0.7.3 – WoW Forever
+# Better Group Finder (BGF) 0.7.4
+
+Autor: **Ibona93** · Kontakt über die Projektseite. – WoW Forever
 
 Erweiterung für den Gruppenfinder von WoW Forever:
 - intelligente Filter
@@ -53,7 +55,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 - **BGF-Filter aktiv:** schaltet Bewertung, Sortierung und Aussortieren ein oder aus. Die BGF-Ansicht und die Leiste bleiben.
 - **Bewertung für:** deine Perspektive, z. B. „Jäger 22 · DPS“ oder „Deine Gruppe (3)“. Bei wenig Platz entfällt das Wort „Bewertung für:“.
 - **Profil:** wird nicht angezeigt, folgt aber der Kategorie oben im Fenster (Dungeons, Schlachtzüge, sonstige). Jede Kategorie hat eigene Chip-Einstellungen.
-- **Freier Platz für / Gesucht:** automatisch gesetzt (solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die fehlenden Rollen). Ein Klick wechselt auf manuelle Auswahl; „Filter zurücksetzen“ in den Optionen stellt wieder auf automatisch. Das erklärt auch der Tooltip der Rollen-Chips.
+- **Freier Platz für / Gesucht:** automatisch gesetzt (solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die fehlenden Rollen). Ein Klick wechselt auf manuelle Auswahl; „Filter zurücksetzen“ in den Optionen stellt wieder auf automatisch. Das erklärt auch der Tooltip der Rollen-Chips. Solo gelten die Chips für dich: bei Gruppen als die Rolle, mit der du beitrittst; bei anderen Einzelspielern (ihr würdet eine Gruppe aufmachen) schränken sie den anderen nicht ein.
 - **Chips:** Linksklick wechselt zwischen *egal* (grau), *bevorzugt* (weiß, Halbkreis) und *benötigt* (gold, Punkt). **Rechtsklick** macht einen Chip zum Favoriten (Stern) oder entfernt ihn wieder; Favoriten stehen zusätzlich in der Favoriten-Zeile, es ist derselbe Chip. Start-Favoriten: Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft, Mana. Der Tooltip eines Chips zeigt Klasse, Zauber und Lernstufe, bei Bedingungen mit Hinweis (z. B. „Krieger – Schildhieb ab Stufe 12 (nur mit Schild)“, „Priester – Stille ab Stufe 30 (Talent)“). Die Zaubernamen kommen aus dem Spiel, also in deiner Clientsprache.
 - **Kategorien:** *Klassen* (9 Chips, „diese Klasse in der Gruppe“, von Haus aus *egal*), *Buffs* (Angriffskraft, Mana, Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Segen der Könige, Segen der Rettung, Göttlicher Willen, Furchtzauberschutz), *Dispells* (Fluch, Magie, Gift, Krankheit), *Kampf & Hilfsmittel* (Kontrolle, Unterbrechen, Kampfwiederbelebung, Gesundheitsstein, Beschwören). Der Tooltip eines Klassen-Chips zeigt, was die Klasse der Gruppe bringt: Bereiche Kampf & Hilfsmittel, Dispells, Buffs (goldene Überschriften), ein Zauber pro Zeile, Name weiß, Stufe grau, Bedingung orange, dahinter der Chip („– Kontrolle“) oder bei Buffs der Effekt in Hellblau („· Ausdauer +“). Am Ende steht türkis, was die Klasse mit auswählt.
 - **Verknüpfung:** Ein Klassen-Chip wählt die Buffs seiner Klasse im gleichen Zustand mit aus (Krieger *benötigt* → Angriffskraft *benötigt*; Hexenmeister → Gesundheitsstein und Beschwören). Ein Chip, den nur eine Klasse bringt, wählt die Klasse mit aus (Seelenstärke → Priester). Keine Kettenreaktion. Mit ausgewählte Chips haben einen türkisen Rand; ein Klick darauf schaltet sie trotzdem ab („abgewählt trotz …“, gedämpft türkiser Rand und durchgestrichen), bis der auslösende Chip wieder aus ist. Mit ausgewählte Chips geben Punkte und Abzüge, sortieren aber nicht allein aus.
@@ -114,7 +116,7 @@ Die Logik liegt in `Logic/Scoring.lua` und ist reines Lua ohne Spiel-API (offlin
   - 20er: 3 / 5 / 12
   - 40er: 4 / 10 / 26
   - Andere Größen werden anteilig skaliert. Überzählige Rollen geben nur Abzug.
-- Quests & Zonen / Benutzerdefiniert: keine Rollenziele.
+- Quests & Zonen / Benutzerdefiniert: keine Rollenziele, keine Rollenprüfung (Rollen-Chips ausgegraut), keine Abzüge für gleiche Klasse oder fehlenden Nutzen, kein Aussortieren wegen 0 Punkten.
 
 Spieler mit mehreren angebotenen Rollen bekommen zuerst einen freien Tank- oder Heilerplatz (knappe Rollen), dann DPS.
 
@@ -190,6 +192,7 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
   - Zaubernamen im Tooltip liefert das Spiel (`C_Spell.GetSpellName`). Kennt Forever eine ID nicht, zeigt BGF den Namen aus der Tabelle: auf Deutsch, in allen anderen Sprachen auf Englisch.
   - Für Forever bestätigt: kein Kampfrausch/Heldentum, Furchtzauberschutz für alle Priester ab 20, Segen der Könige (20) und der Rettung (26) sowie Göttlicher Willen (30) ohne Talent, kein Stich des Flügeldrachen.
   - Nach Klassenpatches muss die Tabelle eventuell angepasst werden.
+- **Schlachtzüge** gibt es in der Beta noch nicht; die Schlachtzug-Logik ist nur offline getestet.
 - **Karten-IDs:** Forever nutzt die Classic-IDs (geprüft: Burg Shadowfang 33, Todesminen 36, Höhlen des Wehklagens 43); Ruinen von Lordaeron hat 2999. Instanz-Hinweise und Namenstabelle bauen darauf auf. Flügel werden nur aus dem Deutschen übersetzt.
 - **Schriftarten-Auswahl in der eigenen Schrift:** Blizzards Menü verbietet `SetFont` auf seinen Texten; BGF setzt deshalb ein eigenes Schrift-Objekt pro Eintrag.
 - **Sprachen außer Deutsch/Englisch** sind von mir übersetzt und sollten vor einer Veröffentlichung von Muttersprachlern geprüft werden.
@@ -207,7 +210,7 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
 | Test | Umfang | Ergebnis |
 |---|---|---|
 | `luacheck` (Lua 5.1) | alle 26 Lua-Dateien | 0 Warnungen, 0 Fehler |
-| `tests/run.lua` | Bewertungslogik, Szenarien 1–7 und 12, Pflicht-Fähigkeiten, Stufen, Rollenwahl, Instanz-Hinweise, fehlende/gesperrte API, Gruppenwert, zusammengefasste Fähigkeiten und Umstellung alter Einstellungen, Mana-Buffs, Zauber je Klasse vollständig, Klassen-Chips, Talente als „möglich“ (eigene gelernte sicher), strengeres „benötigt“, Bedingung in der Begründung, Verknüpfungen und Überstimmen, offene Rollen bei „benötigt“, Instanznamen für englische Vorlagen, Abkürzungen, Vorlagensprachen und -namen; Vollständigkeit aller 11 Sprachdateien | 113/113 bestanden |
+| `tests/run.lua` | Bewertungslogik, Szenarien 1–7 und 12, Pflicht-Fähigkeiten, Stufen, Rollenwahl, Instanz-Hinweise, fehlende/gesperrte API, Gruppenwert, zusammengefasste Fähigkeiten und Umstellung alter Einstellungen, Mana-Buffs, Zauber je Klasse vollständig, Klassen-Chips, Talente als „möglich“ (eigene gelernte sicher), strengeres „benötigt“, Bedingung in der Begründung, Verknüpfungen und Überstimmen, offene Rollen bei „benötigt“, Instanznamen für englische Vorlagen, Abkürzungen, Vorlagensprachen und -namen; Vollständigkeit aller 11 Sprachdateien | 118/118 bestanden |
 | `tests/smoke.lua` | komplettes Addon in TOC-Reihenfolge mit nachgebildeter WoW-Oberfläche: Laden, Events, Liste mit Daten wie in den Beta-Screenshots, Spaltenbreiten und Abkürzungen bei Originalbreite (Schrift 12/14), Aussortieren, Filterleiste (Fenster nur höher, nicht breiter), Chips, „+ mehr“, Haken aus/an (BGF-Ansicht bleibt, keine Punkte, nichts aussortiert), Gruppenwert nur bei Gruppen, Chip-Tooltips (Klasse – Zauber ab Stufe, Bedingungen, Talente, Zaubernamen aus dem Spiel), Klassen-Tooltips nach Bereichen, Favoriten per Rechtsklick, Kategorien mit Zähler und eigenen Zeilen, Verknüpfung Krieger → Angriffskraft mit Überstimmen, Tooltip-Zeilen mit Farben und Effekten, goldener Chip für geöffnete Kategorien, Vorrang für „benötigt“ in der Liste, englischer Instanzname in der Vorlage, Rollen-Tooltip, keine Profilanzeige, Erklärungsfenster mit Abschnitten, Option „Punkte anzeigen“, Erklärungsfenster, `/bgf off` ohne Leiste und Button, Schriftarten inkl. LibSharedMedia, Vorlagen-Menü (Überschrift, nur zwei Sprachen, eigene Namen), Platzhalter, automatisches Senden, Fallback bei Chat-Sperre, Einladen + Nachricht, Tooltip, `/bgf`-Befehle | alle bestanden |
 
 Die Tests lassen sich mit Lua 5.1 erneut ausführen: `lua tests/run.lua` und `lua tests/smoke.lua` aus dem Addon-Ordner.
@@ -271,6 +274,11 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.7.4**
+- Quests & Zonen / Benutzerdefiniert: keine Rollenprüfung (Rollen-Chips ausgegraut), keine Abzüge für gleiche Klasse, nichts wird wegen 0 Punkten aussortiert.
+- Rollen-Chips je nach Blickrichtung: Solo gegenüber anderen Einzelspielern schränken sie deren Rolle nicht mehr ein (Heiler wurden fälschlich aussortiert).
+- Autor: Ibona93.
 
 **0.7.3**
 - Schriftarten-Auswahl zeigt jeden Eintrag jetzt wirklich in seiner eigenen Schrift (0.7.0 nutzte eine Funktion, die Blizzards Menü verbietet).
