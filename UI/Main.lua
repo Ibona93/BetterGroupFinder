@@ -262,14 +262,28 @@ end
 
 function UI.Refresh()
 	if not UI.attached or not LFGBrowseFrame then return end
-	ns.FilterBar.Update()
+	-- full layout, not only colours: chip widths change with their state (markers), and
+	-- states differ per category, so positions must be recalculated after a category change
+	if ns.db.filterOpen and ns.FilterBar.frame and ns.FilterBar.frame:IsShown() then
+		UI.ApplyLayout()
+	else
+		ns.FilterBar.Update()
+	end
 	if not bgfActive() then
 		UI.UpdateButtons()
 		return
 	end
 	setBlizzardListShown(false)
 	local f = LFGBrowseFrame
-	if f.searching then
+	local category = 0
+	if f.CategoryDropdown and f.CategoryDropdown.GetValue then
+		local ok, value = pcall(f.CategoryDropdown.GetValue, f.CategoryDropdown)
+		if ok and type(value) == "number" then category = value end
+	end
+	if category == 0 and not f.searching then
+		-- Blizzard starts without a category; BGF may not choose one (the search is protected)
+		ns.List.SetSections(nil, ns.L.CHOOSE_CATEGORY)
+	elseif f.searching then
 		ns.List.SetSections(nil)
 	else
 		local results = f.results

@@ -1,4 +1,4 @@
-# Better Group Finder (BGF) 0.7.6
+# Better Group Finder (BGF) 0.7.7
 
 Autor: **Ibona93** · Kontakt über die Projektseite. – WoW Forever
 
@@ -196,6 +196,7 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
 - **Schlachtzüge** gibt es in der Beta noch nicht; die Schlachtzug-Logik ist nur offline getestet.
 - **Karten-IDs:** Forever nutzt die Classic-IDs (geprüft: Burg Shadowfang 33, Todesminen 36, Höhlen des Wehklagens 43); Ruinen von Lordaeron hat 2999. Instanz-Hinweise und Namenstabelle bauen darauf auf. Flügel werden nur aus dem Deutschen übersetzt.
 - **Eigene Menüs:** Vorlagen-Menü und Schriftarten-Liste sind eigene, einfache Fenster (`UI/Popup.lua`), nicht Blizzards Menüsystem. Mit `/console taintLog 1` stürzte der Beta-Client (1.60.1.70291) ab, wenn ein Addon-Knopf ein Blizzard-Menü öffnete (Assertion in `ldebug.c`). Das Rechtsklick-Menü auf Einträgen bleibt Blizzards eigenes (Melden geht nur dort).
+- **Keine Kategorie vorausgewählt:** Blizzard startet ohne Kategorie, BGF zeigt dann den Hinweis „Wähle oben links eine Kategorie“. Vorauswählen kann BGF sie nicht: Die Suche ist geschützt und würde durch einen Addon-Wert blockiert.
 - **Keine Hooks auf Blizzard-Funktionen:** BGF folgt dem Gruppenfinder über dessen Ereignisse (Suchergebnisse empfangen, Suche fehlgeschlagen, Eintrag geändert) und hängt sich nur an Fenster-Skripte (Öffnen, Schließen, Aktualisieren-Knopf). Mit eingeschaltetem Taint-Log brach der Beta-Client sonst Blizzards Aufrufkette beim Öffnen des Reiters ab.
 - **Sprachen außer Deutsch/Englisch** sind von mir übersetzt und sollten vor einer Veröffentlichung von Muttersprachlern geprüft werden.
 - **Fensterhöhe:** Mit offener Filterleiste ändert BGF die Höhe von Blizzards Fenster, nur außerhalb des Kampfes, um Taint zu vermeiden. Siehe Taint-Test unten.
@@ -277,6 +278,10 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.7.7**
+- Hinweis in der leeren Liste, solange keine Kategorie gewählt ist.
+- Filterleiste wird bei jeder Aktualisierung neu angeordnet: keine zu großen oder zu kleinen Abstände zwischen Chips mehr nach einem Kategoriewechsel.
 
 **0.7.6**
 - Ereignisse statt Hooks auf Blizzards Listen- und Knopf-Funktionen: kein Fehler mehr beim Öffnen des Reiters mit eingeschaltetem Taint-Log.

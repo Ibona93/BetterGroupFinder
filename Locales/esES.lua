@@ -94,6 +94,7 @@ local strings = {
 	COND_SUCCUBUS = "Sayaad (súcubo)",
 	COND_LEVEL = "nivel desconocido",
 	ROLE_TT_AUTO = "Elegido automáticamente: en solitario tus roles del buscador de grupos, en grupo los roles que aún faltan.",
+	CHOOSE_CATEGORY = "Elige una categoría arriba a la izquierda, p. ej. Mazmorras.",
 	RESET_SHORT = "Restablecer",
 	RESET_TT = "Restablece los botones de esta categoría y vuelve a poner los roles en automático. Los favoritos y las demás categorías se mantienen.",
 	ROLE_TT_NONE = "Esta categoría no tiene reparto de roles; los botones de rol no tienen efecto aquí.",

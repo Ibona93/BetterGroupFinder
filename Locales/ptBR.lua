@@ -94,6 +94,7 @@ ns.RegisterLocale("ptBR", {
 	COND_SUCCUBUS = "Sayaad (súcubo)",
 	COND_LEVEL = "nível desconhecido",
 	ROLE_TT_AUTO = "Escolhido automaticamente: sozinho, suas funções do localizador de grupos; em grupo, as funções que ainda faltam.",
+	CHOOSE_CATEGORY = "Escolha uma categoria no canto superior esquerdo, ex.: Masmorras.",
 	RESET_SHORT = "Redefinir",
 	RESET_TT = "Redefine os botões desta categoria e volta as funções para automático. Os favoritos e as outras categorias permanecem.",
 	ROLE_TT_NONE = "Esta categoria não tem distribuição de funções; os botões de função não têm efeito aqui.",

@@ -287,7 +287,8 @@ browse.ScrollBar = newFrame("Frame")
 browse.SendMessageButton = newFrame("Button")
 browse.GroupInviteButton = newFrame("Button")
 browse.ActivityDropdown = { selectedValues = {}, ValueIsSelected = function() return false end }
-browse.CategoryDropdown = { GetValue = function() return 2 end, SetValue = function() end, HookScript = function() end }
+local categoryValue = 2
+browse.CategoryDropdown = { GetValue = function() return categoryValue end, SetValue = function() end, HookScript = function() end }
 browse.results = { 1, 2, 3, 4, 5, 6, 7 }
 browse.totalResults = 7
 browse.searching = false
@@ -531,6 +532,34 @@ v = shownByCategory()
 check("several categories can be open", v.class == 9 and v.buff == 9, v.class)
 pcall(f.CategoryToggles.class.__scripts.OnClick, f.CategoryToggles.class)
 pcall(f.CategoryToggles.buff.__scripts.OnClick, f.CategoryToggles.buff)
+-- chip positions are recalculated when states (and so widths) change, e.g. after a category change
+do
+	local function overlaps()
+		local list = {}
+		for _, c in pairs(f.FavChips) do if c.__shown and c.__point then list[#list + 1] = c end end
+		for _, a in ipairs(list) do
+			for _, b in ipairs(list) do
+				if a ~= b and a.__point[3] == b.__point[3] then
+					local ax, bx = a.__point[2], b.__point[2]
+					if ax < bx and ax + a.__size.w > bx then return true end
+				end
+			end
+		end
+		return false
+	end
+	categoryValue = 4 -- Quests & zones: cc/interrupt without markers -> narrower chips
+	ns.UI.Refresh()
+	local q = overlaps()
+	categoryValue = 2
+	ns.UI.Refresh()
+	check("chip rows are laid out again after a category change (no overlap, no gaps)", not q and not overlaps())
+	categoryValue = 0
+	ns.UI.Refresh()
+	check("no category chosen: hint instead of the list", ns.List.hint == "Wähle oben links eine Kategorie, z. B. Dungeons.")
+	categoryValue = 2
+	ns.UI.Refresh()
+	check("... and the list comes back with a category", ns.List.hint == nil and ns.List.sections ~= nil)
+end
 -- reset in the filter bar: only the shown category
 ns.db.abilityStates[profile].class_MAGE = "need"
 ns.db.abilityStates.other.class_MAGE = "pref"

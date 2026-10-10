@@ -518,6 +518,8 @@ end
 function BGFMessageMixin:Init(data)
 	self.Text:SetFontObject(List.GetFont(List.Metrics().font))
 	self.Text:SetText(data.text)
+	local c = data.color or COLORS.excluded
+	self.Text:SetTextColor(c[1], c[2], c[3])
 end
 
 -------------------------------------------------------------------------------
@@ -580,8 +582,10 @@ function List.GetSelectedEntry()
 	return nil
 end
 
-function List.SetSections(sections)
+-- `hint`: a line shown instead of the list (e.g. no Group Finder category chosen yet).
+function List.SetSections(sections, hint)
 	List.sections = sections
+	List.hint = hint
 	if List.selectedID and not List.GetSelectedEntry() then
 		List.selectedID = nil
 	end
@@ -597,7 +601,9 @@ function List.Render()
 	local sections = List.sections
 	local L = ns.L
 	local items = {}
-	if sections then
+	if List.hint then
+		items[1] = { kind = "message", text = List.hint, color = { 1, 0.82, 0 } }
+	elseif sections then
 		if ns.Engine.locked then
 			items[#items + 1] = { kind = "message", text = L.LOCKDOWN }
 		end

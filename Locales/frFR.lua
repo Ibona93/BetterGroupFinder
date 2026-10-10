@@ -94,6 +94,7 @@ ns.RegisterLocale("frFR", {
 	COND_SUCCUBUS = "Sayaad (succube)",
 	COND_LEVEL = "niveau inconnu",
 	ROLE_TT_AUTO = "Choisi automatiquement : en solo vos rôles du chercheur de groupe, en groupe les rôles qui manquent encore.",
+	CHOOSE_CATEGORY = "Choisissez une catégorie en haut à gauche, par ex. Donjons.",
 	RESET_SHORT = "Réinitialiser",
 	RESET_TT = "Réinitialise les puces de cette catégorie et remet les rôles en automatique. Les favoris et les autres catégories restent.",
 	ROLE_TT_NONE = "Cette catégorie n'a pas de répartition des rôles ; les puces de rôle n'ont aucun effet ici.",
