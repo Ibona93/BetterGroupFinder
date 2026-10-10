@@ -35,6 +35,7 @@ local STYLES = {
 	pref   = { bg = { 0.10, 0.08, 0.05, 1 }, border = { 0.42, 0.34, 0.22, 1 }, text = C.white },
 	ignore = { bg = { 0.07, 0.055, 0.04, 1 }, border = { 0.26, 0.21, 0.15, 1 }, text = C.grey },
 	more   = { bg = { 0.07, 0.055, 0.04, 1 }, border = { 0.30, 0.25, 0.18, 0.7 }, text = C.grey },
+	open   = { bg = { 0.07, 0.055, 0.04, 1 }, border = { 0.55, 0.45, 0.26, 1 }, text = C.gold },
 }
 local NEXT_STATE = { ignore = "pref", pref = "need", need = "ignore" }
 local LINKED_BORDER = { 0.25, 0.62, 0.66, 1 }
@@ -196,18 +197,31 @@ local function text(parent, color, sizeOffset)
 	return fs
 end
 
-local function spellText(entry)
+-- Tooltip colours: name white, level grey, condition orange, effect light blue, chip light grey.
+local TT = { name = "ffffffff", level = "ff9d9d9d", cond = "ffff9933", fx = "ff66ccff", chip = "ffb4b4b4", link = "ff5fc8cc" }
+local function col(key, str) return "|c" .. TT[key] .. str .. "|r" end
+
+local function levelText(level)
+	-- "%s ab Stufe %d" -> "ab Stufe %d" (works for all locales: the name comes first)
+	local fmt = ns.L.CHIP_TT_SPELL:gsub("^%%s%s*", "")
+	return fmt:format(level)
+end
+
+-- One spell: "Schildhieb  ab Stufe 12  nur mit Schild  · Effekt" (or "  – Chip").
+local function spellLine(entry, suffix)
 	local L = ns.L
-	local line = L.CHIP_TT_SPELL:format(ns.SpellName(entry.sp), entry.level)
+	local line = col("name", ns.SpellName(entry.sp)) .. "  " .. col("level", levelText(entry.level))
 	local cond = ns.ConditionText(entry)
-	if cond then
-		line = line .. " (" .. cond .. ")"
-	elseif entry.possible then
-		line = line .. " " .. L.CHIP_TT_POSSIBLE
+	if not cond and entry.possible then cond = (L.CHIP_TT_POSSIBLE:gsub("[%(%)]", "")) end
+	if cond then line = line .. "  " .. col("cond", cond) end
+	if entry.fx then
+		line = line .. "  " .. col("fx", "· " .. L["FX_" .. entry.fx])
+	elseif suffix then
+		line = line .. "  " .. col("chip", "– " .. suffix)
 	end
 	return line
 end
-Bar.SpellText = spellText
+Bar.SpellLine = spellLine
 
 local function sortedEntries(class, filter)
 	local entries = {}
@@ -218,87 +232,99 @@ local function sortedEntries(class, filter)
 	return entries
 end
 
-local function coloredClass(class)
-	local name = ns.ClassName(class)
+local function classColorCode(class)
 	local c = RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
-	if not c then return name end
-	return ("|cff%02x%02x%02x%s|r"):format(math.floor(c.r * 255), math.floor(c.g * 255), math.floor(c.b * 255), name)
+	if not c then return "ffffffff" end
+	return ("ff%02x%02x%02x"):format(math.floor(c.r * 255), math.floor(c.g * 255), math.floor(c.b * 255))
 end
 
--- Ability chip tooltip: "Class – Spell from level N (condition)", sorted by class and level.
+local function coloredClass(class)
+	return "|c" .. classColorCode(class) .. ns.ClassName(class) .. "|r"
+end
+
+-- Ability chip tooltip: one line per spell, the class in its colour first.
 function Bar.AbilitySources(id)
-	local L = ns.L
 	local lines = {}
 	for _, class in ipairs(ns.CLASS_ORDER) do
 		for _, e in ipairs(sortedEntries(class, function(e) return e.a == id end)) do
-			lines[#lines + 1] = { text = L.CHIP_TT_LINE:format(coloredClass(class), ns.SpellName(e.sp), e.level)
-				.. (ns.ConditionText(e) and (" (" .. ns.ConditionText(e) .. ")") or (e.possible and (" " .. L.CHIP_TT_POSSIBLE) or "")),
-				class = class, level = e.level }
+			lines[#lines + 1] = { text = coloredClass(class) .. "  " .. spellLine(e), class = class, level = e.level }
 		end
 	end
 	return lines
 end
 
--- Class chip tooltip: what the class brings, grouped ("Kontrolle: Verwandlung ab Stufe 8",
--- "Buffs: Arkane Intelligenz ab Stufe 1", "Hilfsmittel: Gesundheitsstein herstellen ...").
-local function tooltipGroup(chip)
-	if chip.category == "buff" then return "buff" end
-	if chip.sole then return "utility" end
-	return chip.id
-end
-
+-- Class chip tooltip: sections like the filter bar (combat & utility, dispels, buffs), one
+-- spell per line sorted by level, with the chip it counts for or its effect.
+local SECTION_ORDER = { "combat", "dispel", "buff" }
 function Bar.ClassSources(class)
 	local L = ns.L
-	local order, groups = {}, {}
-	local ranks = { combat = 1, dispel = 2, buff = 3 }
-	local chips = {}
-	for _, chip in ipairs(ns.ABILITIES) do
-		if not chip.class then chips[#chips + 1] = chip end
-	end
-	table.sort(chips, function(x, y)
-		local rx = (x.sole and x.category == "combat") and 4 or ranks[x.category]
-		local ry = (y.sole and y.category == "combat") and 4 or ranks[y.category]
-		if rx ~= ry then return rx < ry end
-		return x.order < y.order
-	end)
-	for _, chip in ipairs(chips) do
-		local key = tooltipGroup(chip)
-		for _, e in ipairs(sortedEntries(class, function(e) return e.a == chip.id end)) do
-			if not groups[key] then
-				groups[key] = {}
-				order[#order + 1] = key
+	local lines = {}
+	for _, cat in ipairs(SECTION_ORDER) do
+		local items, bySpell = {}, {}
+		for _, chip in ipairs(ns.ABILITIES) do
+			if chip.category == cat and not chip.class then
+				for _, e in ipairs(ns.CLASS_ABILITIES[class] or {}) do
+					if e.a == chip.id then
+						local suffix = cat == "dispel" and L["SHORT_" .. chip.id] or (cat == "combat" and ns.AbilityName(chip.id)) or nil
+						local item = bySpell[e.sp]
+						if item then
+							if suffix then item.suffix = item.suffix and (item.suffix .. ", " .. suffix) or suffix end
+						else
+							item = { entry = e, suffix = suffix, n = #items }
+							bySpell[e.sp] = item
+							items[#items + 1] = item
+						end
+					end
+				end
 			end
-			table.insert(groups[key], { level = e.level, text = spellText(e), n = #groups[key] })
+		end
+		if #items > 0 then
+			table.sort(items, function(x, y)
+				if x.entry.level ~= y.entry.level then return x.entry.level < y.entry.level end
+				return x.n < y.n
+			end)
+			lines[#lines + 1] = { header = L["CAT_" .. cat], category = cat }
+			for _, item in ipairs(items) do
+				lines[#lines + 1] = { text = "  " .. spellLine(item.entry, item.suffix), category = cat, sp = item.entry.sp }
+			end
 		end
 	end
-	local lines = {}
-	for _, key in ipairs(order) do
-		local label = ns.ABILITY_BY_ID[key] and ns.AbilityName(key) or L["CAT_" .. key]
-		local parts = groups[key]
-		table.sort(parts, function(x, y)
-			if x.level ~= y.level then return x.level < y.level end
-			return x.n < y.n
-		end)
-		local texts = {}
-		for i, part in ipairs(parts) do texts[i] = part.text end
-		lines[#lines + 1] = { text = L.CHIP_TT_CAT:format(label, table.concat(texts, ", ")), category = key }
-	end
 	return lines
+end
+
+-- "Wählt mit aus: Mal der Wildnis" for chips that select others.
+function Bar.LinksText(id)
+	local targets = ns.LINKS[id]
+	if not targets then return nil end
+	local names = {}
+	for i, t in ipairs(targets) do names[i] = ns.AbilityName(t) end
+	return ns.L.LINKS_TO:format(table.concat(names, ", "))
 end
 
 function Bar.ShowAbilityTooltip(chip)
-	GameTooltip:SetOwner(chip, "ANCHOR_TOP")
-	GameTooltip:SetText(ns.AbilityName(chip.ability), 1, 0.82, 0)
+	local L = ns.L
 	local ability = ns.ABILITY_BY_ID[chip.ability]
+	GameTooltip:SetOwner(chip, "ANCHOR_TOP")
+	if ability and ability.class then
+		local c = RAID_CLASS_COLORS and RAID_CLASS_COLORS[ability.class]
+		GameTooltip:SetText(ns.AbilityName(chip.ability), c and c.r or 1, c and c.g or 0.82, c and c.b or 0)
+	else
+		GameTooltip:SetText(ns.AbilityName(chip.ability), 1, 0.82, 0)
+	end
 	local lines = ability and ability.class and Bar.ClassSources(ability.class) or Bar.AbilitySources(chip.ability)
 	for _, line in ipairs(lines) do
-		GameTooltip:AddLine(line.text, 1, 1, 1, true)
+		if line.header then
+			GameTooltip:AddLine(line.header, 1, 0.82, 0)
+		else
+			GameTooltip:AddLine(line.text, 1, 1, 1, false)
+		end
 	end
-	local L = ns.L
+	local links = Bar.LinksText(chip.ability)
+	if links then GameTooltip:AddLine(col("link", links), 1, 1, 1, false) end
 	if chip.linked then
-		GameTooltip:AddLine(L.LINKED_BY:format(ns.AbilityName(chip.linked)), LINKED_BORDER[1], LINKED_BORDER[2] + 0.15, LINKED_BORDER[3] + 0.15, true)
+		GameTooltip:AddLine(col("link", L.LINKED_BY:format(ns.AbilityName(chip.linked))), 1, 1, 1, true)
 	elseif chip.overridden then
-		GameTooltip:AddLine(L.OVERRIDDEN:format(ns.AbilityName(chip.overridden)), LINKED_BORDER[1], LINKED_BORDER[2] + 0.15, LINKED_BORDER[3] + 0.15, true)
+		GameTooltip:AddLine(col("link", L.OVERRIDDEN:format(ns.AbilityName(chip.overridden))), 1, 1, 1, true)
 	end
 	GameTooltip:AddLine(L.CHIP_TT_CLICK, 0.6, 0.6, 0.6, true)
 	GameTooltip:AddLine(ns.db.favorites[chip.ability] and L.FAV_REMOVE or L.FAV_ADD, 0.6, 0.6, 0.6, true)
@@ -674,6 +700,7 @@ function Bar.Update()
 	for _, cat in ipairs(ns.CATEGORY_ORDER) do
 		local toggle = f.CategoryToggles[cat]
 		local name = L["CAT_" .. cat]
+		toggle.state = ns.db.openCategories[cat] and "open" or "more"
 		if ns.db.openCategories[cat] then
 			toggle.label = "- " .. name
 		else

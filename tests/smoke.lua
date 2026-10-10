@@ -393,33 +393,49 @@ check("re-checking rates again", ns.List.sections.rated == true and ns.List.scro
 local druidChip, roleChip1
 for _, c in ipairs(ns.FilterBar.frame.AbilityChips) do if c.ability == "class_DRUID" then druidChip = c end end
 roleChip1 = ns.FilterBar.frame.RoleChips[1]
-local tt = ns.FilterBar.AbilitySources("interrupt")
-check("interrupt tooltip names spells, conditions and talents", tt[1].text:find("Schildhieb ab Stufe 12 (nur mit Schild)", 1, true)
-	and tt[2].text:find("Zuschlagen ab Stufe 38", 1, true), tt[1] and tt[1].text)
+local function plain(t) return (t or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "") end
+local function linesOf(list)
+	local out = {}
+	for i, l in ipairs(list) do out[i] = l.header and ("# " .. l.header) or plain(l.text) end
+	return out
+end
+local tt = linesOf(ns.FilterBar.AbilitySources("interrupt"))
+check("interrupt tooltip: class, spell, level, condition", tt[1] == "Krieger  Schildhieb  ab Stufe 12  nur mit Schild"
+	and tt[2] == "Krieger  Zuschlagen  ab Stufe 38", tt[1])
 local silence = false
 for _, l in ipairs(tt) do
-	print("      interrupt: " .. l.text)
-	if l.text:find("Stille ab Stufe 30 (Talent)", 1, true) then silence = true end
+	print("      interrupt: " .. l)
+	if l == "Priester  Stille  ab Stufe 30  Talent" then silence = true end
 end
 check("... including Silence as a talent", silence)
-tt = ns.FilterBar.AbilitySources("buff_mana")
-check("mana chip: Paladin 14, Schamane talent 25 + totem 26", #tt == 3 and tt[1].text:find("Segen der Weisheit ab Stufe 14", 1, true)
-	and tt[2].text:find("Totem der Manaflut ab Stufe 25 (Talent)", 1, true) and tt[3].text:find("Totem der Manaquelle ab Stufe 26", 1, true),
-	tt[1] and tt[1].text)
-tt = ns.FilterBar.ClassSources("DRUID")
-for _, l in ipairs(tt) do print("      Druide: " .. l.text) end
-check("class tooltip groups what the class brings", tt[1].text:find("^Kontrolle: Wucherwurzeln ab Stufe 8, Winterschlaf ab Stufe 18 %(nur Wildtiere/Drachkin%)")
-	and tt[#tt].text == "Buffs: Mal der Wildnis ab Stufe 1", tt[1] and tt[1].text)
-tt = ns.FilterBar.ClassSources("WARLOCK")
-local util = tt[#tt].text
-check("warlock tooltip lists healthstones and summoning under utility", util == "Hilfsmittel: Gesundheitsstein herstellen ab Stufe 10, Ritual der Beschwörung ab Stufe 20", util)
-tt = ns.FilterBar.ClassSources("PALADIN")
-local kings = false
-for _, l in ipairs(tt) do if l.text:find("Buffs: Segen der Macht ab Stufe 4, Segen der Weisheit ab Stufe 14, Segen der Könige ab Stufe 20, Segen der Rettung ab Stufe 26", 1, true) then kings = true end end
-check("paladin tooltip has Kings and Salvation", kings)
-tt = ns.FilterBar.ClassSources("PRIEST")
-check("priest tooltip: Seelenstärke, Furchtzauberschutz, Göttlicher Willen", tt[#tt].text ==
-	"Buffs: Machtwort: Seelenstärke ab Stufe 1, Furchtzauberschutz ab Stufe 20, Göttlicher Willen ab Stufe 30", tt[#tt].text)
+local raw = ns.FilterBar.AbilitySources("interrupt")[1].text
+check("... coloured: name white, level grey, condition orange", raw:find("|cffffffffSchildhieb|r", 1, true) and raw:find("|cff9d9d9dab Stufe 12|r", 1, true)
+	and raw:find("|cffff9933nur mit Schild|r", 1, true), raw)
+tt = linesOf(ns.FilterBar.AbilitySources("buff_mana"))
+check("mana chip with effects", #tt == 3 and tt[1] == "Paladin  Segen der Weisheit  ab Stufe 14  · Manaregeneration +"
+	and tt[2] == "Schamane  Totem der Manaflut  ab Stufe 25  Talent  · Mana + (kurzzeitig)", tt[2])
+tt = linesOf(ns.FilterBar.ClassSources("DRUID"))
+for _, l in ipairs(tt) do print("      Druide: " .. l) end
+check("druid tooltip in sections, one spell per line", tt[1] == "# Kampf & Hilfsmittel" and tt[2] == "  Wucherwurzeln  ab Stufe 8  – Kontrolle"
+	and tt[3] == "  Hieb  ab Stufe 14  Bärform  – Unterbrechen" and tt[7] == "# Dispells" and tt[8] == "  Vergiftung heilen  ab Stufe 14  – Gift"
+	and tt[10] == "# Buffs" and tt[11] == "  Mal der Wildnis  ab Stufe 1  · Rüstung, Werte, Widerstände +", table.concat(tt, " | "))
+tt = linesOf(ns.FilterBar.ClassSources("WARLOCK"))
+local hs, sum = false, false
+for _, l in ipairs(tt) do
+	if l == "  Gesundheitsstein herstellen  ab Stufe 10  · Gesundheitssteine für die Gruppe" then hs = true end
+	if l == "  Ritual der Beschwörung  ab Stufe 20  · Mitspieler herbeirufen" then sum = true end
+end
+check("warlock tooltip: healthstones and summoning with effect", hs and sum)
+tt = linesOf(ns.FilterBar.ClassSources("PALADIN"))
+local purify, kings = false, false
+for _, l in ipairs(tt) do
+	print("      Paladin: " .. l)
+	if l == "  Läutern  ab Stufe 8  – Gift, Krankheit" then purify = true end
+	if l == "  Segen der Könige  ab Stufe 20  · Alle Werte +10 %" then kings = true end
+end
+check("paladin: Purify once for poison and disease, Kings with effect", purify and kings)
+check("links text: druid selects Mark of the Wild", plain(ns.FilterBar.LinksText("class_DRUID")) == "Wählt mit aus: Mal der Wildnis"
+	and plain(ns.FilterBar.LinksText("buff_stamina")) == "Wählt mit aus: Priester")
 check("class chips are named after the class", ns.AbilityName("class_WARLOCK") == "Hexenmeister" and ns.AbilityName("class_DRUID") == "Druide"
 	and ns.AbilityName("buff_mana") == "Mana")
 _G.C_Spell = { GetSpellName = function(id) if id == 6673 then return "Schlachtruf (Spiel)" end end }
@@ -490,6 +506,7 @@ check("warrior off: the override ends", next(ns.db.linkOverrides[profile]) == ni
 pcall(f.CategoryToggles.buff.__scripts.OnClick, f.CategoryToggles.buff)
 v = shownByCategory()
 check("'+ Buffs' shows the 9 buffs", v.buff == 9 and f.CategoryToggles.buff.label == "- Buffs", v.buff)
+check("open category toggle is gold, closed ones stay grey", f.CategoryToggles.buff.state == "open" and f.CategoryToggles.class.state == "more")
 local _, _, buffY = f.CategoryToggles.buff:GetPoint()
 local _, _, classY = f.CategoryToggles.class:GetPoint()
 local _, _, dispelY = f.CategoryToggles.dispel:GetPoint()

@@ -249,6 +249,15 @@ do
 		end
 	end
 	check("13k every class entry has a tooltip spell, a known ability and a condition text", missing == false, tostring(missing))
+	local badFx = false
+	for _, list in pairs(ns.CLASS_ABILITIES) do
+		for _, e in ipairs(list) do
+			if type(e.spells) == "table" then for k in pairs(e.spells) do if type(k) ~= "number" then badFx = e.sp end end end
+			if e.fx and not ns.Locales.enUS["FX_" .. e.fx] then badFx = e.sp end
+			if ns.ABILITY_BY_ID[e.a] and ns.ABILITY_BY_ID[e.a].category == "buff" and not e.fx then badFx = e.sp end
+		end
+	end
+	check("13m every buff has an effect text, spell lists are clean", badFx == false, tostring(badFx))
 	check("13l spell names fall back to the client language without game data", ns.SpellName("fear_ward") == "Furchtzauberschutz")
 end
 

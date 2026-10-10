@@ -141,7 +141,7 @@ ns.SPELLS = {
 Per class: `a` chip id, `level`,
 `sp` tooltip spell, `spells` rank-1 IDs for YOUR OWN spellbook check (none for pet spells),
 `possible` = BGF can only say "may bring", `cond` = condition(s) shown in the tooltip
-(locale keys COND_*).
+(locale keys COND_*), `fx` = short effect shown in the tooltip (locale keys FX_*).
 
 Talents (cond TALENT) follow the Forever beta trees, build 1.60.1.70291 (talentsforever.com,
 CC BY 4.0): earliest level = 10 + 5 x (row - 1). They count as "possible" for other players;
@@ -149,26 +149,26 @@ your own character counts as sure once the talent is in your spellbook.
 ]]
 ns.CLASS_ABILITIES = {
 	WARRIOR = {
-		{ a = "buff_ap",   level = 1,  sp = "battle_shout", spells = { 6673 } },
+		{ a = "buff_ap",   level = 1,  sp = "battle_shout", spells = { 6673 }, fx = "AP" },
 		{ a = "interrupt", level = 12, sp = "shield_bash", spells = { 72 }, possible = true, cond = "SHIELD" },
 		{ a = "interrupt", level = 38, sp = "pummel", spells = { 6552 } },
 		{ a = "cc",        level = 30, sp = "concussion_blow", spells = { 12809 }, possible = true, cond = "TALENT" },
 	},
 	PALADIN = {
-		{ a = "buff_ap",   level = 4,  sp = "blessing_might", spells = { 19740 } },
+		{ a = "buff_ap",   level = 4,  sp = "blessing_might", spells = { 19740 }, fx = "AP" },
 		{ a = "poison",    level = 8,  sp = "purify", spells = { 1152 } },
 		{ a = "disease",   level = 8,  sp = "purify", spells = { 1152 } },
 		{ a = "interrupt", level = 8,  sp = "hammer_justice", spells = { 853 }, cond = "STUN" },
-		{ a = "buff_mana", level = 14, sp = "blessing_wisdom", spells = { 19742 } },
-		{ a = "buff_kings", level = 20, sp = "blessing_kings", spells = { 20217 } },     -- baseline in Forever
-		{ a = "buff_salvation", level = 26, sp = "blessing_salvation", spells = { 1038 } },  -- baseline in Forever
+		{ a = "buff_mana", level = 14, sp = "blessing_wisdom", spells = { 19742 }, fx = "MANAREGEN" },
+		{ a = "buff_kings", level = 20, sp = "blessing_kings", spells = { 20217 }, fx = "KINGS" },     -- baseline in Forever
+		{ a = "buff_salvation", level = 26, sp = "blessing_salvation", spells = { 1038 }, fx = "SALVATION" },  -- baseline in Forever
 		{ a = "cc",        level = 24, sp = "turn_undead", spells = { 2878 }, possible = true, cond = "UNDEAD" },
 		{ a = "cc",        level = 30, sp = "repentance", spells = { 20066 }, possible = true, cond = { "TALENT", "HUMANOID" } },
 		{ a = "magic",     level = 42, sp = "cleanse", spells = { 4987 } },
 	},
 	HUNTER = {
 		{ a = "cc",        level = 20, sp = "freezing_trap", spells = { 1499 } },
-		{ a = "buff_ap",   level = 25, sp = "trueshot_aura", spells = { 19506 }, possible = true, cond = { "TALENT", "RANGED" } },
+		{ a = "buff_ap",   level = 25, sp = "trueshot_aura", spells = { 19506 }, possible = true, cond = { "TALENT", "RANGED" }, fx = "RAP" },
 		{ a = "cc",        level = 30, sp = "scatter_shot", spells = { 19503 }, possible = true, cond = "TALENT" },
 		{ a = "cc",        level = 30, sp = "intimidation", spells = { 19577 }, possible = true, cond = "TALENT" },
 	},
@@ -177,40 +177,40 @@ ns.CLASS_ABILITIES = {
 		{ a = "interrupt", level = 12, sp = "kick", spells = { 1766 } },
 	},
 	PRIEST = {
-		{ a = "buff_stamina", level = 1, sp = "fortitude", spells = { 1243 } },
+		{ a = "buff_stamina", level = 1, sp = "fortitude", spells = { 1243 }, fx = "STAMINA" },
 		{ a = "disease",   level = 14, sp = "cure_disease", spells = { 528 } },
 		{ a = "magic",     level = 18, sp = "dispel_magic", spells = { 527 } },
-		{ a = "buff_fearward", level = 20, sp = "fear_ward", spells = { 6346 } },          -- all priests in Forever
+		{ a = "buff_fearward", level = 20, sp = "fear_ward", spells = { 6346 }, fx = "FEARWARD" },          -- all priests in Forever
 		{ a = "cc",        level = 20, sp = "shackle_undead", spells = { 9484 }, possible = true, cond = "UNDEAD" },
-		{ a = "buff_spirit", level = 30, sp = "divine_spirit", spells = { 14752 } },     -- baseline in Forever
+		{ a = "buff_spirit", level = 30, sp = "divine_spirit", spells = { 14752 }, fx = "SPIRIT" },     -- baseline in Forever
 		{ a = "interrupt", level = 30, sp = "silence", spells = { 15487 }, possible = true, cond = "TALENT" },
 	},
 	SHAMAN = {
 		{ a = "interrupt", level = 4,  sp = "earth_shock", spells = { 8042 } },
-		{ a = "buff_ap",   level = 10, sp = "strength_earth", spells = { 8075 } },
+		{ a = "buff_ap",   level = 10, sp = "strength_earth", spells = { 8075 }, fx = "STR" },
 		{ a = "poison",    level = 16, sp = "cure_poison_sham", spells = { 526 } },
 		{ a = "disease",   level = 22, sp = "cure_disease_sham", spells = { 2870 } },
-		{ a = "buff_mana", level = 25, sp = "mana_tide", spells = { 16190 }, possible = true, cond = "TALENT" },
-		{ a = "buff_mana", level = 26, sp = "mana_spring", spells = { 5675 } },
+		{ a = "buff_mana", level = 25, sp = "mana_tide", spells = { 16190 }, possible = true, cond = "TALENT", fx = "MANA" },
+		{ a = "buff_mana", level = 26, sp = "mana_spring", spells = { 5675 }, fx = "MANAREGEN" },
 	},
 	MAGE = {
-		{ a = "buff_int",  level = 1,  sp = "arcane_intellect", spells = { 1459 } },
+		{ a = "buff_int",  level = 1,  sp = "arcane_intellect", spells = { 1459 }, fx = "INT" },
 		{ a = "cc",        level = 8,  sp = "polymorph", spells = { 118 } },
 		{ a = "curse",     level = 18, sp = "remove_lesser_curse", spells = { 475 } },
 		{ a = "interrupt", level = 24, sp = "counterspell", spells = { 2139 } },
 	},
 	WARLOCK = {
 		{ a = "cc",        level = 8,  sp = "fear", spells = { 5782 }, possible = true, cond = "RISKY" },
-		{ a = "healthstone", level = 10, sp = "healthstone", spells = { 6201 } },
+		{ a = "healthstone", level = 10, sp = "healthstone", spells = { 6201 }, fx = "HEALTHSTONE" },
 		{ a = "battleres", level = 18, sp = "soulstone", spells = { 693 } },
-		{ a = "summon",    level = 20, sp = "summoning", spells = { 698 } },
+		{ a = "summon",    level = 20, sp = "summoning", spells = { 698 }, fx = "SUMMON" },
 		{ a = "cc",        level = 20, sp = "seduction", possible = true, cond = "SUCCUBUS" },  -- pet spell
 		{ a = "cc",        level = 28, sp = "banish", spells = { 710 }, cond = "DEMON" },
 		{ a = "magic",     level = 30, sp = "devour_magic", possible = true, cond = "PET" },    -- Felhunter
 		{ a = "interrupt", level = 36, sp = "spell_lock", possible = true, cond = "PET" },      -- Felhunter
 	},
 	DRUID = {
-		{ a = "buff_wild", level = 1,  sp = "mark_wild", spells = { 1126 } },
+		{ a = "buff_wild", level = 1,  sp = "mark_wild", spells = { 1126 }, fx = "WILD" },
 		{ a = "cc",        level = 8,  sp = "roots", spells = { 339 } },   -- indoors in Forever
 		{ a = "poison",    level = 14, sp = "cure_poison_druid", spells = { 8946 } },
 		{ a = "interrupt", level = 14, sp = "bash", spells = { 5211 }, possible = true, cond = "BEAR" }, -- classic level, not verified
