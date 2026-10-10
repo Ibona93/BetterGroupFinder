@@ -1,6 +1,6 @@
-# Better Group Finder (BGF) 0.7.9
+# Better Group Finder (BGF) 0.8.0
 
-Autor: **Ibona93** · Kontakt über die Projektseite. – WoW Forever
+Autor: **Ibona93** · Kontakt über die Projektseite · Lizenz: MIT (siehe `LICENSE`; mitgelieferte Schriften: SIL OFL 1.1). – WoW Forever
 
 Erweiterung für den Gruppenfinder von WoW Forever:
 - intelligente Filter
@@ -279,6 +279,9 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.8.0** – erste öffentliche Beta
+- MIT-Lizenz (`LICENSE`), Release-ZIP ohne Testdateien.
 
 **0.7.9**
 - Eigener Eintrag zeigt die Mitglieder deiner Gruppe, die fehlende Rolle blass und die Aktivität („Eure Einträge · Todesminen“).
