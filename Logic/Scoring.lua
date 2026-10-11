@@ -279,6 +279,7 @@ function S.Evaluate(ctx)
 	-- Quests & zones / custom (no role targets): no role checks, no class penalties,
 	-- nothing sorted out for low points.
 	local relaxed = not ctx.roleTargets
+	result.relaxed = relaxed
 
 	-- 1. Size
 	if total > maxPlayers then

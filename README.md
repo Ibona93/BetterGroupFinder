@@ -1,4 +1,4 @@
-# BGF - Better Group Finder Forever 0.8.1
+# BGF - Better Group Finder Forever 0.8.2
 
 Autor: **Ibona93** · Kontakt über die Projektseite · Lizenz: MIT (siehe `LICENSE`; mitgelieferte Schriften: SIL OFL 1.1). – WoW Forever
 
@@ -6,7 +6,7 @@ Erweiterung für den Gruppenfinder von WoW Forever:
 - intelligente Filter
 - Bewertung der Gruppenzusammensetzung
 - Nachrichtenvorlagen mit automatischem Versand
-- übersichtliche zweizeilige Liste mit Punkten und Gruppenwert
+- übersichtliche zweizeilige Liste mit farbigen Punkten
 
 Ziel-Version: WoW Forever **1.60.1, Interface 16001** (Beta-Stand 9. Oktober 2026).
 
@@ -34,7 +34,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 | Ergebnisliste | Eigene Liste im Gruppenfinder-Fenster in Blizzards Optik. Bereiche: **Gruppen**, **Spieler**, **Aussortiert** (eingeklappt, mit Begründung). Sortiert nach BGF-Punkten. |
 | Fenstergröße | Das Fenster behält **Blizzards Originalbreite und -höhe**. Es wird nur höher, solange die Filterleiste offen ist (außerhalb des Kampfes). |
 | Einträge | Zweizeilig: Name (+ Stufe, „Neue Spieler willkommen“) oben, Instanz darunter. Spielstil und Rollen-Icons mittig in der Zeile, jedes Rollen-Icon mit Ring in Klassenfarbe. Bei Schlachtzügen erscheinen Rollenzahlen statt Einzel-Icons. |
-| Punkte und Gruppenwert | Rechts der Nutzen („+30“). Bei Gruppen steht darunter in Grau der **Gruppenwert** („72 %“): wie vollständig die Gruppe schon ist. Bei Einzelspielern steht nur der Nutzen, mittig. Beides abschaltbar in den Optionen; dort erklärt „Wie entstehen die Punkte?“ die Berechnung. |
+| Punkte | Rechts der Nutzen („30“), farbig wie die M+-Wertung in Retail: grün = passt gut (ab 40), gelb = passt (15–39), grau = wenig Nutzen; bei Quests & Zonen neutral weiß. Der **Gruppenwert** („72 %“, wie vollständig die Gruppe schon ist) steht im Tooltip direkt unter dem Urteil. Abschaltbar in den Optionen; dort erklärt „Wie entstehen die Punkte?“ die Berechnung. |
 | Schrift | Feste Größen wie bei Blizzard: Namen 14, alles andere 12. Schriftart wählbar (Standard: die WoW-Schrift). |
 | Eigener Eintrag | Zeigt die Mitglieder deiner Gruppe (Klassenfarbe, Rolle), die noch fehlende Rolle als blasses Symbol und in Zeile 2 „Eure Einträge · Aktivität“. Ohne Punkte. |
 | Abkürzungen | Passt ein Text nicht, kürzt BGF zuerst sinnvoll: „Höhlen d. Wehklagens“, „Ruinen v. Lordaeron“, „Aldarin S.“. Erst dann wird mit „…“ abgeschnitten. Der Tooltip zeigt immer die vollen Namen. |
@@ -53,13 +53,13 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 ## 3. Bedienung
 
 ### Filterleiste
-- **Zurücksetzen** (rechts in der ersten Zeile): setzt die Chips der gerade angezeigten Gruppenfinder-Kategorie zurück und die Rollen auf automatisch; Favoriten und die anderen Kategorien bleiben. „Filter zurücksetzen“ in den Optionen setzt alle Kategorien zurück.
+- **Speichern · Zurücksetzen** (rechts in der ersten Zeile): „Speichern“ legt die Chips der gerade angezeigten Gruppenfinder-Kategorie als deinen eigenen Standard fest. „Zurücksetzen“ stellt die Chips dieser Kategorie auf deinen Standard zurück (ohne gespeicherten Standard: auf den eingebauten) und die Rollen auf automatisch; Favoriten und die anderen Kategorien bleiben. „Filter zurücksetzen“ in den Optionen setzt alle Kategorien zurück, „Eingebaute Standards wiederherstellen“ löscht deine eigenen Standards.
 - **BGF-Filter aktiv:** schaltet Bewertung, Sortierung und Aussortieren ein oder aus. Die BGF-Ansicht und die Leiste bleiben.
 - **Bewertung für:** deine Perspektive, z. B. „Jäger 22 · DPS“ oder „Deine Gruppe (3)“. Bei wenig Platz entfällt das Wort „Bewertung für:“.
 - **Profil:** wird nicht angezeigt, folgt aber der Kategorie oben im Fenster (Dungeons, Schlachtzüge, sonstige). Jede Kategorie hat eigene Chip-Einstellungen.
 - **Freier Platz für / Gesucht:** automatisch gesetzt (solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die fehlenden Rollen). Ein Klick wechselt auf manuelle Auswahl; „Filter zurücksetzen“ in den Optionen stellt wieder auf automatisch. Das erklärt auch der Tooltip der Rollen-Chips. Solo gelten die Chips für dich: bei Gruppen als die Rolle, mit der du beitrittst; bei anderen Einzelspielern (ihr würdet eine Gruppe aufmachen) schränken sie den anderen nicht ein.
-- **Chips:** Linksklick wechselt zwischen *egal* (grau), *bevorzugt* (weiß, Halbkreis) und *benötigt* (gold, Punkt). **Rechtsklick** macht einen Chip zum Favoriten (Stern) oder entfernt ihn wieder; Favoriten stehen zusätzlich in der Favoriten-Zeile, es ist derselbe Chip. Start-Favoriten: Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft, Mana. Der Tooltip eines Chips zeigt Klasse, Zauber und Lernstufe, bei Bedingungen mit Hinweis (z. B. „Krieger – Schildhieb ab Stufe 12 (nur mit Schild)“, „Priester – Stille ab Stufe 30 (Talent)“). Die Zaubernamen kommen aus dem Spiel, also in deiner Clientsprache.
-- **Kategorien:** *Klassen* (9 Chips, „diese Klasse in der Gruppe“, von Haus aus *egal*), *Buffs* (Angriffskraft, Mana, Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Segen der Könige, Segen der Rettung, Göttlicher Willen, Furchtzauberschutz), *Dispells* (Fluch, Magie, Gift, Krankheit), *Kampf & Hilfsmittel* (Kontrolle, Unterbrechen, Kampfwiederbelebung, Gesundheitsstein, Beschwören). Der Tooltip eines Klassen-Chips zeigt, was die Klasse der Gruppe bringt: Bereiche Kampf & Hilfsmittel, Dispells, Buffs (goldene Überschriften), ein Zauber pro Zeile, Name weiß, Stufe grau, Bedingung orange, dahinter der Chip („– Kontrolle“) oder bei Buffs der Effekt in Hellblau („· Ausdauer +“). Am Ende steht türkis, was die Klasse mit auswählt.
+- **Chips:** Linksklick wechselt zwischen *egal* (grau), *bevorzugt* (weiß, Halbkreis) und *benötigt* (gold, Punkt). **Rechtsklick** macht einen Chip zum Favoriten (Stern) oder entfernt ihn wieder; Favoriten stehen zusätzlich in der Favoriten-Zeile, es ist derselbe Chip. Start-Favoriten: Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft, Mana. Der Tooltip eines Chips ist kurz: welche Klassen die Fähigkeit mitbringen, darunter „evtl.:“ für Klassen, die sie nur mit Talent, Begleiter, Form o. ä. haben, und der Hinweis „Umschalt gedrückt halten: Details“. Mit gedrückter Umschalttaste (live) zeigt er Klasse, Zauber und Lernstufe, bei Bedingungen mit Hinweis (z. B. „Krieger – Schildhieb ab Stufe 12 (nur mit Schild)“, „Priester – Stille ab Stufe 30 (Talent)“). Die Zaubernamen kommen aus dem Spiel, also in deiner Clientsprache.
+- **Kategorien:** *Klassen* (9 Chips, „diese Klasse in der Gruppe“, von Haus aus *egal*), *Buffs* (Angriffskraft, Mana, Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Segen der Könige, Segen der Rettung, Göttlicher Willen, Furchtzauberschutz), *Dispells* (Fluch, Magie, Gift, Krankheit), *Kampf & Hilfsmittel* (Kontrolle, Unterbrechen, Kampfwiederbelebung, Gesundheitsstein, Beschwören). Der Tooltip eines Klassen-Chips zeigt kurz eine Zeile pro Bereich (nur bedingt verfügbare Fähigkeiten grau); mit Umschalt die Vollansicht mit allem, was die Klasse der Gruppe bringt: Bereiche Kampf & Hilfsmittel, Dispells, Buffs (goldene Überschriften), ein Zauber pro Zeile, Name weiß, Stufe grau, Bedingung orange, dahinter der Chip („– Kontrolle“) oder bei Buffs der Effekt in Hellblau („· Ausdauer +“). Am Ende steht türkis, was die Klasse mit auswählt.
 - **Verknüpfung:** Ein Klassen-Chip wählt die Buffs seiner Klasse im gleichen Zustand mit aus (Krieger *benötigt* → Angriffskraft *benötigt*; Hexenmeister → Gesundheitsstein und Beschwören). Ein Chip, den nur eine Klasse bringt, wählt die Klasse mit aus (Seelenstärke → Priester). Keine Kettenreaktion. Mit ausgewählte Chips haben einen türkisen Rand; ein Klick darauf schaltet sie trotzdem ab („abgewählt trotz …“, gedämpft türkiser Rand und durchgestrichen), bis der auslösende Chip wieder aus ist. Mit ausgewählte Chips geben Punkte und Abzüge, sortieren aber nicht allein aus.
 - **Vorrang:** Einträge, die alle Chips erfüllen, die du selbst auf *benötigt* gestellt hast, stehen in Gruppen und Spielern immer oben; die übrigen folgen mit dem Hinweis „Nachrangig“.
 
@@ -228,14 +228,14 @@ Vorher `/console taintLog 1` eingeben. Nach dem Test liegt die Datei `Logs\taint
 | 1 | Gruppenfinder öffnen → Suche → Dungeons | BGF-Liste in Blizzard-Optik, Fenster in Originalgröße, +/- in den Bereichsköpfen korrekt |
 | 2 | Filter-Button | Filterleiste klappt auf, Fenster wird länger, Liste gleich hoch, Button bleibt eingedrückt, Zahnrad frei |
 | 3 | Fähigkeit auf „benötigt“ stellen | Punkt im Chip; Treffer ohne diese Fähigkeit rutschen nach unten bzw. zu „Aussortiert“ |
-| 4 | Liste ansehen | Spielstil auf Höhe der Rollen-Icons; Gruppen: Nutzen + grauer Gruppenwert; Einzelspieler: Nutzen mittig; nichts überlappt |
-| 5 | Über Fähigkeiten-Chips fahren | Tooltip „Klasse – Zauber ab Stufe …“ mit Zaubernamen in deiner Sprache, Talente mit „(Talent)“ |
+| 4 | Liste ansehen | Spielstil auf Höhe der Rollen-Icons; rechts nur die Punkte ohne „+“, grün/gelb/grau; nichts überlappt |
+| 5 | Über Fähigkeiten-Chips fahren | kurzer Tooltip mit Klassen und Hinweis; Umschalt gedrückt: „Klasse – Zauber ab Stufe …“, Talente mit „(Talent)“; Loslassen wieder kurz |
 | 5a | Kategorien auf- und zuklappen, Rechtsklick auf Chips | geöffnete Kategorie in eigenen Zeilen; Stern und Favoriten-Zeile; Krieger *benötigt* → Angriffskraft mit türkisem Rand |
 | 5c | Optionen → Schriftart aufklappen | jeder Eintrag in seiner eigenen Schrift |
 | 5d | Englische Vorlage an eine Gruppe in Burg Shadowfang | Text nennt „Shadowfang Keep“ |
 | 5b | Optionen → „Wie entstehen die Punkte?“ | Abschnitte mit goldenen Überschriften, Plus grün, Abzüge rot, Aussortiert orange; scrollbar, falls zu lang |
 | 6 | Optionen → Schriftart wechseln | Liste, Filterleiste und Tooltip übernehmen die Schrift |
-| 7 | Eintrag hovern | Blizzard-Tooltip + BGF-Begründung darunter |
+| 7 | Eintrag hovern | Blizzard-Tooltip + BGF-Begründung darunter, Urteil farbig, bei Gruppen der Gruppenwert direkt darunter |
 | 8 | Gruppe wählen → Vorlagen → Freundlich | Flüsternachricht wird gesendet, Platzhalter korrekt |
 | 9 | Als Gruppenleiter Einzelspieler → Vorlagen | Einladung + Nachricht |
 | 10 | Haken „BGF-Filter aktiv“ aus/an | BGF-Ansicht bleibt, ohne Punkte/Aussortieren; nichts verschwindet hinter der Leiste. `/bgf off` → Originalliste |
@@ -279,6 +279,11 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.8.2**
+- Chip-Tooltips kurz: Fähigkeiten zeigen die Klassen (darunter „evtl.:“ für Talent, Begleiter, Form), Klassen eine Zeile pro Bereich. Umschalt gedrückt halten zeigt die Details (Zauber, Stufe, Bedingungen), live; ein Hinweis steht im Tooltip.
+- Punkte ohne „+“ und farbig: grün ab 40, gelb 15–39, grau darunter (Quests neutral). Der Gruppenwert in Prozent steht jetzt im Tooltip statt in der Liste.
+- Eigener Standard: „Speichern“ in der Filterleiste legt die Chips einer Kategorie als deinen Standard fest, „Zurücksetzen“ kehrt dorthin zurück. In den Optionen: „Eingebaute Standards wiederherstellen“.
 
 **0.8.1**
 - Neuer Name: „BGF - Better Group Finder Forever“ (Addon-Liste, Optionen); Chat-Präfix und Filter-Tooltip heißen jetzt „BGF“. Ordner, Einstellungen und `/bgf` bleiben gleich.

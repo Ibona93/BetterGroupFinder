@@ -18,6 +18,7 @@ ns.DEFAULTS = {
 	favorites = ns.DEFAULT_FAVORITES,  -- chips shown in the favourites row (right click)
 	openCategories = {},               -- expanded chip categories in the filter bar
 	linkOverrides = {},                -- [profile][chip] = true: switched off despite a link
+	userDefaults = {},                 -- [profile] = { states, overrides }: own default for "Reset"
 	autoSend = true,
 	showReasons = true,
 	abilityStates = ns.DEFAULT_ABILITY_STATES,
@@ -72,6 +73,19 @@ function ns.ClassName(class)
 	local names = _G.LOCALIZED_CLASS_NAMES_MALE
 	local words = ns.Words[ns.clientLocale] or ns.Words.enUS
 	return (names and names[class]) or (words and words.classes[class]) or ns.Words.enUS.classes[class] or class
+end
+
+-- Score colour by verdict, like the M+ score in Retail: green good, yellow fits, grey little
+-- benefit. Quests & custom have no role rules, so their points stay neutral white.
+ns.SCORE_COLORS = {
+	VERDICT_GOOD = { 0.12, 1, 0.12 },
+	VERDICT_OK = { 1, 0.82, 0 },
+	VERDICT_LOW = { 0.62, 0.62, 0.62 },
+	neutral = { 0.92, 0.92, 0.92 },
+}
+function ns.ScoreColor(result)
+	if not result or result.relaxed then return ns.SCORE_COLORS.neutral end
+	return ns.SCORE_COLORS[result.verdict or "VERDICT_LOW"] or ns.SCORE_COLORS.VERDICT_LOW
 end
 
 -- Formats a reason tuple { kind, key, args... } for display.

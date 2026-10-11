@@ -112,7 +112,7 @@ function List.Columns(rowWidth)
 	styleW = math.min(math.ceil(styleW) + 2, 82)
 	local scoreW = 0
 	if List.ShowScores() then
-		scoreW = math.ceil(math.max(textWidth("+48"), textWidth("100 %"))) + 2
+		scoreW = math.ceil(textWidth("188")) + 2
 	end
 	local slotsW = MAX_SLOTS * m.slot + (MAX_SLOTS - 1)
 	local inner = rowWidth - 6 - 6 - 4 -- background insets and side padding
@@ -416,22 +416,16 @@ function BGFRowMixin:Init(data)
 		self:SetAlpha(0.62)
 	end
 
-	-- Right column: benefit, and for groups the current group value below it
+	-- Right column: the points, coloured by verdict (the group value is in the tooltip)
 	self.Score:SetText("")
 	self.Value:SetText("")
 	self.Score:ClearAllPoints()
 	self.Value:ClearAllPoints()
 	if not excluded and result and not entry.own and List.ShowScores() then
-		self.Score:SetText((result.score > 0 and "+" or "") .. result.score)
-		local value = not entry.isSolo and entry.groupValue
-		if value then
-			local half = m.font / 2 + 2
-			self.Score:SetPoint("RIGHT", self.ScoreAnchor, "RIGHT", 0, half)
-			self.Value:SetPoint("RIGHT", self.ScoreAnchor, "RIGHT", 0, -half)
-			self.Value:SetText(value.percent .. " %")
-		else
-			self.Score:SetPoint("RIGHT", self.ScoreAnchor, "RIGHT", 0, 0)
-		end
+		self.Score:SetText(tostring(result.score))
+		local c = ns.ScoreColor(result)
+		self.Score:SetTextColor(c[1], c[2], c[3])
+		self.Score:SetPoint("RIGHT", self.ScoreAnchor, "RIGHT", 0, 0)
 	end
 	self:UpdateSelection()
 end

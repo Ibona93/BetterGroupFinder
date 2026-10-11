@@ -356,15 +356,14 @@ for _, fr in ipairs(ns.List.scrollBox.__frames) do
 		print(("      %-40s | %-24s | %-10s | %4s %s"):format(fr.Name.__text or "", fr.Activity.__text or "", fr.Style.__text or "",
 			fr.Score.__text or "", fr.Value.__text or ""))
 		if not fr.entry.excluded then
-			if fr.entry.isSolo then
-				if (fr.Value.__text or "") ~= "" then soloValueOK = false end
-			elseif not (fr.Value.__text or ""):match("^%d+ %%$") then
-				groupValueOK = false
+			if (fr.Value.__text or "") ~= "" then
+				if fr.entry.isSolo then soloValueOK = false else groupValueOK = false end
 			end
+			if (fr.Score.__text or ""):find("+", 1, true) then groupValueOK = false end
 		end
 	end
 end
-check("groups show their group value in percent", groupValueOK)
+check("list shows the points without + and no group value (moved to the tooltip)", groupValueOK)
 check("solo players show no group value", soloValueOK)
 
 check("no hooks on Blizzard functions (taint log safe)", #hookedBlizzard == 0, table.concat(hookedBlizzard, ","))
@@ -460,6 +459,41 @@ ok, err = pcall(function() druidChip.__scripts.OnEnter(druidChip) druidChip.__sc
 check("class chip tooltip shows and hides", ok, err)
 ok, err = pcall(function() roleChip1.__scripts.OnEnter(roleChip1) roleChip1.__scripts.OnLeave(roleChip1) end)
 check("role chip tooltip shows and hides", ok, err)
+local sure, maybe = ns.FilterBar.AbilityShort("interrupt")
+local function joined(t) local o = {} for i, v in ipairs(t) do o[i] = plain(v) end return table.concat(o, ", ") end
+check("short interrupt tooltip: sure classes and 'maybe' classes", joined(sure) == "Krieger, Paladin, Schurke, Schamane, Magier"
+	and joined(maybe) == "Priester, Hexenmeister, Druide", joined(sure) .. " / " .. joined(maybe))
+local short = {}
+for i, l in ipairs(ns.FilterBar.ClassShort("PALADIN")) do short[i] = plain(l) end
+check("short paladin tooltip: one line per section", #short == 3 and short[1] == "Kampf & Hilfsmittel: Kontrolle, Unterbrechen"
+	and short[2]:find("Gift", 1, true) and short[3]:find("Segen der Könige", 1, true), table.concat(short, " | "))
+local interruptChip
+for _, c in ipairs(ns.FilterBar.frame.AbilityChips) do if c.ability == "interrupt" then interruptChip = c end end
+_G.IsShiftKeyDown = function() return true end
+ok, err = pcall(function() interruptChip.__scripts.OnEnter(interruptChip) interruptChip.__scripts.OnLeave(interruptChip) end)
+check("chip tooltip with Shift held (details) shows and hides", ok, err)
+_G.IsShiftKeyDown = function() return false end
+ok, err = pcall(function() interruptChip.__scripts.OnEnter(interruptChip) interruptChip.__scripts.OnLeave(interruptChip) end)
+check("chip tooltip without Shift (short) shows and hides", ok, err)
+_G.IsShiftKeyDown = nil
+check("score colours by verdict, quests neutral", ns.ScoreColor({ verdict = "VERDICT_GOOD" })[1] < 0.5
+	and ns.ScoreColor({ verdict = "VERDICT_OK" })[2] == 0.82 and ns.ScoreColor({ verdict = "VERDICT_LOW", relaxed = true }) == ns.SCORE_COLORS.neutral)
+-- own defaults: Save, change, Reset -> back to the saved chips; restore built-in -> defaults again
+ns.FilterBar.ResetFilters()
+ns.db.abilityStates.dungeon.buff_ap = "need"
+ns.FilterBar.SaveCurrent()
+ns.db.abilityStates.dungeon.buff_ap = "ignore"
+ns.db.abilityStates.dungeon.cc = "ignore"
+ns.FilterBar.ResetCurrent()
+check("Reset goes back to the saved own default", ns.db.abilityStates.dungeon.buff_ap == "need"
+	and ns.db.abilityStates.dungeon.cc == ns.DEFAULT_ABILITY_STATES.dungeon.cc)
+ns.db.abilityStates.raid.cc = "ignore"
+ns.FilterBar.ResetFilters()
+check("Reset filters keeps own defaults per category", ns.db.abilityStates.dungeon.buff_ap == "need"
+	and ns.db.abilityStates.raid.cc == ns.DEFAULT_ABILITY_STATES.raid.cc)
+ns.FilterBar.RestoreBuiltIn()
+check("restoring built-in defaults drops the own ones", next(ns.db.userDefaults) == nil
+	and ns.db.abilityStates.dungeon.buff_ap == ns.DEFAULT_ABILITY_STATES.dungeon.buff_ap)
 check("no profile display and no grey role hint any more", ns.FilterBar.frame.ProfileValue == nil and ns.FilterBar.frame.RolesHint == nil)
 pcall(ns.UI.filterButton.__scripts.OnClick)
 check("closing the bar restores the original height", parent.__size.h == 535 and not ns.UI.filterButton.pressed, parent.__size.h)

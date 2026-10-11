@@ -311,9 +311,64 @@ function Bar.LinksText(id)
 	return ns.L.LINKS_TO:format(table.concat(names, ", "))
 end
 
+-- Short tooltips (default): ability chip = classes that bring it ("maybe:" = only with talent,
+-- pet, form ...); class chip = what it brings per section, without levels and conditions.
+-- Holding Shift shows the full version (live, see the modifier watcher below).
+function Bar.AbilityShort(id)
+	local sure, maybe = {}, {}
+	for _, class in ipairs(ns.CLASS_ORDER) do
+		local s, p
+		for _, e in ipairs(ns.CLASS_ABILITIES[class] or {}) do
+			if e.a == id then
+				if e.possible then p = true else s = true end
+			end
+		end
+		if s then
+			sure[#sure + 1] = coloredClass(class)
+		elseif p then
+			maybe[#maybe + 1] = coloredClass(class)
+		end
+	end
+	return sure, maybe
+end
+
+function Bar.ClassShort(class)
+	local L = ns.L
+	local lines = {}
+	for _, cat in ipairs(SECTION_ORDER) do
+		local names, seen = {}, {}
+		for _, chip in ipairs(ns.ABILITIES) do
+			if chip.category == cat and not chip.class then
+				local sure, any = false, false
+				for _, e in ipairs(ns.CLASS_ABILITIES[class] or {}) do
+					if e.a == chip.id then
+						any = true
+						if not e.possible then sure = true end
+					end
+				end
+				if any then
+					local name = cat == "dispel" and L["SHORT_" .. chip.id] or L["AB_" .. chip.id]
+					if not seen[name] then
+						seen[name] = true
+						-- only possible (talent, condition): grey
+						names[#names + 1] = sure and name or col("level", name)
+					end
+				end
+			end
+		end
+		if #names > 0 then
+			lines[#lines + 1] = "|cffffd100" .. L["CAT_" .. cat] .. ":|r " .. col("name", table.concat(names, ", "))
+		end
+	end
+	return lines
+end
+
+local tooltipChip
 function Bar.ShowAbilityTooltip(chip)
 	local L = ns.L
 	local ability = ns.ABILITY_BY_ID[chip.ability]
+	local detail = IsShiftKeyDown and IsShiftKeyDown() or false
+	tooltipChip = chip
 	GameTooltip:SetOwner(chip, "ANCHOR_TOP")
 	if ability and ability.class then
 		local c = RAID_CLASS_COLORS and RAID_CLASS_COLORS[ability.class]
@@ -321,13 +376,23 @@ function Bar.ShowAbilityTooltip(chip)
 	else
 		GameTooltip:SetText(ns.AbilityName(chip.ability), 1, 0.82, 0)
 	end
-	local lines = ability and ability.class and Bar.ClassSources(ability.class) or Bar.AbilitySources(chip.ability)
-	for _, line in ipairs(lines) do
-		if line.header then
-			GameTooltip:AddLine(line.header, 1, 0.82, 0)
-		else
-			GameTooltip:AddLine(line.text, 1, 1, 1, false)
+	if detail then
+		local lines = ability and ability.class and Bar.ClassSources(ability.class) or Bar.AbilitySources(chip.ability)
+		for _, line in ipairs(lines) do
+			if line.header then
+				GameTooltip:AddLine(line.header, 1, 0.82, 0)
+			else
+				GameTooltip:AddLine(line.text, 1, 1, 1, false)
+			end
 		end
+	elseif ability and ability.class then
+		for _, line in ipairs(Bar.ClassShort(ability.class)) do
+			GameTooltip:AddLine(line, 1, 1, 1, false)
+		end
+	else
+		local sure, maybe = Bar.AbilityShort(chip.ability)
+		if #sure > 0 then GameTooltip:AddLine(table.concat(sure, ", "), 1, 1, 1, true) end
+		if #maybe > 0 then GameTooltip:AddLine(col("level", L.TT_MAYBE) .. " " .. table.concat(maybe, ", "), 1, 1, 1, true) end
 	end
 	local links = Bar.LinksText(chip.ability)
 	if links then GameTooltip:AddLine(col("link", links), 1, 1, 1, false) end
@@ -336,10 +401,22 @@ function Bar.ShowAbilityTooltip(chip)
 	elseif chip.overridden then
 		GameTooltip:AddLine(col("link", L.OVERRIDDEN:format(ns.AbilityName(chip.overridden))), 1, 1, 1, true)
 	end
+	if not detail then GameTooltip:AddLine(L.TT_SHIFT_HINT, 0.5, 0.82, 0.5, true) end
 	GameTooltip:AddLine(L.CHIP_TT_CLICK, 0.6, 0.6, 0.6, true)
 	GameTooltip:AddLine(ns.db.favorites[chip.ability] and L.FAV_REMOVE or L.FAV_ADD, 0.6, 0.6, 0.6, true)
 	GameTooltip:Show()
 end
+
+-- Shift pressed or released while a chip tooltip is open: switch between short and full.
+local modWatcher = CreateFrame("Frame")
+modWatcher:RegisterEvent("MODIFIER_STATE_CHANGED")
+modWatcher:SetScript("OnEvent", function(_, _, key)
+	if key ~= "LSHIFT" and key ~= "RSHIFT" then return end
+	local chip = tooltipChip
+	if chip and chip.hover and chip.ability and GameTooltip:IsShown() and GameTooltip:GetOwner() == chip then
+		Bar.ShowAbilityTooltip(chip)
+	end
+end)
 
 function Bar.ShowRoleTooltip(chip)
 	local L = ns.L
@@ -409,6 +486,8 @@ function Bar.Create(parent)
 		GameTooltip:SetOwner(self, "ANCHOR_TOP")
 		GameTooltip:SetText(L.RESET_SHORT, 1, 0.82, 0)
 		GameTooltip:AddLine(L.RESET_TT, 1, 1, 1, true)
+		local own = ns.db.userDefaults[Bar.CurrentProfile()]
+		GameTooltip:AddLine(own and L.RESET_TT_OWN or L.RESET_TT_BUILTIN, 0.5, 0.82, 0.5, true)
 		GameTooltip:Show()
 	end)
 	f.Reset:SetScript("OnLeave", function(self)
@@ -419,6 +498,28 @@ function Bar.Create(parent)
 		if PlaySound and SOUNDKIT then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON) end
 		Bar.ResetCurrent()
 	end)
+	-- "Save": the chips of this category become your own default for "Reset"
+	f.Save = CreateFrame("Button", nil, f)
+	f.Save.Text = text(f.Save, C.grey)
+	f.Save.Text:SetPoint("RIGHT")
+	f.Save.Text:SetText(L.SAVE_SHORT)
+	f.Save:SetScript("OnEnter", function(self)
+		self.Text:SetTextColor(C.white[1], C.white[2], C.white[3])
+		GameTooltip:SetOwner(self, "ANCHOR_TOP")
+		GameTooltip:SetText(L.SAVE_SHORT, 1, 0.82, 0)
+		GameTooltip:AddLine(L.SAVE_TT, 1, 1, 1, true)
+		GameTooltip:Show()
+	end)
+	f.Save:SetScript("OnLeave", function(self)
+		self.Text:SetTextColor(C.grey[1], C.grey[2], C.grey[3])
+		GameTooltip:Hide()
+	end)
+	f.Save:SetScript("OnClick", function()
+		if PlaySound and SOUNDKIT then PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON) end
+		Bar.SaveCurrent()
+	end)
+	f.SaveDot = text(f, C.dim)
+	f.SaveDot:SetText("·")
 
 	-- Row 2: roles
 	f.RolesLabel = text(f, C.white)
@@ -486,7 +587,7 @@ function Bar.ApplyFonts()
 	local f = Bar.frame
 	if not f then return end
 	for _, fs in ipairs({ f.EnableText, f.Separator, f.RatingLabel, f.RatingValue,
-		f.RolesLabel, f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.Reset.Text, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
+		f.RolesLabel, f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.Reset.Text, f.Save.Text, f.SaveDot, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
 		fs:SetFontObject(font())
 	end
 end
@@ -534,7 +635,19 @@ function Bar.Layout()
 	f.Reset:SetSize(resetW + 4, 18)
 	f.Reset:ClearAllPoints()
 	f.Reset:SetPoint("RIGHT", f, "TOPRIGHT", -PADDING, y - 9)
+	f.SaveDot:ClearAllPoints()
+	f.SaveDot:SetPoint("RIGHT", f.Reset, "LEFT", -5, 0)
+	local saveW = math.ceil(f.Save.Text:GetStringWidth())
+	f.Save:SetSize(saveW + 4, 18)
+	f.Save:ClearAllPoints()
+	f.Save:SetPoint("RIGHT", f.SaveDot, "LEFT", -5, 0)
+	resetW = resetW + saveW + math.ceil(f.SaveDot:GetStringWidth()) + 18
 	local tight = leftW + resetW + 12 + 2 * PADDING + 12 > width
+	-- Still too wide without the label (long translations): "Save · Reset" move to the
+	-- bottom row, left of the legend.
+	local bottomButtons = leftW - f.RatingLabel:GetStringWidth() - 4 + resetW + 12 + 2 * PADDING + 12 > width
+	Bar.buttonsBottom = bottomButtons
+	if bottomButtons then tight = leftW + 12 + 2 * PADDING + 12 > width end
 	f.RatingLabel:SetShown(not tight)
 	f.RatingValue:ClearAllPoints()
 	if tight then
@@ -626,6 +739,14 @@ function Bar.Layout()
 	f.LegendNeedText:SetPoint("RIGHT", f.LegendDot, "LEFT", -6, 0)
 	f.LegendNeed:ClearAllPoints()
 	f.LegendNeed:SetPoint("RIGHT", f.LegendNeedText, "LEFT", -4, 0)
+	if Bar.buttonsBottom then
+		f.Save:ClearAllPoints()
+		f.Save:SetPoint("TOPLEFT", PADDING - 2, y + 2)
+		f.SaveDot:ClearAllPoints()
+		f.SaveDot:SetPoint("LEFT", f.Save, "RIGHT", 5, 0)
+		f.Reset:ClearAllPoints()
+		f.Reset:SetPoint("LEFT", f.SaveDot, "RIGHT", 5, 0)
+	end
 	y = y - 14 - PADDING
 
 	Bar.height = -y
@@ -773,12 +894,32 @@ function Bar.Update()
 	end
 end
 
--- Reset in the filter bar: chips of the current category, roles back to automatic,
--- overrides lifted; favourites and the other categories stay.
+-- Own defaults: "Save" stores the chips (and lifted links) of the current category; "Reset"
+-- and "Reset filters" go back to them, or to the built-in defaults when nothing is saved.
+local function defaultsFor(profile)
+	local own = ns.db.userDefaults[profile]
+	if own and own.states then
+		return ns.CopyTable(own.states), own.overrides and ns.CopyTable(own.overrides) or nil
+	end
+	return ns.CopyTable(ns.DEFAULT_ABILITY_STATES[profile]), nil
+end
+Bar.DefaultsFor = defaultsFor
+
+function Bar.SaveCurrent()
+	local profile = Bar.CurrentProfile()
+	local overrides = ns.db.linkOverrides[profile]
+	ns.db.userDefaults[profile] = {
+		states = ns.CopyTable(ns.db.abilityStates[profile] or {}),
+		overrides = overrides and next(overrides) and ns.CopyTable(overrides) or nil,
+	}
+	ns.Print(ns.L.SAVED_MSG)
+end
+
+-- Reset in the filter bar: chips of the current category, roles back to automatic;
+-- favourites and the other categories stay.
 function Bar.ResetCurrent()
 	local profile = Bar.CurrentProfile()
-	ns.db.abilityStates[profile] = ns.CopyTable(ns.DEFAULT_ABILITY_STATES[profile])
-	ns.db.linkOverrides[profile] = nil
+	ns.db.abilityStates[profile], ns.db.linkOverrides[profile] = defaultsFor(profile)
 	ns.db.roleChips = {}
 	if ns.UI and ns.UI.ApplyLayout then ns.UI.ApplyLayout() end
 	ns.RequestRefresh()
@@ -786,9 +927,18 @@ end
 
 function Bar.ResetFilters()
 	ns.db.roleChips = {}
-	ns.db.abilityStates = ns.CopyTable(ns.DEFAULT_ABILITY_STATES)
 	ns.db.linkOverrides = {}
+	for profile in pairs(ns.DEFAULT_ABILITY_STATES) do
+		ns.db.abilityStates[profile], ns.db.linkOverrides[profile] = defaultsFor(profile)
+	end
 	Bar.Update()
 	if ns.UI and ns.UI.ApplyLayout then ns.UI.ApplyLayout() end
 	ns.RequestRefresh()
+end
+
+-- Options: forget your own defaults and go back to the built-in ones.
+function Bar.RestoreBuiltIn()
+	ns.db.userDefaults = {}
+	Bar.ResetFilters()
+	ns.Print(ns.L.RESTORED_MSG)
 end

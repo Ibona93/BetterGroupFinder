@@ -70,7 +70,7 @@ function Tooltip.Show(owner, entry)
 	box.Title:SetFontObject(ns.Fonts.Get(13))
 	local verdict = ns.L[result.verdict or "VERDICT_LOW"]
 	if ns.db.showScores then
-		box.Title:SetText(verdict:format((result.score > 0 and "+" or "") .. result.score))
+		box.Title:SetText(verdict:format(result.score))
 	else
 		-- without points: "BGF: good fit"
 		local plain = verdict:gsub("%%s", ""):gsub("%s*%(%)", ""):gsub("%s*（）", "")
@@ -80,13 +80,26 @@ function Tooltip.Show(owner, entry)
 		box.Title:SetText(ns.L.EXCLUDED)
 		box.Title:SetTextColor(COLORS.exclude[1], COLORS.exclude[2], COLORS.exclude[3])
 	else
-		box.Title:SetTextColor(1, 0.82, 0)
+		local c = ns.ScoreColor(result)
+		box.Title:SetTextColor(c[1], c[2], c[3])
 	end
 
 	local width = 220
 	if anchor then width = math.max(width, anchor:GetWidth() - 20) end
 	local n = 0
 	local seen = {}
+	-- group value first, right below the verdict
+	local value = not entry.isSolo and entry.groupValue
+	if value and ns.db.showScores and not result.excluded then
+		n = n + 1
+		local fs = getLine(n)
+		fs:SetFontObject(ns.Fonts.Get(12))
+		fs:SetWidth(width)
+		fs:SetText(ns.L.GROUP_VALUE:format(value.percent, value.rolesFilled, value.rolesTotal,
+			value.abilitiesCovered, value.abilitiesTotal))
+		fs:SetTextColor(1, 1, 1)
+		fs:Show()
+	end
 	for _, reason in ipairs(result.reasons or {}) do
 		local text = ns.FormatReason(reason)
 		if not seen[text] then
@@ -100,17 +113,6 @@ function Tooltip.Show(owner, entry)
 			fs:SetTextColor(c[1], c[2], c[3])
 			fs:Show()
 		end
-	end
-	local value = not entry.isSolo and entry.groupValue
-	if value and ns.db.showScores then
-		n = n + 1
-		local fs = getLine(n)
-		fs:SetFontObject(ns.Fonts.Get(12))
-		fs:SetWidth(width)
-		fs:SetText(ns.L.GROUP_VALUE:format(value.percent, value.rolesFilled, value.rolesTotal,
-			value.abilitiesCovered, value.abilitiesTotal))
-		fs:SetTextColor(COLORS.info[1], COLORS.info[2], COLORS.info[3])
-		fs:Show()
 	end
 	if entry.activityInfo and ns.INSTANCE_HINTS[entry.activityInfo.mapID] then
 		local names = {}
