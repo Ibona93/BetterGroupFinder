@@ -1,11 +1,11 @@
 ## Interface: 16001
-## Title: Better Group Finder Forever
-## Title-deDE: Better Group Finder Forever
+## Title: BGF - Better Group Finder Forever
+## Title-deDE: BGF - Better Group Finder Forever
 ## Notes: Smart filters, group composition rating, favourites and message templates for the WoW Forever Group Finder.
 ## Notes-deDE: Intelligente Filter, Bewertung der Gruppenzusammensetzung, Favoriten und Nachrichtenvorlagen für den Gruppenfinder von WoW Forever.
 ## Author: Ibona93
 ## X-License: MIT
-## Version: 0.8.0
+## Version: 0.8.1
 ## IconTexture: Interface\AddOns\BetterGroupFinder\Media\Logo
 ## SavedVariables: BetterGroupFinderDB
 ## Category: Group Finder

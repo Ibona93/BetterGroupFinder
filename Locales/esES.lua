@@ -1,7 +1,7 @@
 local _, ns = ...
 
 local strings = {
-	FILTER_BUTTON_TT = "Filtros de Better Group Finder",
+	FILTER_BUTTON_TT = "Filtros de BGF",
 	FILTER_BUTTON_TT2 = "Mostrar u ocultar la barra de filtros de BGF.",
 	ENABLED = "Filtro BGF activo",
 	RATING_FOR = "Valoración para:",
@@ -144,7 +144,7 @@ local strings = {
 	CHIP_TT_POSSIBLE = "(posible)",
 	CHIP_TT_CLICK = "Clic: ignorado > preferido > necesario",
 	GROUP_VALUE = "Valor del grupo %d %%: roles %d/%d, habilidades %d/%d",
-	OPT_TITLE = "Better Group Finder Forever",
+	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Enviar al instante al elegir una plantilla",
 	OPT_REASONS = "Mostrar la valoración de BGF en la descripción emergente",
 	OPT_TEMPLATES = "Plantillas de mensaje",

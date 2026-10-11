@@ -1,7 +1,7 @@
 local _, ns = ...
 
 ns.RegisterLocale("ruRU", {
-	FILTER_BUTTON_TT = "Фильтры Better Group Finder",
+	FILTER_BUTTON_TT = "Фильтры BGF",
 	FILTER_BUTTON_TT2 = "Показать или скрыть панель фильтров BGF.",
 	ENABLED = "Фильтр BGF включен",
 	RATING_FOR = "Оценка для:",
@@ -144,7 +144,7 @@ ns.RegisterLocale("ruRU", {
 	CHIP_TT_POSSIBLE = "(возможно)",
 	CHIP_TT_CLICK = "Щелчок: неважно > желательно > нужно",
 	GROUP_VALUE = "Ценность группы %d %%: роли %d/%d, способности %d/%d",
-	OPT_TITLE = "Better Group Finder Forever",
+	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Отправлять сразу при выборе шаблона",
 	OPT_REASONS = "Показывать оценку BGF в подсказке",
 	OPT_TEMPLATES = "Шаблоны сообщений",

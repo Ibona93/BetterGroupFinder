@@ -1,7 +1,7 @@
 local _, ns = ...
 
 ns.RegisterLocale("deDE", {
-	FILTER_BUTTON_TT = "Better-Group-Finder-Filter",
+	FILTER_BUTTON_TT = "BGF-Filter",
 	FILTER_BUTTON_TT2 = "Filterleiste von BGF ein- oder ausblenden.",
 	ENABLED = "BGF-Filter aktiv",
 	RATING_FOR = "Bewertung für:",
@@ -144,7 +144,7 @@ ns.RegisterLocale("deDE", {
 	CHIP_TT_POSSIBLE = "(möglich)",
 	CHIP_TT_CLICK = "Klick: egal > bevorzugt > benötigt",
 	GROUP_VALUE = "Gruppenwert %d %%: Rollen %d/%d, Fähigkeiten %d/%d",
-	OPT_TITLE = "Better Group Finder Forever",
+	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Sofort senden, wenn eine Vorlage gewählt wird",
 	OPT_REASONS = "BGF-Bewertung im Tooltip anzeigen",
 	OPT_TEMPLATES = "Nachrichtenvorlagen",

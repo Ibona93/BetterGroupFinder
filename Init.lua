@@ -1,9 +1,9 @@
--- Better Group Finder (BGF) - namespace and shared helpers.
+-- BGF - Better Group Finder Forever: namespace and shared helpers.
 -- Loaded first; every other file receives the same private namespace table `ns`.
 local ADDON_NAME, ns = ...
 
 ns.ADDON_NAME = ADDON_NAME
-ns.VERSION = "0.8.0"
+ns.VERSION = "0.8.1"
 
 -- Locale registries, filled by Locales/*.lua.
 ns.Locales = {}           -- [locale] = { KEY = "UI string" }
@@ -72,7 +72,7 @@ end
 
 function ns.Print(msg)
 	if DEFAULT_CHAT_FRAME then
-		DEFAULT_CHAT_FRAME:AddMessage("|cffffd100Better Group Finder:|r " .. tostring(msg))
+		DEFAULT_CHAT_FRAME:AddMessage("|cffffd100BGF:|r " .. tostring(msg))
 	end
 end
 

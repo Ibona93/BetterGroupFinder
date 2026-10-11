@@ -2,7 +2,7 @@ local _, ns = ...
 
 -- English is the base and fallback for every UI string and every template.
 ns.RegisterLocale("enUS", {
-	FILTER_BUTTON_TT = "Better Group Finder filters",
+	FILTER_BUTTON_TT = "BGF filters",
 	FILTER_BUTTON_TT2 = "Show or hide the BGF filter bar.",
 	ENABLED = "BGF filter active",
 	RATING_FOR = "Rating for:",
@@ -148,7 +148,7 @@ ns.RegisterLocale("enUS", {
 	CHIP_TT_POSSIBLE = "(possible)",
 	CHIP_TT_CLICK = "Click: ignored > preferred > required",
 	GROUP_VALUE = "Group value %d %%: roles %d/%d, abilities %d/%d",
-	OPT_TITLE = "Better Group Finder Forever",
+	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Send immediately when a template is chosen",
 	OPT_REASONS = "Show the BGF rating in the tooltip",
 	OPT_TEMPLATES = "Message templates",

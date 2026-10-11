@@ -1,7 +1,7 @@
 local _, ns = ...
 
 ns.RegisterLocale("koKR", {
-	FILTER_BUTTON_TT = "Better Group Finder 필터",
+	FILTER_BUTTON_TT = "BGF 필터",
 	FILTER_BUTTON_TT2 = "BGF 필터 막대를 표시하거나 숨깁니다.",
 	ENABLED = "BGF 필터 사용",
 	RATING_FOR = "평가 대상:",
@@ -144,7 +144,7 @@ ns.RegisterLocale("koKR", {
 	CHIP_TT_POSSIBLE = "(가능)",
 	CHIP_TT_CLICK = "클릭: 무시 > 선호 > 필수",
 	GROUP_VALUE = "파티 점수 %d %%: 역할 %d/%d, 능력 %d/%d",
-	OPT_TITLE = "Better Group Finder Forever",
+	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "템플릿 선택 시 바로 보내기",
 	OPT_REASONS = "툴팁에 BGF 평가 표시",
 	OPT_TEMPLATES = "메시지 템플릿",

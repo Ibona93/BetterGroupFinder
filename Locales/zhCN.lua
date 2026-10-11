@@ -1,7 +1,7 @@
 local _, ns = ...
 
 ns.RegisterLocale("zhCN", {
-	FILTER_BUTTON_TT = "Better Group Finder 筛选",
+	FILTER_BUTTON_TT = "BGF 筛选",
 	FILTER_BUTTON_TT2 = "显示或隐藏 BGF 筛选栏。",
 	ENABLED = "启用 BGF 筛选",
 	RATING_FOR = "评估对象：",
@@ -144,7 +144,7 @@ ns.RegisterLocale("zhCN", {
 	CHIP_TT_POSSIBLE = "（可能）",
 	CHIP_TT_CLICK = "点击：忽略 > 优先 > 必需",
 	GROUP_VALUE = "队伍评分 %d %%：职责 %d/%d，技能 %d/%d",
-	OPT_TITLE = "Better Group Finder Forever",
+	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "选择模板后立即发送",
 	OPT_REASONS = "在鼠标提示中显示 BGF 评估",
 	OPT_TEMPLATES = "消息模板",

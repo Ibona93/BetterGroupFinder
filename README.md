@@ -1,4 +1,4 @@
-# Better Group Finder Forever (BGF) 0.8.0
+# BGF - Better Group Finder Forever 0.8.1
 
 Autor: **Ibona93** · Kontakt über die Projektseite · Lizenz: MIT (siehe `LICENSE`; mitgelieferte Schriften: SIL OFL 1.1). – WoW Forever
 
@@ -20,7 +20,7 @@ Ziel-Version: WoW Forever **1.60.1, Interface 16001** (Beta-Stand 9. Oktober 202
    `World of Warcraft\_classic_beta_\Interface\AddOns\BetterGroupFinder`
    Nach dem Release heißt der Client-Ordner voraussichtlich anders. Entscheidend ist der Ordner, aus dem du Forever startest.
 4. Der Ordner muss direkt `BetterGroupFinder.toc` enthalten. Ein Ordner `BetterGroupFinder\BetterGroupFinder\…` funktioniert nicht.
-5. Im Charakterauswahl-Bildschirm unter **AddOns** „Better Group Finder“ aktivieren.
+5. Im Charakterauswahl-Bildschirm unter **AddOns** „BGF - Better Group Finder Forever“ aktivieren.
 6. Empfohlen für die ersten Tests: **BugSack + BugGrabber** installieren, damit eventuelle Lua-Fehler gesammelt werden.
 
 Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch die Interface-Nummer geändert. Prüfen mit `/dump (select(4, GetBuildInfo()))` und die Zahl in der ersten Zeile der `.toc` anpassen.
@@ -79,7 +79,7 @@ Aufbau des Menüs: weiße Überschrift (was passiert), darunter die Sprachen in 
 | `/bgf off` / `/bgf on` | Notausgang: Blizzards Originalliste / BGF wieder an |
 | `/bgf debug` | Debug-Ausgabe an/aus. Beim Hovern über einen Eintrag werden dessen Rohdaten (inkl. `mapID`, Spezialisierung) in den Chat geschrieben. |
 
-### Optionen (`/bgf` oder Optionen → AddOns → Better Group Finder)
+### Optionen (`/bgf` oder Optionen → AddOns → BGF - Better Group Finder Forever)
 - Sofort senden, BGF-Bewertung im Tooltip, **Punkte anzeigen** (mit Button „Wie entstehen die Punkte?“), BGF-Filter aktiv
 - **Schriftart** mit Vorschau:
   - im Spiel enthalten: Friz Quadrata (Standard), Arial Narrow, Morpheus, Skurri
@@ -279,6 +279,9 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.8.1**
+- Neuer Name: „BGF - Better Group Finder Forever“ (Addon-Liste, Optionen); Chat-Präfix und Filter-Tooltip heißen jetzt „BGF“. Ordner, Einstellungen und `/bgf` bleiben gleich.
 
 **0.8.0** – erste öffentliche Beta
 - MIT-Lizenz (`LICENSE`), Release-ZIP ohne Testdateien.
