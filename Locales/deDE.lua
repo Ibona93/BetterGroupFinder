@@ -107,7 +107,7 @@ ns.RegisterLocale("deDE", {
 	RESET_TT_BUILTIN = "Kehrt zum eingebauten Standard zurück („Speichern“ legt deinen eigenen fest).",
 	SAVED_MSG = "Filter dieser Kategorie als dein Standard gespeichert.",
 	RESTORED_MSG = "Eingebaute Standardfilter wiederhergestellt.",
-	OPT_RESTORE_DEFAULTS = "Eingebaute Standards wiederherstellen",
+	OPT_RESTORE_DEFAULTS = "Standards wiederherstellen",
 	OPT_RESTORE_DEFAULTS_TT = "Löscht deine gespeicherten Standards und setzt alle Kategorien auf die eingebauten Filter zurück.",
 	ROLE_TT_NONE = "In dieser Kategorie gibt es keine Rollenverteilung; die Rollen-Chips wirken hier nicht.",
 	ROLE_TT_MANUAL = "Manuell gewählt.",

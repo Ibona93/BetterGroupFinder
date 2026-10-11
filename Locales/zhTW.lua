@@ -107,7 +107,7 @@ ns.RegisterLocale("zhTW", {
 	RESET_TT_BUILTIN = "恢復到內建預設值（「儲存」可設定你自己的）。",
 	SAVED_MSG = "此分類的篩選已儲存為你的預設值。",
 	RESTORED_MSG = "已恢復內建預設篩選。",
-	OPT_RESTORE_DEFAULTS = "恢復內建預設值",
+	OPT_RESTORE_DEFAULTS = "恢復預設值",
 	OPT_RESTORE_DEFAULTS_TT = "刪除你儲存的預設值，並將所有分類重置為內建篩選。",
 	ROLE_TT_NONE = "此分類沒有職責分配，職責按鈕在此無效。",
 	ROLE_TT_MANUAL = "手動選擇。",

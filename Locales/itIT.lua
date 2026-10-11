@@ -107,7 +107,7 @@ ns.RegisterLocale("itIT", {
 	RESET_TT_BUILTIN = "Torna al predefinito integrato («Salva» imposta il tuo).",
 	SAVED_MSG = "Filtri di questa categoria salvati come tuo predefinito.",
 	RESTORED_MSG = "Filtri predefiniti integrati ripristinati.",
-	OPT_RESTORE_DEFAULTS = "Ripristina predefiniti integrati",
+	OPT_RESTORE_DEFAULTS = "Ripristina predefiniti",
 	OPT_RESTORE_DEFAULTS_TT = "Elimina i tuoi predefiniti salvati e reimposta tutte le categorie ai filtri integrati.",
 	ROLE_TT_NONE = "Questa categoria non ha una distribuzione dei ruoli; i pulsanti ruolo qui non hanno effetto.",
 	ROLE_TT_MANUAL = "Scelto manualmente.",

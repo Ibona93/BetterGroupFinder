@@ -107,7 +107,7 @@ ns.RegisterLocale("frFR", {
 	RESET_TT_BUILTIN = "Revient au défaut intégré (« Enregistrer » définit le vôtre).",
 	SAVED_MSG = "Filtres de cette catégorie enregistrés comme votre défaut.",
 	RESTORED_MSG = "Filtres par défaut intégrés restaurés.",
-	OPT_RESTORE_DEFAULTS = "Restaurer les défauts intégrés",
+	OPT_RESTORE_DEFAULTS = "Restaurer les défauts",
 	OPT_RESTORE_DEFAULTS_TT = "Supprime vos défauts enregistrés et remet toutes les catégories sur les filtres intégrés.",
 	ROLE_TT_NONE = "Cette catégorie n'a pas de répartition des rôles ; les puces de rôle n'ont aucun effet ici.",
 	ROLE_TT_MANUAL = "Choisi manuellement.",

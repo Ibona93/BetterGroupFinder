@@ -53,7 +53,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 ## 3. Bedienung
 
 ### Filterleiste
-- **Speichern · Zurücksetzen** (rechts in der ersten Zeile): „Speichern“ legt die Chips der gerade angezeigten Gruppenfinder-Kategorie als deinen eigenen Standard fest. „Zurücksetzen“ stellt die Chips dieser Kategorie auf deinen Standard zurück (ohne gespeicherten Standard: auf den eingebauten) und die Rollen auf automatisch; Favoriten und die anderen Kategorien bleiben. „Filter zurücksetzen“ in den Optionen setzt alle Kategorien zurück, „Eingebaute Standards wiederherstellen“ löscht deine eigenen Standards.
+- **Speichern · Zurücksetzen** (rechts in der ersten Zeile): „Speichern“ legt die Chips der gerade angezeigten Gruppenfinder-Kategorie als deinen eigenen Standard fest. „Zurücksetzen“ stellt die Chips dieser Kategorie auf deinen Standard zurück (ohne gespeicherten Standard: auf den eingebauten) und die Rollen auf automatisch; Favoriten und die anderen Kategorien bleiben. „Filter zurücksetzen“ in den Optionen setzt alle Kategorien zurück, „Standards wiederherstellen“ löscht deine eigenen Standards.
 - **BGF-Filter aktiv:** schaltet Bewertung, Sortierung und Aussortieren ein oder aus. Die BGF-Ansicht und die Leiste bleiben.
 - **Bewertung für:** deine Perspektive, z. B. „Jäger 22 · DPS“ oder „Deine Gruppe (3)“. Bei wenig Platz entfällt das Wort „Bewertung für:“.
 - **Profil:** wird nicht angezeigt, folgt aber der Kategorie oben im Fenster (Dungeons, Schlachtzüge, sonstige). Jede Kategorie hat eigene Chip-Einstellungen.
@@ -283,7 +283,7 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 **0.8.2**
 - Chip-Tooltips kurz: Fähigkeiten zeigen die Klassen (darunter „evtl.:“ für Talent, Begleiter, Form), Klassen eine Zeile pro Bereich. Umschalt gedrückt halten zeigt die Details (Zauber, Stufe, Bedingungen), live; ein Hinweis steht im Tooltip.
 - Punkte ohne „+“ und farbig: grün ab 40, gelb 15–39, grau darunter (Quests neutral). Der Gruppenwert in Prozent steht jetzt im Tooltip statt in der Liste.
-- Eigener Standard: „Speichern“ in der Filterleiste legt die Chips einer Kategorie als deinen Standard fest, „Zurücksetzen“ kehrt dorthin zurück. In den Optionen: „Eingebaute Standards wiederherstellen“.
+- Eigener Standard: „Speichern“ in der Filterleiste legt die Chips einer Kategorie als deinen Standard fest, „Zurücksetzen“ kehrt dorthin zurück. In den Optionen: „Standards wiederherstellen“.
 
 **0.8.1**
 - Neuer Name: „BGF - Better Group Finder Forever“ (Addon-Liste, Optionen); Chat-Präfix und Filter-Tooltip heißen jetzt „BGF“. Ordner, Einstellungen und `/bgf` bleiben gleich.

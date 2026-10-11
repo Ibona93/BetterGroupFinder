@@ -244,7 +244,32 @@ local function build()
 	local restoreBuiltIn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
 	restoreBuiltIn:SetText(L.OPT_RESTORE_DEFAULTS)
 	restoreBuiltIn:SetSize(restoreBuiltIn:GetFontString():GetStringWidth() + 30, 24)
-	restoreBuiltIn:SetPoint("TOPLEFT", resetTemplates, "BOTTOMLEFT", 0, -8)
+	-- Same row as the other two; only if the row is too wide for the panel (long translations)
+	-- it goes below, with the row moved up a little so it stays inside the panel.
+	local function layoutResetRow()
+		local w = panel:GetWidth() or 0
+		local buttons = { resetTemplates, resetFilters, restoreBuiltIn }
+		local function sizeAll(pad)
+			local total = 32 + 16
+			for _, b in ipairs(buttons) do
+				b:SetWidth(b:GetFontString():GetStringWidth() + pad)
+				total = total + b:GetWidth()
+			end
+			return total
+		end
+		restoreBuiltIn:ClearAllPoints()
+		resetTemplates:ClearAllPoints()
+		-- 1. normal width, 2. narrower buttons, 3. third button below, row moved up
+		if w == 0 or sizeAll(30) <= w or sizeAll(16) <= w then
+			resetTemplates:SetPoint("TOPLEFT", hint, "BOTTOMLEFT", 0, -12)
+			restoreBuiltIn:SetPoint("LEFT", resetFilters, "RIGHT", 8, 0)
+		else
+			sizeAll(30)
+			resetTemplates:SetPoint("TOPLEFT", hint, "BOTTOMLEFT", 0, -4)
+			restoreBuiltIn:SetPoint("TOPLEFT", resetTemplates, "BOTTOMLEFT", 0, -2)
+		end
+	end
+	layoutResetRow()
 	restoreBuiltIn:SetScript("OnClick", function()
 		ns.FilterBar.RestoreBuiltIn()
 	end)
@@ -257,6 +282,7 @@ local function build()
 	restoreBuiltIn:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 	panel:SetScript("OnShow", function()
+		layoutResetRow()
 		panel.updateFontControls()
 		currentLang = currentLang or ns.clientLocale
 		if not ns.DefaultTemplates[currentLang] then currentLang = "enUS" end

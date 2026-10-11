@@ -111,7 +111,7 @@ ns.RegisterLocale("enUS", {
 	RESET_TT_BUILTIN = "Goes back to the built-in default (\"Save\" stores your own).",
 	SAVED_MSG = "Filters of this category saved as your default.",
 	RESTORED_MSG = "Built-in default filters restored.",
-	OPT_RESTORE_DEFAULTS = "Restore built-in defaults",
+	OPT_RESTORE_DEFAULTS = "Restore defaults",
 	OPT_RESTORE_DEFAULTS_TT = "Deletes your saved defaults and resets all categories to the built-in filters.",
 	ROLE_TT_NONE = "This category has no role distribution; the role chips do nothing here.",
 	ROLE_TT_MANUAL = "Chosen manually.",

@@ -107,7 +107,7 @@ ns.RegisterLocale("ptBR", {
 	RESET_TT_BUILTIN = "Volta ao padrão embutido (\"Salvar\" define o seu).",
 	SAVED_MSG = "Filtros desta categoria salvos como seu padrão.",
 	RESTORED_MSG = "Filtros padrão embutidos restaurados.",
-	OPT_RESTORE_DEFAULTS = "Restaurar padrões embutidos",
+	OPT_RESTORE_DEFAULTS = "Restaurar padrões",
 	OPT_RESTORE_DEFAULTS_TT = "Apaga seus padrões salvos e redefine todas as categorias para os filtros embutidos.",
 	ROLE_TT_NONE = "Esta categoria não tem distribuição de funções; os botões de função não têm efeito aqui.",
 	ROLE_TT_MANUAL = "Escolhido manualmente.",

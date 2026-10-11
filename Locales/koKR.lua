@@ -107,7 +107,7 @@ ns.RegisterLocale("koKR", {
 	RESET_TT_BUILTIN = "내장 기본값으로 돌아갑니다 (\"저장\"으로 내 기본값 저장).",
 	SAVED_MSG = "이 카테고리의 필터를 기본값으로 저장했습니다.",
 	RESTORED_MSG = "내장 기본 필터를 복원했습니다.",
-	OPT_RESTORE_DEFAULTS = "내장 기본값 복원",
+	OPT_RESTORE_DEFAULTS = "기본값 복원",
 	OPT_RESTORE_DEFAULTS_TT = "저장한 기본값을 삭제하고 모든 카테고리를 내장 필터로 초기화합니다.",
 	ROLE_TT_NONE = "이 분류에는 역할 분배가 없으므로 역할 버튼이 적용되지 않습니다.",
 	ROLE_TT_MANUAL = "수동 선택.",
