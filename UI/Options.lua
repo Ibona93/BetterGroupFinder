@@ -95,6 +95,12 @@ local function build()
 		function(v) ns.db.enabled = v if ns.UI.ApplyEnabled then ns.UI.ApplyEnabled() end end)
 	enabled:SetPoint("TOPLEFT", scores, "BOTTOMLEFT", 0, -4)
 
+	local chipsButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+	chipsButton:SetText(L.OPT_CHIPS_BUTTON)
+	chipsButton:SetSize(chipsButton:GetFontString():GetStringWidth() + 30, 22)
+	chipsButton:SetPoint("LEFT", enabled.Label, "RIGHT", 16, 0)
+	chipsButton:SetScript("OnClick", function() Options.ShowChipsWindow() end)
+
 	-- Font and font size
 	local fontLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	fontLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -14)
@@ -348,7 +354,7 @@ function Options.ParseHelp(text)
 					table.insert(byWeight[weight], name)
 				end
 				for _, ability in ipairs(ns.ABILITIES) do
-					if not ability.class then add(ability.weight, ns.AbilityName(ability.id)) end
+					if not ability.class and not ability.special then add(ability.weight, ns.AbilityName(ability.id)) end
 				end
 				add(ns.CLASS_WEIGHT, ns.L.CLASS_WEIGHT_ROW)
 				table.sort(weights, function(x, y) return x > y end)
@@ -458,6 +464,112 @@ function Options.ShowScoreHelp()
 	end
 	helpFrame:Show()
 	return helpFrame
+end
+
+-- "Shown chips": rows, categories and single chips can be hidden. Hidden = ignored.
+local chipsFrame
+local function chipsChanged()
+	if ns.UI and ns.UI.ApplyLayout then ns.UI.ApplyLayout() end
+	ns.RequestRefresh()
+	if chipsFrame and chipsFrame.Refresh then chipsFrame.Refresh() end
+end
+
+function Options.ShowChipsWindow()
+	if not chipsFrame then
+		local L = ns.L
+		local COL_W, COLS = 190, 3
+		local WIDTH = COL_W * COLS
+		chipsFrame = CreateFrame("Frame", "BGFChipsWindow", UIParent, "BackdropTemplate")
+		chipsFrame:SetPoint("CENTER")
+		chipsFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+		chipsFrame:EnableMouse(true)
+		chipsFrame:SetMovable(true)
+		chipsFrame:RegisterForDrag("LeftButton")
+		chipsFrame:SetScript("OnDragStart", chipsFrame.StartMoving)
+		chipsFrame:SetScript("OnDragStop", chipsFrame.StopMovingOrSizing)
+		if chipsFrame.SetBackdrop then
+			chipsFrame:SetBackdrop({
+				bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1,
+			})
+			chipsFrame:SetBackdropColor(0.05, 0.04, 0.03, 0.97)
+			chipsFrame:SetBackdropBorderColor(0.6, 0.48, 0.25, 1)
+		end
+		local title = chipsFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+		title:SetPoint("TOPLEFT", 16, -14)
+		title:SetText(L.OPT_CHIPS_TITLE)
+		local hint = chipsFrame:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+		hint:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
+		hint:SetWidth(WIDTH)
+		hint:SetJustifyH("LEFT")
+		hint:SetText(L.OPT_CHIPS_HINT)
+
+		local checks = {}
+		local y = -62
+		local function header(text)
+			local fs = chipsFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+			fs:SetPoint("TOPLEFT", 16, y)
+			fs:SetText(text)
+			y = y - 20
+		end
+		local function check(x, text, get, set, isEnabled)
+			local cb = createCheck(chipsFrame, text, get, function(v) set(v) chipsChanged() end)
+			cb:SetPoint("TOPLEFT", x, y)
+			cb.get, cb.isEnabled = get, isEnabled
+			checks[#checks + 1] = cb
+			return cb
+		end
+
+		header(L.OPT_CHIPS_ROWS)
+		check(16, L.OPT_CHIPS_FAVROW, function() return ns.db.showFavRow end, function(v) ns.db.showFavRow = v end)
+		check(16 + COL_W + 40, L.OPT_CHIPS_ABILITYROW, function() return ns.db.showAbilityRow end,
+			function(v) ns.db.showAbilityRow = v end)
+		y = y - 30
+		for _, cat in ipairs(ns.CATEGORY_ORDER) do
+			check(16, "|cffffd100" .. L["CAT_" .. cat] .. "|r", function() return not ns.db.hiddenCategories[cat] end,
+				function(v) ns.db.hiddenCategories[cat] = (not v) or nil end)
+			y = y - 26
+			local col = 0
+			for _, ability in ipairs(ns.ABILITIES) do
+				if ability.category == cat then
+					local id = ability.id
+					check(36 + col * COL_W, ns.AbilityName(id), function() return not ns.db.hiddenChips[id] end,
+						function(v) ns.db.hiddenChips[id] = (not v) or nil end,
+						function() return not ns.db.hiddenCategories[cat] end)
+					col = col + 1
+					if col == COLS then col = 0 y = y - 24 end
+				end
+			end
+			if col > 0 then y = y - 24 end
+			y = y - 6
+		end
+
+		local showAll = CreateFrame("Button", nil, chipsFrame, "UIPanelButtonTemplate")
+		showAll:SetText(L.OPT_CHIPS_SHOWALL)
+		showAll:SetSize(showAll:GetFontString():GetStringWidth() + 30, 22)
+		showAll:SetPoint("TOPLEFT", 16, y - 4)
+		showAll:SetScript("OnClick", function()
+			ns.db.showFavRow, ns.db.showAbilityRow = true, true
+			ns.db.hiddenCategories, ns.db.hiddenChips = {}, {}
+			chipsChanged()
+		end)
+		chipsFrame:SetSize(WIDTH + 60, -y + 40)
+
+		chipsFrame.Refresh = function()
+			for _, cb in ipairs(checks) do
+				cb:SetChecked(cb.get() and true or false)
+				local on = not cb.isEnabled or cb.isEnabled()
+				cb:SetEnabled(on)
+				cb.Label:SetAlpha(on and 1 or 0.4)
+			end
+		end
+		chipsFrame:SetScript("OnShow", chipsFrame.Refresh)
+		local close = CreateFrame("Button", nil, chipsFrame, "UIPanelCloseButton")
+		close:SetPoint("TOPRIGHT", -2, -2)
+		ns.Popup.CloseOnEscape(chipsFrame)
+	end
+	chipsFrame:Show()
+	chipsFrame.Refresh()
+	return chipsFrame
 end
 
 function Options.Open()

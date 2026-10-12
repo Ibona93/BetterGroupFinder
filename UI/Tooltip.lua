@@ -114,9 +114,10 @@ function Tooltip.Show(owner, entry)
 			fs:Show()
 		end
 	end
-	if entry.activityInfo and ns.INSTANCE_HINTS[entry.activityInfo.mapID] then
+	local hints = entry.activityInfo and ns.Engine.VisibleHints(ns.INSTANCE_HINTS[entry.activityInfo.mapID])
+	if hints and #hints > 0 then
 		local names = {}
-		for _, id in ipairs(ns.INSTANCE_HINTS[entry.activityInfo.mapID]) do names[#names + 1] = ns.AbilityName(id) end
+		for _, id in ipairs(hints) do names[#names + 1] = ns.AbilityName(id) end
 		n = n + 1
 		local fs = getLine(n)
 		fs:SetFontObject(ns.Fonts.Get(12))

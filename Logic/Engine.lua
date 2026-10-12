@@ -317,8 +317,10 @@ function E.EvaluateResult(resultID, mySide, noRating)
 			strictRoles = strict,
 			states = states,
 			explicitNeed = info2.explicitNeed,
-			hints = act and ns.INSTANCE_HINTS[act.mapID],
+			hints = act and E.VisibleHints(ns.INSTANCE_HINTS[act.mapID]),
 			allowedGuestRoles = E.AllowedRolesFor(swapped, #mySide),
+			lootTargets = E.LootTargets(mySide),
+			lootOthers = members,
 			activity = act and {
 				minLevel = act.minLevel,
 				minSuggest = act.minLevelSuggestion,
@@ -331,7 +333,7 @@ function E.EvaluateResult(resultID, mySide, noRating)
 			entry.groupValue = ns.Scoring.GroupValue(members, {
 				roleTargets = targets,
 				states = states,
-				hints = act and ns.INSTANCE_HINTS[act.mapID],
+				hints = act and E.VisibleHints(ns.INSTANCE_HINTS[act.mapID]),
 			})
 		end
 		if swapped then
@@ -345,7 +347,50 @@ end
 -- Effective chip states of a profile (own settings + links), see Scoring.ResolveStates.
 function E.ProfileStates(profileKey)
 	local overrides = ns.db.linkOverrides and ns.db.linkOverrides[profileKey]
-	return ns.Scoring.ResolveStates(ns.db.abilityStates[profileKey], overrides)
+	local own = {}
+	for id, state in pairs(ns.db.abilityStates[profileKey] or {}) do
+		if ns.ChipVisible(id) then own[id] = state end
+	end
+	local states, info = ns.Scoring.ResolveStates(own, overrides)
+	for id in pairs(states) do
+		if not ns.ChipVisible(id) then states[id] = "ignore" end
+	end
+	return states, info
+end
+
+-- Instance hints without hidden chips.
+function E.VisibleHints(hints)
+	if not hints then return nil end
+	local out = {}
+	for _, id in ipairs(hints) do
+		if ns.ChipVisible(id) then out[#out + 1] = id end
+	end
+	return out
+end
+
+-- Loot competition: is it checked for this player? You by default, others when ticked.
+function E.LootChecked(member)
+	if member.isSelf then return ns.db.lootFor["@self"] ~= false end
+	return member.name ~= nil and ns.db.lootFor[member.name] == true
+end
+
+-- Players of your side loot competition is checked for (role from the Group Finder solo).
+function E.LootTargets(mySide)
+	local out = {}
+	for _, m in ipairs(mySide or {}) do
+		if m.class and E.LootChecked(m) then
+			local role = m.role
+			if not role and m.lfgRoles then
+				local n, only = 0, nil
+				for key, r in pairs({ tank = "TANK", healer = "HEALER", dps = "DAMAGER" }) do
+					if m.lfgRoles[key] then n, only = n + 1, r end
+				end
+				if n == 1 then role = only end
+			end
+			out[#out + 1] = { class = m.class, level = m.level, role = role, name = m.name, isSelf = m.isSelf }
+		end
+	end
+	return out
 end
 
 -- Builds the sections shown in the BGF list from Blizzard's (already sorted) results.

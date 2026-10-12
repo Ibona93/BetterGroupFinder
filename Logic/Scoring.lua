@@ -267,6 +267,8 @@ ctx = {
   allowedGuestRoles      -- { TANK = true, ... } or nil (filter chips)
   activity               -- { minLevel, minSuggest, maxSuggest } or nil
   selfKnown              -- function(entry) -> true/false/nil (own spellbook)
+  lootTargets            -- players of your side you check loot competition for (or nil)
+  lootOthers             -- players of the listing (possible competitors)
 }
 ]]
 function S.Evaluate(ctx)
@@ -344,7 +346,7 @@ function S.Evaluate(ctx)
 		local id = ability.id
 		local state = ctx.states and ctx.states[id] or "ignore"
 		if state == "ignore" and hinted[id] then state = "pref" end
-		if state ~= "ignore" then
+		if state ~= "ignore" and not ability.special then
 			local w = ability.weight * (state == "need" and 1.5 or 1) * (hinted[id] and 1.5 or 1)
 			local h, g = hostCov[id], guestCov[id]
 			if h ~= "sure" and g then
@@ -441,6 +443,33 @@ function S.Evaluate(ctx)
 		table.insert(result.reasons, 1, { "exclude", "R_NO_VALUE" })
 	end
 
+	-- 10. Loot competition (after 9, so "preferred" only lowers the points, never sorts out)
+	local lootState = ctx.states and ctx.states.loot or "ignore"
+	if lootState ~= "ignore" and not result.excluded and ctx.lootTargets and #ctx.lootTargets > 0 then
+		local w = ns.ABILITY_BY_ID.loot.weight
+		for _, c in ipairs(ctx.lootOthers or {}) do
+			local found, forWhom
+			for _, t in ipairs(ctx.lootTargets) do
+				local r = S.LootCompetes(t, c)
+				if r == "sure" or (r == "maybe" and not found) then found, forWhom = r, t end
+				if r == "sure" then break end
+			end
+			if found then
+				local who = forWhom.isSelf and "@self" or (forWhom.name or "?")
+				result.lootCompetitors = (result.lootCompetitors or 0) + 1
+				if found == "sure" and lootState == "need" then
+					exclude(result, "R_LOOT_OUT", c.class, who)
+				elseif found == "sure" then
+					result.score = result.score - w
+					addReason(result, "minus", "R_LOOT", c.class, who)
+				else
+					result.score = result.score - w / 2
+					addReason(result, "minus", "R_LOOT_MAYBE", c.class, who)
+				end
+			end
+		end
+	end
+
 	result.score = math.floor(result.score + 0.5)
 	if result.score >= P.verdictGood then
 		result.verdict = "VERDICT_GOOD"
@@ -488,7 +517,7 @@ function S.GroupValue(members, ctx)
 	for _, ability in ipairs(ns.ABILITIES) do
 		local state = ctx.states and ctx.states[ability.id] or "ignore"
 		if state == "ignore" and hinted[ability.id] then state = "pref" end
-		if state ~= "ignore" then
+		if state ~= "ignore" and not ability.special then
 			local w = ability.weight * (state == "need" and 1.5 or 1) * (hinted[ability.id] and 1.5 or 1)
 			need = need + w
 			considered = considered + 1
@@ -513,6 +542,45 @@ function S.GroupValue(members, ctx)
 		rolesFilled = filled, rolesTotal = total,
 		abilitiesCovered = covered, abilitiesTotal = considered,
 	}
+end
+
+-- Loot competition between a player you check for (t) and another player (c):
+-- "sure", "maybe" or nil. See ns.LOOT_ARMOR / ns.LOOT_STATS.
+local function lootArmor(m)
+	local a = ns.LOOT_ARMOR[m.class or ""]
+	if not a then return nil end
+	return (m.level and m.level < ns.LOOT_ARMOR_LEVEL) and a[1] or a[2]
+end
+local function lootStats(m)
+	local byRole = ns.LOOT_STATS[m.class or ""]
+	if not byRole then return {} end
+	if m.role and byRole[m.role] then return byRole[m.role] end
+	local all, seen = {}, {}
+	for _, stats in pairs(byRole) do
+		for _, st in ipairs(stats) do
+			if not seen[st] then seen[st] = true all[#all + 1] = st end
+		end
+	end
+	table.sort(all)
+	return all
+end
+S.LootStats = lootStats
+S.LootArmor = lootArmor
+
+function S.LootCompetes(t, c)
+	if not t.class or not c.class then return nil end
+	if t.class == c.class then return "sure" end
+	local at, ac = lootArmor(t), lootArmor(c)
+	if not at or at ~= ac then return nil end
+	local st, sc = lootStats(t), lootStats(c)
+	local overlap = false
+	for _, a in ipairs(st) do
+		for _, b in ipairs(sc) do
+			if a == b then overlap = true end
+		end
+	end
+	if not overlap then return nil end
+	return (#st == 1 and #sc == 1) and "sure" or "maybe"
 end
 
 -- Chooses host/guest for two sides. The larger side is the host; on a tie your side is.

@@ -363,6 +363,97 @@ function Bar.ClassShort(class)
 	return lines
 end
 
+-- Loot competition chip -----------------------------------------------------
+
+local function lootTargets()
+	return ns.Engine.LootTargets(ns.Engine.GetMySide())
+end
+
+-- "Loot (me)", "Loot (Thoradin)", "Loot (2)", "Loot (nobody)"
+function Bar.LootLabel()
+	local L = ns.L
+	local names = {}
+	for _, t in ipairs(lootTargets()) do names[#names + 1] = t.isSelf and L.LOOT_ME or (t.name or "?") end
+	local suffix = (#names == 0 and L.LOOT_NOBODY) or (#names == 1 and names[1]) or tostring(#names)
+	return L.AB_loot .. " (" .. suffix .. ")"
+end
+
+local function memberText(m)
+	return ("%s %s"):format(coloredClass(m.class), tostring(m.level or "?"))
+end
+
+-- Classes that compete with a player: sure (in at least one role) and only maybe.
+function Bar.LootClasses(t)
+	local sure, maybe = {}, {}
+	for _, class in ipairs(ns.CLASS_ORDER) do
+		local best
+		for role in pairs(ns.LOOT_STATS[class] or {}) do
+			local r = ns.Scoring.LootCompetes(t, { class = class, level = t.level, role = role })
+			if r == "sure" then best = "sure" elseif r == "maybe" and not best then best = "maybe" end
+		end
+		if best == "sure" then sure[#sure + 1] = coloredClass(class)
+		elseif best == "maybe" then maybe[#maybe + 1] = coloredClass(class) end
+	end
+	return sure, maybe
+end
+
+function Bar.ShowLootTooltip(chip, detail)
+	local L = ns.L
+	GameTooltip:SetText(L.LOOT_TITLE, 1, 0.82, 0)
+	local targets = lootTargets()
+	if #targets == 0 then
+		GameTooltip:AddLine(L.LOOT_NONE_SELECTED, 1, 0.6, 0.2, true)
+	end
+	for _, t in ipairs(targets) do
+		local who = t.isSelf and (L.LOOT_ME_CAP .. " (" .. memberText(t) .. ")") or ((t.name or "?") .. " (" .. memberText(t) .. ")")
+		GameTooltip:AddLine(who, 1, 1, 1, false)
+		local sure, maybe = Bar.LootClasses(t)
+		GameTooltip:AddLine("  " .. col("chip", L.LOOT_COMPETITORS) .. " " .. (#sure > 0 and table.concat(sure, ", ") or "-"), 1, 1, 1, true)
+		if #maybe > 0 then
+			GameTooltip:AddLine("  " .. col("level", L.TT_MAYBE) .. " " .. table.concat(maybe, ", "), 1, 1, 1, true)
+		end
+		if detail then
+			local armor = ns.Scoring.LootArmor(t)
+			local stats = {}
+			for i, st in ipairs(ns.Scoring.LootStats(t)) do stats[i] = L["STAT_" .. st] end
+			GameTooltip:AddLine("  " .. col("fx", (armor and L["ARMOR_" .. armor] or "?") .. ", " .. table.concat(stats, "/")), 1, 1, 1, false)
+		end
+	end
+	if detail then
+		GameTooltip:AddLine(L.LOOT_RULE, 0.85, 0.85, 0.85, true)
+		GameTooltip:AddLine(L.LOOT_EFFECT, 0.85, 0.85, 0.85, true)
+	else
+		GameTooltip:AddLine(L.TT_SHIFT_HINT, 0.5, 0.82, 0.5, true)
+	end
+	GameTooltip:AddLine(L.LOOT_SHIFT_CLICK, 0.5, 0.82, 0.5, true)
+end
+
+-- Shift-click: choose who loot competition is checked for (you and your group members).
+function Bar.OpenLootMenu(chip)
+	local L = ns.L
+	local items = { { kind = "title", text = L.LOOT_MENU_TITLE } }
+	for _, m in ipairs(ns.Engine.GetMySide()) do
+		if m.class then
+			local checked = ns.Engine.LootChecked(m)
+			local label = (m.isSelf and L.LOOT_ME_CAP or (m.name or "?")) .. " (" .. memberText(m) .. ")"
+			items[#items + 1] = {
+				kind = "button", text = label, checked = checked,
+				fn = function()
+					if m.isSelf then
+						ns.db.lootFor["@self"] = not checked
+					elseif m.name then
+						ns.db.lootFor[m.name] = (not checked) or nil
+					end
+					if ns.UI and ns.UI.ApplyLayout then ns.UI.ApplyLayout() end
+					ns.RequestRefresh()
+				end,
+			}
+		end
+	end
+	if GameTooltip:GetOwner() == chip then GameTooltip:Hide() end
+	ns.Popup.Open(chip, items)
+end
+
 local tooltipChip
 function Bar.ShowAbilityTooltip(chip)
 	local L = ns.L
@@ -370,6 +461,13 @@ function Bar.ShowAbilityTooltip(chip)
 	local detail = IsShiftKeyDown and IsShiftKeyDown() or false
 	tooltipChip = chip
 	GameTooltip:SetOwner(chip, "ANCHOR_TOP")
+	if chip.ability == "loot" then
+		Bar.ShowLootTooltip(chip, detail)
+		GameTooltip:AddLine(L.CHIP_TT_CLICK, 0.6, 0.6, 0.6, true)
+		GameTooltip:AddLine(ns.db.favorites[chip.ability] and L.FAV_REMOVE or L.FAV_ADD, 0.6, 0.6, 0.6, true)
+		GameTooltip:Show()
+		return
+	end
 	if ability and ability.class then
 		local c = RAID_CLASS_COLORS and RAID_CLASS_COLORS[ability.class]
 		GameTooltip:SetText(ns.AbilityName(chip.ability), c and c.r or 1, c and c.g or 0.82, c and c.b or 0)
@@ -538,8 +636,14 @@ function Bar.Create(parent)
 	f.AbilitiesLabel:SetText(L.ABILITIES)
 	f.AbilityChips = {}
 	local function onAbilityClick(id)
-		return function(_, button)
-			if button == "RightButton" then Bar.ToggleFavorite(id) else Bar.CycleAbility(id) end
+		return function(chip, button)
+			if button == "RightButton" then
+				Bar.ToggleFavorite(id)
+			elseif id == "loot" and IsShiftKeyDown and IsShiftKeyDown() then
+				Bar.OpenLootMenu(chip)
+			else
+				Bar.CycleAbility(id)
+			end
 		end
 	end
 	f.FavChips = {}
@@ -601,7 +705,8 @@ end
 function Bar.ActiveCount(category, states)
 	local n = 0
 	for _, ability in ipairs(ns.ABILITIES) do
-		if ability.category == category and (states[ability.id] or "ignore") ~= "ignore" then n = n + 1 end
+		if ability.category == category and ns.ChipVisible(ability.id)
+			and (states[ability.id] or "ignore") ~= "ignore" then n = n + 1 end
 	end
 	return n
 end
@@ -684,27 +789,32 @@ function Bar.Layout()
 		x = x + w + CHIP_GAP
 	end
 
-	-- row 3: favourites, a row of their own
-	placeLabel(f.FavLabel)
-	x = LABEL_WIDTH
-	local anyFavorite = false
-	for _, ability in ipairs(ns.ABILITIES) do
-		local fav = f.FavChips[ability.id]
-		if ns.db.favorites[ability.id] then
-			place(fav)
-			anyFavorite = true
-		else
-			fav:Hide()
+	-- row 3: favourites, a row of their own (can be switched off in the options)
+	f.FavLabel:SetShown(ns.db.showFavRow)
+	if ns.db.showFavRow then
+		placeLabel(f.FavLabel)
+		x = LABEL_WIDTH
+		local anyFavorite = false
+		for _, ability in ipairs(ns.ABILITIES) do
+			local fav = f.FavChips[ability.id]
+			if ns.db.favorites[ability.id] and ns.ChipVisible(ability.id) then
+				place(fav)
+				anyFavorite = true
+			else
+				fav:Hide()
+			end
 		end
+		f.FavEmpty:ClearAllPoints()
+		f.FavEmpty:SetPoint("LEFT", f, "TOPLEFT", LABEL_WIDTH + 2, y - CHIP_HEIGHT / 2)
+		f.FavEmpty:SetShown(not anyFavorite)
+		y = y - CHIP_HEIGHT - ROW_GAP
+	else
+		for _, fav in pairs(f.FavChips) do fav:Hide() end
+		f.FavEmpty:Hide()
 	end
-	f.FavEmpty:ClearAllPoints()
-	f.FavEmpty:SetPoint("LEFT", f, "TOPLEFT", LABEL_WIDTH + 2, y - CHIP_HEIGHT / 2)
-	f.FavEmpty:SetShown(not anyFavorite)
-	y = y - CHIP_HEIGHT - ROW_GAP
 
-	-- rows 4+: categories; closed ones side by side, an open one gets rows of its own
-	placeLabel(f.AbilitiesLabel)
-	x = LABEL_WIDTH
+	-- rows 4+: categories; closed ones side by side, an open one gets rows of its own.
+	-- Hidden categories / chips (options) are left out; the whole row can be switched off.
 	local function newLine()
 		if x > LABEL_WIDTH then
 			x = LABEL_WIDTH
@@ -712,21 +822,41 @@ function Bar.Layout()
 		end
 	end
 	for _, chip in ipairs(f.AbilityChips) do chip:Hide() end
-	for _, cat in ipairs(ns.CATEGORY_ORDER) do
-		local toggle = f.CategoryToggles[cat]
-		if ns.db.openCategories[cat] then
-			newLine()
-			place(toggle)
+	for _, toggle in pairs(f.CategoryToggles) do toggle:Hide() end
+	local anyCategory = false
+	if ns.db.showAbilityRow then
+		for _, cat in ipairs(ns.CATEGORY_ORDER) do
+			local visible = false
 			for _, chip in ipairs(f.AbilityChips) do
-				if chipCategory(chip) == cat then place(chip) end
+				if chipCategory(chip) == cat and ns.ChipVisible(chip.ability) then visible = true end
 			end
-			newLine()
-		else
-			place(toggle)
+			if visible then
+				if not anyCategory then
+					placeLabel(f.AbilitiesLabel)
+					x = LABEL_WIDTH
+					anyCategory = true
+				end
+				local toggle = f.CategoryToggles[cat]
+				if ns.db.openCategories[cat] then
+					newLine()
+					place(toggle)
+					for _, chip in ipairs(f.AbilityChips) do
+						if chipCategory(chip) == cat and ns.ChipVisible(chip.ability) then place(chip) end
+					end
+					newLine()
+				else
+					place(toggle)
+				end
+			end
 		end
 	end
-	if x == LABEL_WIDTH then y = y + CHIP_HEIGHT + CHIP_GAP end -- undo the last line break
-	y = y - CHIP_HEIGHT - 6
+	f.AbilitiesLabel:SetShown(anyCategory)
+	if anyCategory then
+		if x == LABEL_WIDTH then y = y + CHIP_HEIGHT + CHIP_GAP end -- undo the last line break
+		y = y - CHIP_HEIGHT - 6
+	else
+		y = y + ROW_GAP - 6
+	end
 
 	-- legend, right aligned
 	f.LegendPrefText:ClearAllPoints()
@@ -851,6 +981,7 @@ function Bar.Update()
 		chip.linked = info.linked[id]
 		chip.overridden = info.overridden[id]
 		chip.favorite = not chip.inFavorites and ns.db.favorites[id] and true or false
+		if id == "loot" then chip.label = Bar.LootLabel() end
 		Bar.StyleChip(chip)
 	end
 	for _, chip in ipairs(f.AbilityChips) do styleAbility(chip) end

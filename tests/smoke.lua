@@ -530,7 +530,7 @@ local function shownFavorites()
 	return n
 end
 local v = shownByCategory()
-check("all categories closed: no category chips, 5 default favourites", v.class + v.buff + v.dispel + v.combat == 0 and shownFavorites() == 5,
+check("all categories closed: no category chips, 6 default favourites (incl. loot)", v.class + v.buff + v.dispel + v.combat == 0 and shownFavorites() == 6,
 	shownFavorites())
 check("category toggles", f.CategoryToggles.class.label == "+ Klassen" and f.CategoryToggles.buff.label == "+ Buffs"
 	and f.CategoryToggles.dispel.label == "+ Dispells" and f.CategoryToggles.combat.label == "+ Kampf & Hilfsmittel (2)", f.CategoryToggles.combat.label)
@@ -612,9 +612,45 @@ local summon
 for _, c in ipairs(f.AbilityChips) do if c.ability == "summon" then summon = c end end
 summon.__scripts.OnClick(summon, "RightButton")
 check("right click adds a favourite (star on the chip, shown in the favourites row)", ns.db.favorites.summon == true and summonFav.__shown
-	and summon.favorite and shownFavorites() == 6)
+	and summon.favorite and shownFavorites() == 7)
 summonFav.__scripts.OnClick(summonFav, "LeftButton")
 check("favourite and original are the same chip", summon.state == "pref" and ns.db.abilityStates[profile].summon == "pref")
+-- loot competition chip: label shows for whom, Shift-click opens the member menu
+local lootChip = f.FavChips.loot
+check("loot chip is a default favourite and shows for whom it checks", lootChip.__shown and plain(lootChip.label) == "Loot (ich)", lootChip.label)
+ok, err = pcall(function() lootChip.__scripts.OnEnter(lootChip) lootChip.__scripts.OnLeave(lootChip) end)
+check("loot chip tooltip shows and hides", ok, err)
+local hunterSure, hunterMaybe = ns.FilterBar.LootClasses({ class = "HUNTER", level = 23, role = "DAMAGER" })
+local hs = {} for i, v in ipairs(hunterSure) do hs[i] = plain(v) end
+check("hunter 23 competes with hunters, rogues and feral druids (leather, agility)", table.concat(hs, ", ") == "Jäger, Schurke, Druide"
+	and #hunterMaybe == 1, table.concat(hs, ", ") .. " / " .. #hunterMaybe)
+_G.IsShiftKeyDown = function() return true end
+ok, err = pcall(lootChip.__scripts.OnClick, lootChip, "LeftButton")
+_G.IsShiftKeyDown = nil
+local lootMenu = ns.Popup.current
+check("Shift-click on the loot chip opens the member menu instead of cycling", ok and lootMenu and lootMenu[2] and lootMenu[2].checked == true
+	and (ns.db.abilityStates[profile].loot or "ignore") == "ignore", err)
+if lootMenu and lootMenu[2] then lootMenu[2].fn() end
+ns.Popup.Close()
+check("unticking yourself: chip shows 'nobody'", ns.db.lootFor["@self"] == false and plain(f.FavChips.loot.label) == "Loot (niemand)", f.FavChips.loot.label)
+ns.db.lootFor = {}
+-- options "Shown chips": window, hidden rows and categories
+local chipsWin
+ok, chipsWin = pcall(ns.Options.ShowChipsWindow)
+check("shown chips window opens", ok and chipsWin, chipsWin)
+ns.db.showFavRow = false
+ns.UI.ApplyLayout()
+check("favourites row can be hidden", shownFavorites() == 0 and not f.FavLabel.__shown)
+ns.db.showFavRow = true
+ns.db.hiddenCategories.class = true
+ns.UI.ApplyLayout()
+check("hidden category: its toggle chip is gone", not f.CategoryToggles.class.__shown and f.CategoryToggles.buff.__shown)
+ns.db.showAbilityRow = false
+ns.UI.ApplyLayout()
+check("abilities row can be hidden", not f.CategoryToggles.buff.__shown and not f.AbilitiesLabel.__shown)
+ns.db.showAbilityRow = true
+ns.db.hiddenCategories = {}
+ns.UI.ApplyLayout()
 do
 	ns.UI.Refresh()
 	local players = ns.List.sections.players

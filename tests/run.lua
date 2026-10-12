@@ -221,7 +221,7 @@ do
 	check("13d no role targets (quests) -> no group value", S.GroupValue({ M("MAGE", 30) }, { states = states }) == nil)
 	check("13e class chips: the member's class is always covered", S.Coverage({ M("DRUID", 5) }).class_DRUID == "sure"
 		and S.Coverage({ M("DRUID", 5) }).class_MAGE == nil)
-	check("13f 0.7.0 chips: 9 classes, 9 buffs, 4 dispels, 5 combat", #ns.ABILITIES == 27 and ns.ABILITY_BY_ID.healthstone
+	check("13f chips: 9 classes, 9 buffs, 4 dispels, 5 combat, 1 loot", #ns.ABILITIES == 28 and ns.ABILITY_BY_ID.healthstone
 		and ns.ABILITY_BY_ID.summon and ns.ABILITY_BY_ID.buff_fearward and ns.ABILITY_BY_ID.healthstone.category == "combat", #ns.ABILITIES)
 	check("13g all class chips start as 'ignore'", ns.DEFAULT_ABILITY_STATES.dungeon.class_WARLOCK == "ignore"
 		and ns.DEFAULT_ABILITY_STATES.raid.class_PRIEST == "ignore" and ns.DEFAULT_ABILITY_STATES.dungeon.summon == "ignore")
@@ -410,6 +410,75 @@ do
 	ns.db.templateNames.deDE = { join_short = "Raid-Anfrage" }
 	check("T4 custom template name", ns.GetTemplateName("deDE", "join_short") == "Raid-Anfrage")
 	ns.db.templateNames.deDE = nil
+end
+
+print("Loot competition and hidden chips (0.9.0)")
+do
+	local LC = S.LootCompetes
+	local me = { class = "HUNTER", level = 50, role = "DAMAGER", isSelf = true }
+	check("20a same class competes", LC(me, M("HUNTER", 48, "DAMAGER")) == "sure")
+	check("20b rogue 50 (leather) does not compete with hunter 50 (mail)", LC(me, M("ROGUE", 50, "DAMAGER")) == nil)
+	check("20c below 40 hunter and rogue both wear leather with agility", LC(M("HUNTER", 30, "DAMAGER"), M("ROGUE", 30, "DAMAGER")) == "sure")
+	check("20d shaman DPS only maybe (elemental or enhancement)", LC(me, M("SHAMAN", 50, "DAMAGER")) == "maybe")
+	check("20e shaman healer and warrior do not compete with a hunter", LC(me, M("SHAMAN", 50, "HEALER")) == nil
+		and LC(me, M("WARRIOR", 50, "TANK")) == nil)
+	check("20f feral druid competes with a rogue, a druid healer not", LC(M("ROGUE", 30, "DAMAGER"), M("DRUID", 30, "TANK")) == "sure"
+		and LC(M("ROGUE", 30, "DAMAGER"), M("DRUID", 30, "HEALER")) == nil)
+	check("20g paladin without known role vs warrior: maybe", LC(M("PALADIN", 50), M("WARRIOR", 50, "DAMAGER")) == "maybe")
+
+	local host = { M("WARRIOR", 50, "TANK"), M("PRIEST", 50, "HEALER"), M("HUNTER", 49, "DAMAGER") }
+	local function ctx(state, others)
+		local states = ns.CopyTable(ns.DEFAULT_ABILITY_STATES.dungeon)
+		states.loot = state
+		return dungeonCtx(host, { M("HUNTER", 50, nil, { dps = true }) }, {
+			states = states, lootTargets = { me }, lootOthers = others or host,
+			activity = { minLevel = 45, minSuggest = 45, maxSuggest = 52 },
+		})
+	end
+	local off = S.Evaluate(ctx("ignore"))
+	local pref = S.Evaluate(ctx("pref"))
+	local need = S.Evaluate(ctx("need"))
+	check("20h preferred: minus points for the other hunter, not sorted out", not pref.excluded and pref.score < off.score
+		and hasReason(pref, "R_LOOT", "HUNTER"), reasonsText(pref))
+	check("20i required: sorted out with the competitor as reason", need.excluded and need.excludeReason[2] == "R_LOOT_OUT", reasonsText(need))
+	local shamanHost = { M("WARRIOR", 50, "TANK"), M("PRIEST", 50, "HEALER"), M("SHAMAN", 49, "DAMAGER") }
+	local maybe = S.Evaluate(ctx("need", shamanHost))
+	check("20j required + only 'maybe' competitor: half minus, not sorted out", not maybe.excluded
+		and hasReason(maybe, "R_LOOT_MAYBE", "SHAMAN"), reasonsText(maybe))
+
+	-- for whom: you by default, others when ticked; you can be unticked
+	local mySide = { { class = "HUNTER", level = 50, isSelf = true, name = "Ibona", lfgRoles = { dps = true } },
+		{ class = "PALADIN", level = 50, role = "TANK", name = "Thoradin" } }
+	ns.db.lootFor = {}
+	local t1 = ns.Engine.LootTargets(mySide)
+	check("20k by default loot competition is checked only for you (role from the Group Finder)", #t1 == 1 and t1[1].isSelf
+		and t1[1].role == "DAMAGER")
+	ns.db.lootFor = { ["@self"] = false, Thoradin = true }
+	local t2 = ns.Engine.LootTargets(mySide)
+	check("20l only for a friend (you unticked)", #t2 == 1 and t2[1].name == "Thoradin")
+	local r = S.Evaluate(dungeonCtx({ M("WARRIOR", 50, "DAMAGER") }, mySide, { selfIsGuest = false,
+		states = (function() local st = ns.CopyTable(ns.DEFAULT_ABILITY_STATES.dungeon) st.loot = "pref" return st end)(),
+		lootTargets = t2, lootOthers = { M("WARRIOR", 50, "DAMAGER") } }))
+	check("20m warrior (plate, strength) competes with the paladin tank", hasReason(r, "R_LOOT", "WARRIOR"), reasonsText(r))
+	ns.db.lootFor = {}
+
+	-- hidden chips count as ignored, also through links and instance hints
+	ns.db.abilityStates.dungeon.class_WARRIOR = "pref"
+	local st = ns.Engine.ProfileStates("dungeon")
+	check("20n class chip selects its buff (link)", st.buff_ap == "pref")
+	ns.db.hiddenChips.buff_ap = true
+	st = ns.Engine.ProfileStates("dungeon")
+	check("20o hidden chip: ignored, also when linked", st.buff_ap == "ignore" and st.class_WARRIOR == "pref")
+	ns.db.hiddenCategories.class = true
+	st = ns.Engine.ProfileStates("dungeon")
+	check("20p hidden category: its chips are ignored", st.class_WARRIOR == "ignore")
+	local hints = ns.Engine.VisibleHints({ "buff_ap", "cc" })
+	check("20q instance hints without hidden chips", #hints == 1 and hints[1] == "cc")
+	ns.db.hiddenChips, ns.db.hiddenCategories = {}, {}
+	ns.db.showAbilityRow = false
+	check("20r without the abilities row only favourites stay usable", ns.ChipVisible("cc") and not ns.ChipVisible("curse"))
+	ns.db.showAbilityRow = true
+	ns.db.abilityStates.dungeon.class_WARRIOR = "ignore"
 end
 
 print("Locale tests (Sprachdateien)")

@@ -9,7 +9,7 @@ attached when that addon loads.
 local BLIZZ_ADDON = "Blizzard_GroupFinder_VanillaStyle"
 
 ns.DEFAULTS = {
-	schema = 6,
+	schema = 7,
 	enabled = true,         -- "BGF filter active": rating, sorting, sorting out
 	uiEnabled = true,       -- /bgf on|off: BGF list at all (off = Blizzard's original list)
 	showScores = true,
@@ -19,6 +19,11 @@ ns.DEFAULTS = {
 	openCategories = {},               -- expanded chip categories in the filter bar
 	linkOverrides = {},                -- [profile][chip] = true: switched off despite a link
 	userDefaults = {},                 -- [profile] = { states, overrides }: own default for "Reset"
+	lootFor = {},                      -- loot competition checked for: ["@self"] = false, [name] = true
+	showFavRow = true,                 -- options "Shown chips": favourites row
+	showAbilityRow = true,             --   abilities row (categories)
+	hiddenCategories = {},             --   [category] = true
+	hiddenChips = {},                  --   [chip] = true
 	autoSend = true,
 	showReasons = true,
 	abilityStates = ns.DEFAULT_ABILITY_STATES,
@@ -75,6 +80,18 @@ function ns.ClassName(class)
 	return (names and names[class]) or (words and words.classes[class]) or ns.Words.enUS.classes[class] or class
 end
 
+-- Options "Shown chips": a hidden chip counts as "ignored" everywhere (links, instance hints).
+-- Without the abilities row only the favourites stay usable.
+function ns.ChipVisible(id)
+	local db = ns.db
+	if not db then return true end
+	local ability = ns.ABILITY_BY_ID[id]
+	if not ability then return false end
+	if db.hiddenChips[id] or db.hiddenCategories[ability.category] then return false end
+	if db.showAbilityRow then return true end
+	return db.showFavRow and db.favorites[id] and true or false
+end
+
 -- Score colour by verdict, like the M+ score in Retail: green good, yellow fits, grey little
 -- benefit. Quests & custom have no role rules, so their points stay neutral white.
 ns.SCORE_COLORS = {
@@ -99,6 +116,8 @@ function ns.FormatReason(reason)
 				local keys = {}
 				for condKey in v:sub(6):gmatch("[^,]+") do keys[#keys + 1] = condKey end
 				v = ns.ConditionText({ cond = keys }) or ""
+			elseif v == "@self" then
+				v = ns.L.LOOT_YOU
 			elseif ns.ABILITY_BY_ID[v] then
 				v = ns.AbilityName(v)
 			elseif v == "TANK" or v == "HEALER" or v == "DAMAGER" then
@@ -198,6 +217,10 @@ frame:SetScript("OnEvent", function(_, event, arg1)
 				ns.db.showAllAbilities = nil -- 0.7.0: categories instead of "+ more"
 				ns.db.showClasses = nil
 				ns.db.schema = 6
+			end
+			if not isNew and (ns.db.schema or 0) < 7 then
+				ns.db.favorites.loot = true   -- 0.9.0: new loot competition chip, shown as favourite
+				ns.db.schema = 7
 			end
 			ns.CleanAbilityStates(ns.db.abilityStates)
 			if ns.Fonts then ns.Fonts.RegisterShared() end

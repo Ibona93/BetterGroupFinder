@@ -26,7 +26,7 @@ Source status (October 2026, beta build 1.60.1):
 -- group") and `sole` when only one class brings it (linked both ways with that class).
 ns.CLASS_ORDER = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }
 ns.CLASS_WEIGHT = 6
-ns.CATEGORY_ORDER = { "class", "buff", "dispel", "combat" }
+ns.CATEGORY_ORDER = { "class", "buff", "dispel", "combat", "loot" }
 
 ns.ABILITIES = {}
 for _, class in ipairs(ns.CLASS_ORDER) do
@@ -51,6 +51,8 @@ for _, a in ipairs({
 	{ id = "battleres",      weight = 6, category = "combat" },
 	{ id = "healthstone",    weight = 3, category = "combat", sole = "WARLOCK" },
 	{ id = "summon",         weight = 7, category = "combat", sole = "WARLOCK" },  -- no meeting stones in Forever
+	-- not an ability: minus points (or sorted out) for players who need the same gear
+	{ id = "loot",           weight = 8, category = "loot", special = "loot" },
 }) do
 	ns.ABILITIES[#ns.ABILITIES + 1] = a
 end
@@ -62,7 +64,33 @@ for i, ability in ipairs(ns.ABILITIES) do
 end
 
 -- Starting favourites (right click on a chip adds or removes one).
-ns.DEFAULT_FAVORITES = { cc = true, interrupt = true, battleres = true, buff_ap = true, buff_mana = true }
+ns.DEFAULT_FAVORITES = { cc = true, interrupt = true, battleres = true, buff_ap = true, buff_mana = true, loot = true }
+
+--[[
+Loot competition, derived from class, role and level (the Group Finder shows no gear):
+a player competes with you when he has the same class, or wears the same armour type with
+the same main stat. Armour below / from level 40 (also in Forever). A role with more than
+one possible main stat (e.g. shaman DPS: elemental or enhancement) only "maybe" competes.
+Rings, necks, cloaks and weapons are not considered.
+]]
+ns.LOOT_ARMOR = {
+	WARRIOR = { "MAIL", "PLATE" }, PALADIN = { "MAIL", "PLATE" },
+	HUNTER = { "LEATHER", "MAIL" }, SHAMAN = { "LEATHER", "MAIL" },
+	ROGUE = { "LEATHER", "LEATHER" }, DRUID = { "LEATHER", "LEATHER" },
+	PRIEST = { "CLOTH", "CLOTH" }, MAGE = { "CLOTH", "CLOTH" }, WARLOCK = { "CLOTH", "CLOTH" },
+}
+ns.LOOT_ARMOR_LEVEL = 40
+ns.LOOT_STATS = {
+	WARRIOR = { TANK = { "STR" }, DAMAGER = { "STR" } },
+	PALADIN = { TANK = { "STR" }, HEALER = { "INT" }, DAMAGER = { "STR" } },
+	HUNTER = { DAMAGER = { "AGI" } },
+	ROGUE = { DAMAGER = { "AGI" } },
+	PRIEST = { HEALER = { "INT" }, DAMAGER = { "INT" } },
+	MAGE = { DAMAGER = { "INT" } },
+	WARLOCK = { DAMAGER = { "INT" } },
+	SHAMAN = { HEALER = { "INT" }, DAMAGER = { "AGI", "STR", "INT" } },
+	DRUID = { TANK = { "AGI" }, HEALER = { "INT" }, DAMAGER = { "AGI" } },
+}
 
 -- Roles a class can play (for "required": can the missing class still join on a free slot?).
 ns.CLASS_ROLES = {
