@@ -1,0 +1,5 @@
+# version  commit  (only releases that were uploaded to CurseForge, oldest first)
+0.8.0 1058ac046e98ea59c208eeb7f054c574cff48f13
+0.8.1 224426735f53340db5367528f5785b72964d6bc9
+0.8.2 8698dee77b090fead57241c2922d46bb73a36593
+0.9.0 e11f7673068a067d4669448be88324fd6a75eaab

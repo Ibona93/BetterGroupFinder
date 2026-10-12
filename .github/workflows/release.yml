@@ -1,0 +1,41 @@
+# Creates a GitHub release for every version listed in releases/notes/releases.txt that does
+# not have one yet: tag at the listed commit, ZIP from releases/, text from releases/notes/.
+# Runs when the notes change on main, or by hand (Actions -> Releases -> Run workflow).
+name: Releases
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "releases/notes/**"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create missing releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          while read -r version sha; do
+            case "$version" in ""|\#*) continue ;; esac
+            tag="v$version"
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "$tag exists"
+              continue
+            fi
+            zip="releases/BetterGroupFinder-$version.zip"
+            notes="releases/notes/$version.md"
+            echo "creating $tag at $sha"
+            gh release create "$tag" "$zip" \
+              --target "$sha" \
+              --title "BGF - Better Group Finder Forever $version" \
+              --notes-file "$notes"
+          done < releases/notes/releases.txt
