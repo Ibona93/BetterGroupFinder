@@ -285,6 +285,7 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 **0.9.0**
 - Neuer Chip „Loot“ (Loot-Konkurrenz vermeiden): Minuspunkte oder Aussortieren für Spieler mit gleicher Klasse bzw. gleicher Rüstung und gleichem Hauptwert; Umschalt-Klick wählt, für wen geprüft wird (du, Gruppenmitglieder).
 - Optionen „Angezeigte Chips“: Favoriten-Zeile, Fähigkeiten-Zeile, Kategorien und einzelne Chips ausblenden (zählen dann als egal).
+- Fenster „Neu in BGF“: erscheint einmal pro neuer Version direkt beim Einloggen (nach einem Kampf, falls du kämpfend einloggst; nicht bei Instanz-Ladebildschirmen). Neue Nutzer sehen „Willkommen bei BGF“. Ein Klick auf die Version oben rechts zeigt die Seiten früherer Releases (ab 0.8.0). Deutsch bei deutschem Client, sonst Englisch. Abschaltbar im Fenster und in den Optionen, dort auch ein Knopf zum erneuten Öffnen.
 
 **0.8.2**
 - Chip-Tooltips kurz: Fähigkeiten zeigen die Klassen (darunter „evtl.:“ für Talent, Begleiter, Form), Klassen eine Zeile pro Bereich. Umschalt gedrückt halten zeigt die Details (Zauber, Stufe, Bedingungen), live; ein Hinweis steht im Tooltip.

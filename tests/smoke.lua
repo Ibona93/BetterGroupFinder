@@ -328,6 +328,39 @@ local ok, err = pcall(fire, "ADDON_LOADED", "BetterGroupFinder")
 check("ADDON_LOADED creates the saved variables and attaches the UI", ok and BetterGroupFinderDB ~= nil and ns.UI.attached, err)
 ok, err = pcall(fire, "PLAYER_LOGIN")
 check("PLAYER_LOGIN builds the options", ok, err)
+-- "What's new": new users get the welcome page at login, once; not on instance loading screens
+ok, err = pcall(fire, "PLAYER_ENTERING_WORLD", true, false)
+local newsWin = _G.BGFWhatsNew or (ns.WhatsNew and ns.WhatsNew.ShowPage and nil)
+check("login shows the welcome page for new users", ok and ns.db.lastSeenVersion == ns.VERSION, err)
+local shownPage = newsWin and newsWin.version
+check("... page 0.8.0 (welcome)", shownPage == "0.8.0", tostring(shownPage))
+if newsWin then newsWin:Hide() end
+ok, err = pcall(fire, "PLAYER_ENTERING_WORLD", false, false)
+check("instance loading screen shows nothing", ok and not (newsWin and newsWin.__shown), err)
+-- after an update: page of the current version, unless switched off
+ns.isNewInstall = false
+ns.db.lastSeenVersion = "0.8.2"
+pcall(fire, "PLAYER_ENTERING_WORLD", true, false)
+check("after an update the current version's page is shown", newsWin and newsWin.__shown and newsWin.version == ns.VERSION,
+	newsWin and newsWin.version)
+newsWin:Hide()
+ns.db.lastSeenVersion, ns.db.showWhatsNew = "0.8.2", false
+pcall(fire, "PLAYER_ENTERING_WORLD", false, true)
+check("switched off: nothing after the next update", not newsWin.__shown and ns.db.lastSeenVersion == ns.VERSION)
+ns.db.showWhatsNew = true
+ok, err = pcall(ns.WhatsNew.OpenVersionMenu, newsWin.Badge)
+local vmenu = ns.Popup.current
+check("version badge lists all releases", ok and vmenu and #vmenu == 1 + #ns.NEWS_ORDER, err)
+if vmenu then vmenu[#vmenu].fn() end
+ns.Popup.Close()
+check("choosing a version shows its page", newsWin.version == "0.8.0" and newsWin.__shown)
+local deOK, enOK = true, true
+for _, v in ipairs(ns.NEWS_ORDER) do
+	local p = ns.NEWS[v]
+	if not (p and p.deDE and p.enUS and #p.deDE.items == #p.enUS.items) then deOK = false end
+end
+check("every release page exists in German and English", deOK and enOK)
+newsWin:Hide()
 
 print("List")
 ok, err = pcall(ns.UI.Refresh)

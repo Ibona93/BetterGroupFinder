@@ -19,6 +19,7 @@ ns.DEFAULTS = {
 	openCategories = {},               -- expanded chip categories in the filter bar
 	linkOverrides = {},                -- [profile][chip] = true: switched off despite a link
 	userDefaults = {},                 -- [profile] = { states, overrides }: own default for "Reset"
+	showWhatsNew = true,               -- "What's new" window after updates (lastSeenVersion: last shown)
 	lootFor = {},                      -- loot competition checked for: ["@self"] = false, [name] = true
 	showFavRow = true,                 -- options "Shown chips": favourites row
 	showAbilityRow = true,             --   abilities row (categories)
@@ -208,6 +209,7 @@ frame:SetScript("OnEvent", function(_, event, arg1)
 		if arg1 == ADDON_NAME then
 			BetterGroupFinderDB = BetterGroupFinderDB or {}
 			local isNew = next(BetterGroupFinderDB) == nil
+			ns.isNewInstall = isNew
 			local oldSchema = BetterGroupFinderDB.schema or 0
 			ns.db = ns.MergeDefaults(BetterGroupFinderDB, ns.DEFAULTS)
 			ns.db.scale = nil -- removed in 0.2.0

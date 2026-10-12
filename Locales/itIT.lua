@@ -99,6 +99,8 @@ ns.RegisterLocale("itIT", {
 	REPORT_HINT = "La segnalazione è possibile solo nell'elenco di Blizzard: passa con /bgf off, clic destro sulla voce → Segnala, poi /bgf on.",
 	RESET_SHORT = "Ripristina",
 	RESET_TT = "Ripristina i pulsanti di questa categoria e riporta i ruoli su automatico. I preferiti e le altre categorie restano.",
+	OPT_WHATSNEW = "Mostra «Novità» dopo gli aggiornamenti",
+	OPT_WHATSNEW_BUTTON = "Novità",
 	AB_loot = "Bottino",
 	CAT_loot = "Bottino",
 	LOOT_TITLE = "Evita concorrenza sul bottino",

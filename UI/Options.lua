@@ -101,9 +101,18 @@ local function build()
 	chipsButton:SetPoint("LEFT", enabled.Label, "RIGHT", 16, 0)
 	chipsButton:SetScript("OnClick", function() Options.ShowChipsWindow() end)
 
+	local whatsNew = createCheck(panel, L.OPT_WHATSNEW,
+		function() return ns.db.showWhatsNew ~= false end, function(v) ns.db.showWhatsNew = v end)
+	whatsNew:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 0, -4)
+	local whatsNewButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+	whatsNewButton:SetText(L.OPT_WHATSNEW_BUTTON)
+	whatsNewButton:SetSize(whatsNewButton:GetFontString():GetStringWidth() + 30, 22)
+	whatsNewButton:SetPoint("LEFT", whatsNew.Label, "RIGHT", 16, 0)
+	whatsNewButton:SetScript("OnClick", function() ns.WhatsNew.ShowPage(ns.VERSION) end)
+
 	-- Font and font size
 	local fontLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	fontLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -14)
+	fontLabel:SetPoint("TOPLEFT", whatsNew, "BOTTOMLEFT", 4, -14)
 	fontLabel:SetText(L.OPT_FONT)
 	local preview = panel:CreateFontString(nil, "ARTWORK")
 	local fontButtonRef

@@ -99,6 +99,8 @@ ns.RegisterLocale("ptBR", {
 	REPORT_HINT = "Só é possível denunciar na lista da Blizzard: troque com /bgf off, clique com o botão direito na entrada → Denunciar e depois /bgf on.",
 	RESET_SHORT = "Redefinir",
 	RESET_TT = "Redefine os botões desta categoria e volta as funções para automático. Os favoritos e as outras categorias permanecem.",
+	OPT_WHATSNEW = "Mostrar \"Novidades\" após atualizações",
+	OPT_WHATSNEW_BUTTON = "Novidades",
 	AB_loot = "Saque",
 	CAT_loot = "Saque",
 	LOOT_TITLE = "Evitar disputa por saque",

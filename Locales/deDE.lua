@@ -99,6 +99,8 @@ ns.RegisterLocale("deDE", {
 	REPORT_HINT = "Melden geht nur in Blizzards eigener Liste: mit /bgf off umschalten, Rechtsklick auf den Eintrag → Melden, danach /bgf on.",
 	RESET_SHORT = "Zurücksetzen",
 	RESET_TT = "Setzt die Chips dieser Gruppenfinder-Kategorie zurück und stellt die Rollen wieder auf automatisch. Favoriten und die anderen Kategorien bleiben.",
+	OPT_WHATSNEW = "„Neu in BGF“ nach Updates anzeigen",
+	OPT_WHATSNEW_BUTTON = "Neu in BGF",
 	AB_loot = "Loot",
 	CAT_loot = "Loot",
 	LOOT_TITLE = "Loot-Konkurrenz vermeiden",

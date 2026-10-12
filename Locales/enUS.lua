@@ -103,6 +103,8 @@ ns.RegisterLocale("enUS", {
 	REPORT_HINT = "Reporting is only possible in Blizzard's own list: switch with /bgf off, right-click the entry → Report, then /bgf on.",
 	RESET_SHORT = "Reset",
 	RESET_TT = "Resets the chips of this Group Finder category and sets the roles back to automatic. Favourites and the other categories stay.",
+	OPT_WHATSNEW = "Show \"What's new\" after updates",
+	OPT_WHATSNEW_BUTTON = "What's new",
 	AB_loot = "Loot",
 	CAT_loot = "Loot",
 	LOOT_TITLE = "Avoid loot competition",

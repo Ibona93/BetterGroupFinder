@@ -27,6 +27,7 @@ Data\Abilities.lua
 Data\Profiles.lua
 Data\Abbreviations.lua
 Data\Instances.lua
+Data\News.lua
 
 Logic\Scoring.lua
 Logic\Engine.lua
@@ -41,4 +42,5 @@ UI\FilterBar.lua
 UI\Popup.lua
 UI\Contact.lua
 UI\Options.lua
+UI\WhatsNew.lua
 UI\Main.lua

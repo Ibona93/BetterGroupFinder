@@ -99,6 +99,8 @@ ns.RegisterLocale("koKR", {
 	REPORT_HINT = "신고는 블리자드 기본 목록에서만 가능합니다: /bgf off로 전환하고 항목을 오른쪽 클릭 → 신고, 그다음 /bgf on.",
 	RESET_SHORT = "초기화",
 	RESET_TT = "이 분류의 버튼을 초기화하고 역할을 다시 자동으로 설정합니다. 즐겨찾기와 다른 분류는 유지됩니다.",
+	OPT_WHATSNEW = "업데이트 후 \"새 기능\" 표시",
+	OPT_WHATSNEW_BUTTON = "새 기능",
 	AB_loot = "전리품",
 	CAT_loot = "전리품",
 	LOOT_TITLE = "전리품 경쟁 피하기",

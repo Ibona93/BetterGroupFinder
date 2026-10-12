@@ -99,6 +99,8 @@ ns.RegisterLocale("zhTW", {
 	REPORT_HINT = "只能在暴雪內建列表中檢舉：輸入 /bgf off 切換，右鍵點擊條目 → 檢舉，然後輸入 /bgf on。",
 	RESET_SHORT = "重置",
 	RESET_TT = "重置此分類的按鈕，並將職責恢復為自動。收藏和其他分類保持不變。",
+	OPT_WHATSNEW = "更新後顯示「新功能」",
+	OPT_WHATSNEW_BUTTON = "新功能",
 	AB_loot = "戰利品",
 	CAT_loot = "戰利品",
 	LOOT_TITLE = "避免戰利品競爭",

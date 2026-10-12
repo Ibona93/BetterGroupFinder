@@ -99,6 +99,8 @@ ns.RegisterLocale("frFR", {
 	REPORT_HINT = "Le signalement n'est possible que dans la liste de Blizzard : passez avec /bgf off, clic droit sur l'entrée → Signaler, puis /bgf on.",
 	RESET_SHORT = "Réinitialiser",
 	RESET_TT = "Réinitialise les puces de cette catégorie et remet les rôles en automatique. Les favoris et les autres catégories restent.",
+	OPT_WHATSNEW = "Afficher « Nouveautés » après les mises à jour",
+	OPT_WHATSNEW_BUTTON = "Nouveautés",
 	AB_loot = "Butin",
 	CAT_loot = "Butin",
 	LOOT_TITLE = "Éviter la concurrence pour le butin",
