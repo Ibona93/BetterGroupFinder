@@ -85,7 +85,7 @@ Aufbau des Menüs: weiße Überschrift (was passiert), darunter die Sprachen in 
 - **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen, darunter die Neuerungen der aktuellen Version direkt auf der Seite (Versionsabzeichen öffnet frühere Releases), Befehle.
 - **Anzeige:** **Punkte anzeigen** (mit Button „Wie entstehen die Punkte?“), BGF-Bewertung im Tooltip, Schriftart.
 - **Filter & Chips:** BGF-Filter aktiv, angezeigte Zeilen/Kategorien/Chips, „Alle anzeigen“, „Filter zurücksetzen“, „Standards wiederherstellen“.
-- **Nachrichtenvorlagen:** Sofort senden, Vorlagen je Sprache (die eigene Sprache ist vorausgewählt und mit Haken markiert), „Vorlagen dieser Sprache zurücksetzen“.
+- **Nachrichtenvorlagen:** Sofort senden, Vorlagen je Sprache (die eigene Sprache ist vorausgewählt und hervorgehoben), „Vorlagen dieser Sprache zurücksetzen“.
 - **Schriftart** (Anzeige) mit Vorschau:
   - im Spiel enthalten: Friz Quadrata (Standard), Arial Narrow, Morpheus, Skurri
   - mitgeliefert: Philosopher, PT Sans Narrow, Roboto Condensed, Noto Sans

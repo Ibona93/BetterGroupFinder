@@ -58,10 +58,10 @@ local function loadTemplates()
 	end
 	local tp = Options.Pages and Options.Pages.templates
 	if tp and tp.LangButtons then
-		-- the chosen language: check mark and gold text, both buttons stay clickable
+		-- the chosen language: lit up with gold text, both buttons stay clickable
 		for _, b in ipairs(tp.LangButtons) do
 			local chosen = b.lang == currentLang
-			b.Check:SetShown(chosen)
+			b.chosen = chosen
 			local fs = b:GetFontString()
 			if fs then
 				if chosen then fs:SetTextColor(1, 0.82, 0) else fs:SetTextColor(0.85, 0.85, 0.85) end
@@ -226,12 +226,7 @@ local function buildTemplatesPage(p, title)
 			currentLang = lang
 			loadTemplates()
 		end)
-		b:SetWidth(math.max(80, b:GetFontString():GetStringWidth() + 40))
-		b.Check = b:CreateTexture(nil, "OVERLAY")
-		b.Check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
-		b.Check:SetSize(18, 18)
-		b.Check:SetPoint("LEFT", 6, 0)
-		b.Check:Hide()
+		b:SetWidth(math.max(70, b:GetFontString():GetStringWidth() + 20))
 		if i == 1 then
 			b:SetPoint("LEFT", langLabel, "RIGHT", 8, 0)
 		else

@@ -862,8 +862,8 @@ check("main page shows the release notes of this version (no 'What's new' button
 pcall(mainPage.RenderNews, "0.8.0")
 check("... the version badge switches to earlier releases", mainPage.newsVersion == "0.8.0" and mainPage.Badge.version == "0.8.0")
 local langs = ns.Options.Pages.templates.LangButtons
-check("templates: your own language is chosen right away (check mark), both buttons clickable",
-	langs[1].lang == "deDE" and langs[1].Check.__shown and not langs[2].Check.__shown)
+check("templates: your own language is chosen right away (lit up), both buttons clickable",
+	langs[1].lang == "deDE" and langs[1].chosen and not langs[2].chosen)
 check("points explanation window opens", ok and helpWin, helpWin)
 local fontList = ns.Options.FontItems and ns.Options.FontItems()
 check("font list is BGF's own popup with one font object per entry", fontList and #fontList >= 8 and fontList[3].fontObject ~= fontList[1].fontObject
