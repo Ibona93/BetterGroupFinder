@@ -1,5 +1,9 @@
-# Creates a GitHub release for every version listed in releases/notes/releases.txt that does
-# not have one yet: tag at the listed commit, ZIP from releases/, text from releases/notes/.
+# Publishes the versions listed in releases/notes/releases.txt:
+#   * uploads the ZIP from releases/ to CurseForge (once per line; a marker file in
+#     releases/notes/uploaded/ records it), with the changelog from releases/notes/<version>.md
+#   * creates the GitHub release (tag at the listed commit) for type "release"
+# Line format: <version> <commit> [release|beta|alpha]   (default: release)
+# A line is only added after Felix tested the version and said to upload it.
 # Runs when the notes change on main, or by hand (Actions -> Releases -> Run workflow).
 name: Releases
 
@@ -14,28 +18,81 @@ on:
 permissions:
   contents: write
 
+env:
+  CF_PROJECT_ID: "1736838"
+  CF_GAME_VERSION: "1.60.1"     # WoW Forever client version on CurseForge
+  CF_API: "https://wow.curseforge.com/api"
+
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create missing releases
+        with:
+          fetch-depth: 0
+      - name: Publish missing releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          set -e
-          while read -r version sha; do
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          changed=0
+          gameVersionId=""
+
+          while read -r version sha rtype rest; do
             case "$version" in ""|\#*) continue ;; esac
-            tag="v$version"
-            if gh release view "$tag" >/dev/null 2>&1; then
-              echo "$tag exists"
-              continue
-            fi
-            zip="releases/BetterGroupFinder-$version.zip"
+            rtype="${rtype:-release}"
             notes="releases/notes/$version.md"
-            echo "creating $tag at $sha"
-            gh release create "$tag" "$zip" \
-              --target "$sha" \
-              --title "BGF - Better Group Finder Forever $version" \
-              --notes-file "$notes"
+            zip="releases/BetterGroupFinder-$version.zip"
+            [ -f "$zip" ] || zip="releases/BetterGroupFinder-${version%%-*}.zip"
+            marker="releases/notes/uploaded/$version"
+
+            # 1. CurseForge upload (once)
+            if [ ! -f "$marker" ]; then
+              if [ -z "${CF_API_TOKEN:-}" ]; then
+                echo "::error::CF_API_TOKEN secret missing"; exit 1
+              fi
+              if [ -z "$gameVersionId" ]; then
+                curl -sf -H "X-Api-Token: $CF_API_TOKEN" "$CF_API/game/versions" > /tmp/versions.json
+                matches=$(jq -c --arg v "$CF_GAME_VERSION" '[.[] | select(.name == $v)]' /tmp/versions.json)
+                echo "game versions named $CF_GAME_VERSION: $matches"
+                count=$(echo "$matches" | jq 'length')
+                if [ "$count" -ne 1 ]; then
+                  echo "::error::expected exactly one CurseForge game version named $CF_GAME_VERSION, found $count"
+                  jq -c '[.[] | select(.name | startswith("1.60"))]' /tmp/versions.json
+                  exit 1
+                fi
+                gameVersionId=$(echo "$matches" | jq '.[0].id')
+              fi
+              display="BGF - Better Group Finder Forever ${version}"
+              metadata=$(jq -n --rawfile changelog "$notes" --arg name "$display" --arg type "$rtype" \
+                --argjson gv "$gameVersionId" \
+                '{changelog: $changelog, changelogType: "markdown", displayName: $name, gameVersions: [$gv], releaseType: $type}')
+              echo "uploading $zip to CurseForge as '$display' ($rtype)"
+              curl -sf -H "X-Api-Token: $CF_API_TOKEN" -F "metadata=$metadata" -F "file=@$zip" \
+                "$CF_API/projects/$CF_PROJECT_ID/upload-file" | tee /tmp/upload.json
+              echo
+              echo "uploaded by the workflow ($rtype): $(cat /tmp/upload.json)" > "$marker"
+              git add "$marker"
+              changed=1
+            else
+              echo "$version already on CurseForge"
+            fi
+
+            # 2. GitHub release (only for real releases)
+            if [ "$rtype" = "release" ]; then
+              if gh release view "v$version" >/dev/null 2>&1; then
+                echo "v$version exists on GitHub"
+              else
+                gh release create "v$version" "$zip" --target "$sha" \
+                  --title "BGF - Better Group Finder Forever $version" --notes-file "$notes"
+              fi
+            fi
           done < releases/notes/releases.txt
+
+          if [ "$changed" = 1 ]; then
+            git commit -m "Record CurseForge uploads [skip ci]"
+            git push
+          fi
