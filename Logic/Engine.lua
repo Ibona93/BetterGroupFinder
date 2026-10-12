@@ -141,6 +141,9 @@ function E.GetListingMembers(resultID, numMembers)
 				name = info.name,
 				isLeader = info.isLeader,
 			}
+			if type(info.areaName) == "string" and info.areaName ~= "" and not ns.IsSecret(info.areaName) then
+				member.zone = info.areaName
+			end
 			if numMembers == 1 then
 				member.lfgRoles = info.lfgRoles
 			else
@@ -288,6 +291,8 @@ function E.EvaluateResult(resultID, mySide, noRating)
 
 	local members, state = E.GetListingMembers(resultID, info.numMembers)
 	entry.members = members
+	entry.zone = E.EntryZone(members)
+	entry.sameZone = E.IsMyZone(entry.zone)
 	if not members and state == "locked" then entry.locked = true end
 
 	-- "BGF filter active" switched off: show everything, no rating
@@ -321,6 +326,8 @@ function E.EvaluateResult(resultID, mySide, noRating)
 			allowedGuestRoles = E.AllowedRolesFor(swapped, #mySide),
 			lootTargets = E.LootTargets(mySide),
 			lootOthers = members,
+			otherZone = entry.zone,
+			sameZone = entry.sameZone,
 			activity = act and {
 				minLevel = act.minLevel,
 				minSuggest = act.minLevelSuggestion,
@@ -366,6 +373,33 @@ function E.VisibleHints(hints)
 		if ns.ChipVisible(id) then out[#out + 1] = id end
 	end
 	return out
+end
+
+-- Zones: your current zone (zone, real zone and sub zone, whatever the listing reports).
+function E.MyZones()
+	local out = {}
+	for _, fn in ipairs({ GetRealZoneText, GetZoneText, GetSubZoneText }) do
+		local ok, z = pcall(fn or function() end)
+		if ok and type(z) == "string" and z ~= "" then out[z] = true end
+	end
+	return out
+end
+
+-- Zone of a listing: the leader's (or the first member's that is known).
+function E.EntryZone(members)
+	local first
+	for _, m in ipairs(members or {}) do
+		if m.zone then
+			if m.isLeader then return m.zone end
+			first = first or m.zone
+		end
+	end
+	return first
+end
+
+function E.IsMyZone(zone, myZones)
+	if not zone then return nil end
+	return (myZones or E.MyZones())[zone] == true
 end
 
 -- Loot competition: is it checked for this player? You by default, others when ticked.

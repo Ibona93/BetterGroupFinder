@@ -26,9 +26,9 @@ Source status (October 2026, beta build 1.60.1):
 -- group") and `sole` when only one class brings it (linked both ways with that class).
 ns.CLASS_ORDER = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }
 ns.CLASS_WEIGHT = 6
-ns.CATEGORY_ORDER = { "class", "buff", "dispel", "combat", "loot" }
+ns.CATEGORY_ORDER = { "class", "buff", "dispel", "combat", "loot", "zone" }
 -- categories without a toggle chip: their chips stand directly in the abilities row
-ns.INLINE_CATEGORIES = { loot = true }
+ns.INLINE_CATEGORIES = { loot = true, zone = true }
 
 ns.ABILITIES = {}
 for _, class in ipairs(ns.CLASS_ORDER) do
@@ -55,6 +55,8 @@ for _, a in ipairs({
 	{ id = "summon",         weight = 7, category = "combat", sole = "WARLOCK" },  -- no meeting stones in Forever
 	-- not an ability: minus points (or sorted out) for players who need the same gear
 	{ id = "loot",           weight = 8, category = "loot", special = "loot" },
+	-- not an ability: plus points (or only these) for players in your current zone
+	{ id = "zone",           weight = 6, category = "zone", special = "zone" },
 }) do
 	ns.ABILITIES[#ns.ABILITIES + 1] = a
 end

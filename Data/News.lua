@@ -15,9 +15,11 @@ local ICON = {
 	list = "Interface\\Icons\\INV_Scroll_03",
 	reason = "Interface\\Icons\\INV_Misc_Spyglass_03",
 	whisper = "Interface\\Icons\\INV_Letter_01",
+	map = "Interface\\Icons\\INV_Misc_Map_01",
+	zone = "Interface\\Icons\\Ability_Hunter_Pathfinding",
 }
 
-ns.NEWS_ORDER = { "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
+ns.NEWS_ORDER = { "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
 ns.NEWS_FIRST = "0.8.0"   -- welcome page for new users
 
 ns.NEWS_UI = {
@@ -36,6 +38,25 @@ ns.NEWS_UI = {
 }
 
 ns.NEWS = {
+	["0.10.0"] = {
+		options = "chips",
+		enUS = { title = "What's new in BGF", items = {
+			{ icon = ICON.map, title = "See where players are",
+				text = "Every listing now shows the current zone next to the activity (for groups the leader's zone, all members in the tooltip). Green = your zone.",
+				tip = "No more inviting someone from the other side of the world" },
+			{ icon = ICON.zone, title = "New chip \"Same zone\"",
+				text = "Preferred: plus points for players in your zone. Required: only players in your zone. Great for quest and zone groups.",
+				tip = "Filter bar › Abilities › Same zone" },
+		} },
+		deDE = { title = "Neu in BGF", items = {
+			{ icon = ICON.map, title = "Sehen, wo die Spieler sind",
+				text = "Jeder Eintrag zeigt jetzt neben der Aktivität die aktuelle Zone (bei Gruppen die des Anführers, alle Mitglieder im Tooltip). Grün = deine Zone.",
+				tip = "Kein Einladen mehr von der anderen Seite der Welt" },
+			{ icon = ICON.zone, title = "Neuer Chip „Gleiche Zone“",
+				text = "Bevorzugt: Pluspunkte für Spieler in deiner Zone. Benötigt: nur Spieler in deiner Zone. Ideal für Quest- und Zonengruppen.",
+				tip = "Filterleiste › Fähigkeiten › Gleiche Zone" },
+		} },
+	},
 	["0.9.0"] = {
 		options = "chips",
 		enUS = { title = "What's new in BGF", items = {

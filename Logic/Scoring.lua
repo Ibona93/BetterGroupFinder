@@ -269,6 +269,7 @@ ctx = {
   selfKnown              -- function(entry) -> true/false/nil (own spellbook)
   lootTargets            -- players of your side you check loot competition for (or nil)
   lootOthers             -- players of the listing (possible competitors)
+  otherZone, sameZone    -- zone of the listing, and whether it is yours (nil = unknown)
 }
 ]]
 function S.Evaluate(ctx)
@@ -435,6 +436,20 @@ function S.Evaluate(ctx)
 	-- 8. Profiles without role targets (quests, custom): free space is enough
 	if not targets and not result.excluded then
 		result.score = result.score + P.otherBase
+	end
+
+	-- 8b. Same zone ("Same zone" chip): bonus, or only players in your zone when required.
+	-- An unknown zone neither helps nor sorts out.
+	local zoneState = ctx.states and ctx.states.zone or "ignore"
+	if zoneState ~= "ignore" and not result.excluded and ctx.sameZone ~= nil then
+		if ctx.sameZone then
+			result.score = result.score + ns.ABILITY_BY_ID.zone.weight
+			addReason(result, "plus", "R_ZONE_SAME", ctx.otherZone)
+		elseif zoneState == "need" then
+			exclude(result, "R_ZONE_OTHER", ctx.otherZone)
+		else
+			addReason(result, "note", "R_ZONE_ELSEWHERE", ctx.otherZone)
+		end
 	end
 
 	-- 9. No benefit -> sorted out, with reason

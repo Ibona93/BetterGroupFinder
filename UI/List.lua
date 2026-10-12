@@ -330,8 +330,24 @@ function BGFRowMixin:Init(data)
 	elseif (entry.numActivities or 0) > 1 and activity == "" and LFGBROWSE_ACTIVITY_COUNT then
 		activity = LFGBROWSE_ACTIVITY_COUNT:format(entry.numActivities)
 	end
-	local activityVariants = { activity }
-	for _, step in ipairs(ns.AbbreviationSteps(activity, ns.clientLocale)) do activityVariants[#activityVariants + 1] = step end
+	local actSteps = { activity }
+	for _, step in ipairs(ns.AbbreviationSteps(activity, ns.clientLocale)) do actSteps[#actSteps + 1] = step end
+	-- current zone after the activity: green = your zone, grey = elsewhere (leader's zone)
+	local activityVariants = actSteps
+	if entry.zone and not entry.own then
+		local color = entry.sameZone and "ff4ce64c" or "ff8c8c8c"
+		local function withZone(a, z)
+			local zoneText = "|c" .. color .. z .. "|r"
+			if a == "" then return zoneText end
+			return a .. " · " .. zoneText
+		end
+		activityVariants = {}
+		for _, a in ipairs(actSteps) do activityVariants[#activityVariants + 1] = withZone(a, entry.zone) end
+		local last = actSteps[#actSteps]
+		for _, z in ipairs(ns.AbbreviationSteps(entry.zone, ns.clientLocale)) do
+			activityVariants[#activityVariants + 1] = withZone(last, z)
+		end
+	end
 	fit(self.Activity, activityVariants, activityW)
 
 	local style = ""

@@ -221,7 +221,7 @@ do
 	check("13d no role targets (quests) -> no group value", S.GroupValue({ M("MAGE", 30) }, { states = states }) == nil)
 	check("13e class chips: the member's class is always covered", S.Coverage({ M("DRUID", 5) }).class_DRUID == "sure"
 		and S.Coverage({ M("DRUID", 5) }).class_MAGE == nil)
-	check("13f chips: 9 classes, 9 buffs, 4 dispels, 5 combat, 1 loot", #ns.ABILITIES == 28 and ns.ABILITY_BY_ID.healthstone
+	check("13f chips: 9 classes, 9 buffs, 4 dispels, 5 combat, loot, zone", #ns.ABILITIES == 29 and ns.ABILITY_BY_ID.healthstone
 		and ns.ABILITY_BY_ID.summon and ns.ABILITY_BY_ID.buff_fearward and ns.ABILITY_BY_ID.healthstone.category == "combat", #ns.ABILITIES)
 	check("13g all class chips start as 'ignore'", ns.DEFAULT_ABILITY_STATES.dungeon.class_WARLOCK == "ignore"
 		and ns.DEFAULT_ABILITY_STATES.raid.class_PRIEST == "ignore" and ns.DEFAULT_ABILITY_STATES.dungeon.summon == "ignore")

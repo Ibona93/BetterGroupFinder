@@ -461,6 +461,16 @@ function Bar.ShowAbilityTooltip(chip)
 	local detail = IsShiftKeyDown and IsShiftKeyDown() or false
 	tooltipChip = chip
 	GameTooltip:SetOwner(chip, "ANCHOR_TOP")
+	if chip.ability == "zone" then
+		GameTooltip:SetText(L.ZONE_TITLE, 1, 0.82, 0)
+		local zone = GetRealZoneText and GetRealZoneText() or ""
+		if zone ~= "" then GameTooltip:AddLine(L.ZONE_TT_NOW:format(zone), 0.3, 0.9, 0.3, true) end
+		GameTooltip:AddLine(L.ZONE_TT_EFFECT, 1, 1, 1, true)
+		GameTooltip:AddLine(L.CHIP_TT_CLICK, 0.6, 0.6, 0.6, true)
+		GameTooltip:AddLine(ns.db.favorites[chip.ability] and L.FAV_REMOVE or L.FAV_ADD, 0.6, 0.6, 0.6, true)
+		GameTooltip:Show()
+		return
+	end
 	if chip.ability == "loot" then
 		Bar.ShowLootTooltip(chip, detail)
 		GameTooltip:AddLine(L.CHIP_TT_CLICK, 0.6, 0.6, 0.6, true)

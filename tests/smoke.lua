@@ -250,18 +250,19 @@ local RESULTS = {
 	[1] = { leaderName = "Alde Eisenfaust", numMembers = 4, activityIDs = { 11 }, generalPlaystyle = 2,
 		members = { { "WARRIOR", 18, "TANK", true }, { "PALADIN", 21, "DAMAGER" }, { "PRIEST", 18, "HEALER" }, { "ROGUE", 24, "DAMAGER" } } },
 	[2] = { leaderName = "Selune Selunar", numMembers = 3, activityIDs = { 11 }, generalPlaystyle = 3, newPlayerFriendly = true,
-		members = { { "PRIEST", 22, "HEALER", true }, { "WARRIOR", 19, "TANK" }, { "DRUID", 22, "DAMAGER" } } },
+		members = { { "PRIEST", 22, "HEALER", true, nil, "Sumpfland" }, { "WARRIOR", 19, "TANK", nil, nil, "Sumpfland" }, { "DRUID", 22, "DAMAGER", nil, nil, "Dun Morogh" } } },
 	[3] = { leaderName = "Zwerg Naseweis", numMembers = 4, activityIDs = { 12 }, generalPlaystyle = 2,
 		members = { { "PRIEST", 21, "HEALER", true }, { "MAGE", 22, "DAMAGER" }, { "WARLOCK", 22, "DAMAGER" }, { "ROGUE", 22, "DAMAGER" } } },
 	[4] = { leaderName = "Chronos Temporalis", numMembers = 1, activityIDs = { 11 }, generalPlaystyle = 2,
-		members = { { "DRUID", 15, nil, true, { dps = true } } } },
+		members = { { "DRUID", 15, nil, true, { dps = true }, "Brachland" } } },
 	[5] = { leaderName = "Imogshaarig Bär", numMembers = 1, activityIDs = { 11 }, generalPlaystyle = 2,
-		members = { { "DRUID", 16, nil, true, { tank = true } } } },
+		members = { { "DRUID", 16, nil, true, { tank = true }, "Sumpfland" } } },
 	[7] = { leaderName = "Aldarin Schattentanz", numMembers = 1, activityIDs = { 11 }, generalPlaystyle = 4, newPlayerFriendly = true,
 		members = { { "HUNTER", 26, nil, true, { dps = true } } } },
 	[6] = { leaderName = "Nandhelia Mondklinge", numMembers = 1, activityIDs = { 11, 13 }, generalPlaystyle = 2,
 		members = { { "WARRIOR", 19, nil, true, { dps = true } } } },
 }
+_G.GetRealZoneText = function() return "Sumpfland" end
 _G.C_LFGList = {
 	GetSearchResultInfo = function(id)
 		local r = RESULTS[id]
@@ -272,7 +273,7 @@ _G.C_LFGList = {
 	GetSearchResultPlayerInfo = function(id, i)
 		local m = RESULTS[id].members[i]
 		if not m then return nil end
-		return { classFilename = m[1], level = m[2], assignedRole = m[3] or "DAMAGER", isLeader = m[4], lfgRoles = m[5] or { dps = true }, name = "Member" .. i }
+		return { classFilename = m[1], level = m[2], assignedRole = m[3] or "DAMAGER", isLeader = m[4], lfgRoles = m[5] or { dps = true }, name = "Member" .. i, areaName = m[6] }
 	end,
 	GetActivityInfoTable = function(id) return ACT[id] end,
 	GetActiveEntryInfo = function() return nil end,
@@ -398,6 +399,33 @@ for _, fr in ipairs(ns.List.scrollBox.__frames) do
 end
 check("list shows the points without + and no group value (moved to the tooltip)", groupValueOK)
 check("solo players show no group value", soloValueOK)
+
+-- zones: shown after the activity, green when it is your zone; "Same zone" chip
+do
+	local zoneRow, otherRow
+	for _, fr in ipairs(ns.List.scrollBox.__frames) do
+		local t = fr.Activity and fr.Activity.__text or ""
+		if fr.entry and fr.entry.info and fr.entry.info.leaderName == "Imogshaarig Bär" then zoneRow = t end
+		if fr.entry and fr.entry.info and fr.entry.info.leaderName == "Chronos Temporalis" then otherRow = t end
+	end
+	check("zone after the activity, green when it is your zone", zoneRow and zoneRow:find("|cff4ce64cSumpfland|r", 1, true) ~= nil, zoneRow)
+	check("... grey for another zone", otherRow and otherRow:find("|cff8c8c8cBrachland|r", 1, true) ~= nil, otherRow)
+	local e = ns.Engine.EvaluateResult(2, ns.Engine.GetMySide())
+	check("group zone is the leader's zone", e.zone == "Sumpfland" and e.sameZone == true, tostring(e.zone))
+	ns.db.abilityStates.dungeon.zone = "need"
+	local away = ns.Engine.EvaluateResult(4, ns.Engine.GetMySide())
+	local near = ns.Engine.EvaluateResult(5, ns.Engine.GetMySide())
+	local unknown = ns.Engine.EvaluateResult(7, ns.Engine.GetMySide())
+	check("'Same zone' required: other zones sorted out, unknown zones stay", away.result.excluded and away.result.excludeReason[2] == "R_ZONE_OTHER"
+		and not (near.result.excludeReason and near.result.excludeReason[2] == "R_ZONE_OTHER")
+		and not (unknown.result.excludeReason and unknown.result.excludeReason[2] == "R_ZONE_OTHER"))
+	ns.db.abilityStates.dungeon.zone = "pref"
+	local nearPref = ns.Engine.EvaluateResult(5, ns.Engine.GetMySide())
+	ns.db.abilityStates.dungeon.zone = "ignore"
+	local nearOff = ns.Engine.EvaluateResult(5, ns.Engine.GetMySide())
+	check("'Same zone' preferred: plus points in your zone", nearPref.result.score == nearOff.result.score + 6,
+		nearPref.result.score .. " vs " .. nearOff.result.score)
+end
 
 check("no hooks on Blizzard functions (taint log safe)", #hookedBlizzard == 0, table.concat(hookedBlizzard, ","))
 do
@@ -551,7 +579,7 @@ ns.db.filterOpen = false
 pcall(ns.UI.filterButton.__scripts.OnClick)
 local f = ns.FilterBar.frame
 local function shownByCategory()
-	local count = { class = 0, buff = 0, dispel = 0, combat = 0, loot = 0 }
+	local count = { class = 0, buff = 0, dispel = 0, combat = 0, loot = 0, zone = 0 }
 	for _, c in ipairs(f.AbilityChips) do
 		if c.__shown then local g = ns.ABILITY_BY_ID[c.ability].category count[g] = count[g] + 1 end
 	end
@@ -670,7 +698,7 @@ check("unticking yourself: chip shows 'nobody'", ns.db.lootFor["@self"] == false
 ns.db.lootFor = {}
 -- options "Shown chips": window, hidden rows and categories
 local chipsPage = ns.Options.Pages.chips
-check("Filter & Chips page has the checks (filter active, rows, categories, chips)", chipsPage and #chipsPage.Checks == 1 + 2 + 4 + 27 + 1,
+check("Filter & Chips page has the checks (filter active, rows, categories, chips)", chipsPage and #chipsPage.Checks == 1 + 2 + 4 + 27 + 2,
 	chipsPage and #chipsPage.Checks)
 ok, err = pcall(chipsPage.Refresh)
 check("... refresh without errors", ok, err)
@@ -875,7 +903,7 @@ if ok and helpWin then
 		if item.kind == "row" and item.tag == "weights" and item.value ~= "" then weights = weights + 1 end
 		if item.kind == "row" and item.tag == "plus" then plusRows = plusRows + 1 end
 	end
-	check("... with 7 sections, generated weight rows (classes in one row) and plus rows", headers == 7 and weights == 8 and plusRows == 5,
+	check("... with 7 sections, generated weight rows (classes in one row) and plus rows", headers == 7 and weights == 8 and plusRows == 6,
 		headers .. "/" .. weights .. "/" .. plusRows)
 	for _, item in ipairs(helpWin.Items) do
 		if item.tag == "weights" and item.kind == "row" then print(("      %3s | %s"):format(item.value, item.text)) end

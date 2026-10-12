@@ -126,6 +126,31 @@ function Tooltip.Show(owner, entry)
 		fs:SetTextColor(COLORS.info[1], COLORS.info[2], COLORS.info[3])
 		fs:Show()
 	end
+	-- current zones (leader / members), green when it is your zone
+	local zoned = {}
+	for _, m in ipairs(entry.members or {}) do
+		if m.zone then zoned[#zoned + 1] = m end
+	end
+	if #zoned > 0 then
+		local myZones = ns.Engine.MyZones()
+		local function zoneColor(z) return myZones[z] and "|cff4ce64c" or "|cffb4b4b4" end
+		n = n + 1
+		local fs = getLine(n)
+		fs:SetFontObject(ns.Fonts.Get(12))
+		fs:SetWidth(width)
+		if #zoned == 1 and #(entry.members or {}) <= 1 then
+			fs:SetText(ns.L.ZONE_LINE:format(zoneColor(zoned[1].zone) .. zoned[1].zone .. "|r"))
+		else
+			local parts = {}
+			for i, m in ipairs(zoned) do
+				if i > 5 then parts[#parts + 1] = "…" break end
+				parts[#parts + 1] = (m.name or "?") .. ": " .. zoneColor(m.zone) .. m.zone .. "|r"
+			end
+			fs:SetText(ns.L.ZONES_LINE:format(table.concat(parts, ", ")))
+		end
+		fs:SetTextColor(0.8, 0.8, 0.8)
+		fs:Show()
+	end
 	for i = n + 1, #lines do lines[i]:Hide() end
 
 	local height = 18 + box.Title:GetStringHeight()
