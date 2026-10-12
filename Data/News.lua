@@ -42,7 +42,7 @@ ns.NEWS = {
 		options = "chips",
 		enUS = { title = "What's new in BGF", items = {
 			{ icon = ICON.map, title = "See where players are",
-				text = "Every listing now shows the current zone next to the activity (for groups the leader's zone, all members in the tooltip). Green = your zone.",
+				text = "Every listing now shows the current zone next to the activity (for groups the leader's zone). Green = your zone.",
 				tip = "No more inviting someone from the other side of the world" },
 			{ icon = ICON.zone, title = "New chip \"Same zone\"",
 				text = "Preferred: plus points for players in your zone. Required: only players in your zone. Great for quest and zone groups.",
@@ -50,7 +50,7 @@ ns.NEWS = {
 		} },
 		deDE = { title = "Neu in BGF", items = {
 			{ icon = ICON.map, title = "Sehen, wo die Spieler sind",
-				text = "Jeder Eintrag zeigt jetzt neben der Aktivität die aktuelle Zone (bei Gruppen die des Anführers, alle Mitglieder im Tooltip). Grün = deine Zone.",
+				text = "Jeder Eintrag zeigt jetzt neben der Aktivität die aktuelle Zone (bei Gruppen die des Anführers). Grün = deine Zone.",
 				tip = "Kein Einladen mehr von der anderen Seite der Welt" },
 			{ icon = ICON.zone, title = "Neuer Chip „Gleiche Zone“",
 				text = "Bevorzugt: Pluspunkte für Spieler in deiner Zone. Benötigt: nur Spieler in deiner Zone. Ideal für Quest- und Zonengruppen.",

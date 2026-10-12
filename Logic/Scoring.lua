@@ -447,8 +447,6 @@ function S.Evaluate(ctx)
 			addReason(result, "plus", "R_ZONE_SAME", ctx.otherZone)
 		elseif zoneState == "need" then
 			exclude(result, "R_ZONE_OTHER", ctx.otherZone)
-		else
-			addReason(result, "note", "R_ZONE_ELSEWHERE", ctx.otherZone)
 		end
 	end
 
