@@ -37,13 +37,14 @@ ns.NEWS_UI = {
 
 ns.NEWS = {
 	["0.9.0"] = {
+		options = "chips",
 		enUS = { title = "What's new in BGF", items = {
 			{ icon = ICON.loot, title = "Avoid loot competition",
 				text = "New \"Loot\" chip: groups with players who need the same gear (same class, or same armour and main stat) rank lower, or are sorted out when set to required.",
 				tip = "Shift-click the chip to check for a friend instead of yourself" },
 			{ icon = ICON.chips, title = "Show only the chips you need",
 				text = "Hide the favourites row, the abilities row, whole categories or single chips. Hidden chips count as ignored.",
-				tip = "Options › Shown chips..." },
+				tip = "Options › Filter & Chips" },
 		} },
 		deDE = { title = "Neu in BGF", items = {
 			{ icon = ICON.loot, title = "Loot-Konkurrenz vermeiden",
@@ -51,7 +52,7 @@ ns.NEWS = {
 				tip = "Umschalt-Klick auf den Chip: für einen Freund statt für dich prüfen" },
 			{ icon = ICON.chips, title = "Nur die Chips, die du brauchst",
 				text = "Favoriten-Zeile, Fähigkeiten-Zeile, ganze Kategorien oder einzelne Chips ausblenden. Ausgeblendete zählen als egal.",
-				tip = "Optionen › Angezeigte Chips …" },
+				tip = "Optionen › Filter & Chips" },
 		} },
 	},
 	["0.8.2"] = {

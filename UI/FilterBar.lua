@@ -837,7 +837,12 @@ function Bar.Layout()
 					anyCategory = true
 				end
 				local toggle = f.CategoryToggles[cat]
-				if ns.db.openCategories[cat] then
+				if ns.INLINE_CATEGORIES[cat] then
+					-- no toggle: the chip(s) stand directly in the row
+					for _, chip in ipairs(f.AbilityChips) do
+						if chipCategory(chip) == cat and ns.ChipVisible(chip.ability) then place(chip) end
+					end
+				elseif ns.db.openCategories[cat] then
 					newLine()
 					place(toggle)
 					for _, chip in ipairs(f.AbilityChips) do

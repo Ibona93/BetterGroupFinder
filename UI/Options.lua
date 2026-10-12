@@ -55,137 +55,181 @@ local function loadTemplates()
 		box:SetText(ns.GetTemplateName(currentLang, key))
 		box:SetCursorPosition(0)
 	end
-	if panel and panel.LangButtons then
-		for _, b in ipairs(panel.LangButtons) do
+	local tp = Options.Pages and Options.Pages.templates
+	if tp and tp.LangButtons then
+		for _, b in ipairs(tp.LangButtons) do
 			b:SetEnabled(b.lang ~= currentLang)
 		end
 	end
 end
 
-local function build()
-	local L = ns.L
-	panel = CreateFrame("Frame", "BGFOptionsPanel")
-	panel.name = L.OPT_TITLE
+-- Pages: main page plus three sub pages (Settings sub categories, like other addons).
+local pages, pageOrder = {}, { "main", "display", "chips", "templates" }
+local subcategories = {}
 
-	local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+local function newPage(key, name)
+	local p = CreateFrame("Frame", "BGFOptions_" .. key)
+	p.name = name
+	p.key = key
+	local title = p:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 16, -16)
-	title:SetText(L.OPT_TITLE .. "  |cff808080" .. ns.VERSION .. "|r")
+	title:SetText(name)
+	p.Title = title
+	pages[key] = p
+	return p, title
+end
 
-	local autoSend = createCheck(panel, L.OPT_AUTOSEND,
-		function() return ns.db.autoSend end, function(v) ns.db.autoSend = v end)
-	autoSend:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -14)
+local function button(parent, text, onClick, height)
+	local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+	b:SetText(text)
+	b:SetSize(b:GetFontString():GetStringWidth() + 30, height or 22)
+	b:SetScript("OnClick", onClick)
+	return b
+end
 
-	local reasons = createCheck(panel, L.OPT_REASONS,
-		function() return ns.db.showReasons end, function(v) ns.db.showReasons = v end)
-	reasons:SetPoint("TOPLEFT", autoSend, "BOTTOMLEFT", 0, -4)
+-- Filter & Chips: hidden rows, categories and chips count as "ignored".
+local function chipsChanged()
+	if ns.UI and ns.UI.ApplyLayout then ns.UI.ApplyLayout() end
+	ns.RequestRefresh()
+	if pages.chips and pages.chips.Refresh then pages.chips.Refresh() end
+end
 
-	local scores = createCheck(panel, L.OPT_SCORES,
-		function() return ns.db.showScores end,
-		function(v) ns.db.showScores = v ns.RequestRefresh() end)
-	scores:SetPoint("TOPLEFT", reasons, "BOTTOMLEFT", 0, -4)
+local function buildChipsPage(p, title)
+	local L = ns.L
+	local COL_W, COLS = 165, 4
+	local checks = {}
+	local function track(cb, get, isEnabled)
+		cb.get, cb.isEnabled = get, isEnabled
+		checks[#checks + 1] = cb
+		return cb
+	end
 
-	local help = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-	help:SetText(L.OPT_SCORE_HELP_BUTTON)
-	help:SetSize(help:GetFontString():GetStringWidth() + 30, 22)
-	help:SetPoint("LEFT", scores.Label, "RIGHT", 16, 0)
-	help:SetScript("OnClick", function() Options.ShowScoreHelp() end)
-
-	local enabled = createCheck(panel, L.ENABLED,
+	local enabled = createCheck(p, L.ENABLED,
 		function() return ns.db.enabled end,
 		function(v) ns.db.enabled = v if ns.UI.ApplyEnabled then ns.UI.ApplyEnabled() end end)
-	enabled:SetPoint("TOPLEFT", scores, "BOTTOMLEFT", 0, -4)
+	enabled:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -12)
+	track(enabled, function() return ns.db.enabled end)
 
-	local chipsButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-	chipsButton:SetText(L.OPT_CHIPS_BUTTON)
-	chipsButton:SetSize(chipsButton:GetFontString():GetStringWidth() + 30, 22)
-	chipsButton:SetPoint("LEFT", enabled.Label, "RIGHT", 16, 0)
-	chipsButton:SetScript("OnClick", function() Options.ShowChipsWindow() end)
+	local header = p:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	header:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -14)
+	header:SetText(L.OPT_CHIPS_TITLE)
+	local hint = p:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+	hint:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -4)
+	hint:SetWidth(COL_W * COLS)
+	hint:SetJustifyH("LEFT")
+	hint:SetText(L.OPT_CHIPS_HINT)
 
-	local whatsNew = createCheck(panel, L.OPT_WHATSNEW,
-		function() return ns.db.showWhatsNew ~= false end, function(v) ns.db.showWhatsNew = v end)
-	whatsNew:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 0, -4)
-	local whatsNewButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-	whatsNewButton:SetText(L.OPT_WHATSNEW_BUTTON)
-	whatsNewButton:SetSize(whatsNewButton:GetFontString():GetStringWidth() + 30, 22)
-	whatsNewButton:SetPoint("LEFT", whatsNew.Label, "RIGHT", 16, 0)
-	whatsNewButton:SetScript("OnClick", function() ns.WhatsNew.ShowPage(ns.VERSION) end)
-
-	-- Font and font size
-	local fontLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	fontLabel:SetPoint("TOPLEFT", whatsNew, "BOTTOMLEFT", 4, -14)
-	fontLabel:SetText(L.OPT_FONT)
-	local preview = panel:CreateFontString(nil, "ARTWORK")
-	local fontButtonRef
-	local function updatePreview()
-		preview:SetFontObject(ns.Fonts.Get(12))
-		-- the dropdown shows the chosen font's name in that font
-		if fontButtonRef and fontButtonRef.SetNormalFontObject then
-			pcall(fontButtonRef.SetNormalFontObject, fontButtonRef, ns.Fonts.Get(12))
-			pcall(fontButtonRef.SetHighlightFontObject, fontButtonRef, ns.Fonts.Get(12))
+	local y = -142
+	local function check(x, text, get, set, isEnabled)
+		local cb = createCheck(p, text, get, function(v) set(v) chipsChanged() end)
+		cb:SetPoint("TOPLEFT", x, y)
+		return track(cb, get, isEnabled)
+	end
+	local rows = p:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+	rows:SetPoint("TOPLEFT", 20, y)
+	rows:SetText(L.OPT_CHIPS_ROWS)
+	y = y - 18
+	check(16, L.OPT_CHIPS_FAVROW, function() return ns.db.showFavRow end, function(v) ns.db.showFavRow = v end)
+	check(16 + COL_W * 2, L.OPT_CHIPS_ABILITYROW, function() return ns.db.showAbilityRow end,
+		function(v) ns.db.showAbilityRow = v end)
+	y = y - 30
+	local inline = {}
+	for _, cat in ipairs(ns.CATEGORY_ORDER) do
+		if ns.INLINE_CATEGORIES[cat] then
+			inline[#inline + 1] = cat
+		else
+			check(16, "|cffffd100" .. L["CAT_" .. cat] .. "|r", function() return not ns.db.hiddenCategories[cat] end,
+				function(v) ns.db.hiddenCategories[cat] = (not v) or nil end)
+			y = y - 24
+			local col = 0
+			for _, ability in ipairs(ns.ABILITIES) do
+				if ability.category == cat then
+					local id = ability.id
+					check(36 + col * COL_W, ns.AbilityName(id), function() return not ns.db.hiddenChips[id] end,
+						function(v) ns.db.hiddenChips[id] = (not v) or nil end,
+						function() return not ns.db.hiddenCategories[cat] end)
+					col = col + 1
+					if col == COLS then col = 0 y = y - 22 end
+				end
+			end
+			if col > 0 then y = y - 22 end
+			y = y - 4
 		end
-		preview:SetText("Höhlen des Wehklagens · Aldarin Schattentanz 26 · +46")
-		preview:SetTextColor(1, 0.82, 0)
 	end
-	-- Own font list (not Blizzard's dropdown menu, see UI/Popup.lua); every entry is written
-	-- in its own font.
-	local fontButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-	fontButton:SetSize(200, 22)
-	local function fontItems()
-		local items = {}
-		for _, f in ipairs(ns.Fonts.List()) do
-			items[#items + 1] = {
-				kind = "button", text = f.name, checked = ns.db.font == f.key, fontObject = ns.Fonts.GetFor(f.key, 12),
-				fn = function()
-					ns.Fonts.Set(f.key)
-					fontButton:SetText(ns.Fonts.Name())
-					updatePreview()
-				end,
-			}
+	-- chips without a category toggle (loot): one check each, no category header
+	for _, cat in ipairs(inline) do
+		for _, ability in ipairs(ns.ABILITIES) do
+			if ability.category == cat then
+				local id = ability.id
+				check(16, id == "loot" and L.LOOT_TITLE or ns.AbilityName(id), function() return not ns.db.hiddenChips[id] end,
+					function(v) ns.db.hiddenChips[id] = (not v) or nil end)
+				y = y - 24
+			end
 		end
-		return items
-	end
-	fontButton:SetScript("OnClick", function(self) ns.Popup.Open(self, fontItems()) end)
-	fontButton:SetText(ns.Fonts.Name())
-	Options.FontItems = fontItems
-	fontButton:SetPoint("LEFT", fontLabel, "RIGHT", 10, 0)
-	fontButtonRef = fontButton
-
-	preview:SetPoint("TOPLEFT", fontLabel, "BOTTOMLEFT", 0, -14)
-	panel.updateFontControls = function()
-		updatePreview()
 	end
 
-	local header = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	header:SetPoint("TOPLEFT", preview, "BOTTOMLEFT", -4, -18)
-	header:SetText(L.OPT_TEMPLATES)
+	local showAll = button(p, L.OPT_CHIPS_SHOWALL, function()
+		ns.db.showFavRow, ns.db.showAbilityRow = true, true
+		ns.db.hiddenCategories, ns.db.hiddenChips = {}, {}
+		chipsChanged()
+	end)
+	showAll:SetPoint("TOPLEFT", 20, y - 8)
+	local resetFilters = button(p, L.OPT_RESET_FILTERS, function() ns.FilterBar.ResetFilters() end)
+	resetFilters:SetPoint("LEFT", showAll, "RIGHT", 8, 0)
+	local restoreBuiltIn = button(p, L.OPT_RESTORE_DEFAULTS, function() ns.FilterBar.RestoreBuiltIn() end)
+	restoreBuiltIn:SetPoint("LEFT", resetFilters, "RIGHT", 8, 0)
+	restoreBuiltIn:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOP")
+		GameTooltip:SetText(L.OPT_RESTORE_DEFAULTS, 1, 0.82, 0)
+		GameTooltip:AddLine(L.OPT_RESTORE_DEFAULTS_TT, 1, 1, 1, true)
+		GameTooltip:Show()
+	end)
+	restoreBuiltIn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	p.ShowAll, p.ResetFilters, p.RestoreBuiltIn = showAll, resetFilters, restoreBuiltIn
+	p.Checks = checks
 
-	local langLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	langLabel:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -10)
+	p.Refresh = function()
+		for _, cb in ipairs(checks) do
+			cb:SetChecked(cb.get() and true or false)
+			local on = not cb.isEnabled or cb.isEnabled()
+			cb:SetEnabled(on)
+			cb.Label:SetAlpha(on and 1 or 0.4)
+		end
+	end
+	p:SetScript("OnShow", p.Refresh)
+end
+
+local function buildTemplatesPage(p, title)
+	local L = ns.L
+	local autoSend = createCheck(p, L.OPT_AUTOSEND,
+		function() return ns.db.autoSend end, function(v) ns.db.autoSend = v end)
+	autoSend:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -12)
+
+	local langLabel = p:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	langLabel:SetPoint("TOPLEFT", autoSend, "BOTTOMLEFT", 4, -14)
 	langLabel:SetText(L.OPT_LANGUAGE)
 
-	panel.LangButtons = {}
+	p.LangButtons = {}
 	local prev
 	for i, lang in ipairs(ns.TemplateLanguages()) do
-		local b = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-		b:SetText(ns.LANGUAGE_NAMES[lang] or lang)
-		b:SetSize(math.max(70, b:GetFontString():GetStringWidth() + 20), 22)
+		local b = button(p, ns.LANGUAGE_NAMES[lang] or lang, function()
+			currentLang = lang
+			loadTemplates()
+		end)
+		b:SetWidth(math.max(70, b:GetFontString():GetStringWidth() + 20))
 		if i == 1 then
 			b:SetPoint("LEFT", langLabel, "RIGHT", 8, 0)
 		else
 			b:SetPoint("LEFT", prev, "RIGHT", 4, 0)
 		end
 		b.lang = lang
-		b:SetScript("OnClick", function()
-			currentLang = lang
-			loadTemplates()
-		end)
-		panel.LangButtons[i] = b
+		p.LangButtons[i] = b
 		prev = b
 	end
 
 	local previousBox
 	for _, key in ipairs(ns.TEMPLATE_KEYS) do
-		local label = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+		local label = p:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
 		if previousBox then
 			label:SetPoint("TOPLEFT", previousBox, "BOTTOMLEFT", -6, -10)
 		else
@@ -193,7 +237,7 @@ local function build()
 		end
 		label:SetText(L["OPT_T_" .. key] .. "  |cff808080(" .. L.OPT_NAME .. " / Text)|r")
 		-- Name of the template (shown in the menu) and its text.
-		local nameBox = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
+		local nameBox = CreateFrame("EditBox", nil, p, "InputBoxTemplate")
 		nameBox:SetSize(130, 22)
 		nameBox:SetAutoFocus(false)
 		nameBox:SetMaxLetters(40)
@@ -211,7 +255,7 @@ local function build()
 		end)
 		nameBoxes[key] = nameBox
 
-		local box = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
+		local box = CreateFrame("EditBox", nil, p, "InputBoxTemplate")
 		box:SetSize(440, 22)
 		box:SetAutoFocus(false)
 		box:SetMaxLetters(255)
@@ -230,105 +274,167 @@ local function build()
 		editBoxes[key] = box
 		previousBox = nameBox
 	end
-	panel.lastBox = previousBox
 
-	local hint = panel:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
-	hint:SetPoint("TOPLEFT", panel.lastBox, "BOTTOMLEFT", -6, -8)
+	local hint = p:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+	hint:SetPoint("TOPLEFT", previousBox, "BOTTOMLEFT", -6, -8)
 	hint:SetWidth(580)
 	hint:SetJustifyH("LEFT")
 	hint:SetText(L.OPT_PLACEHOLDERS)
 
-	local resetTemplates = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-	resetTemplates:SetText(L.OPT_RESET_TEMPLATES)
-	resetTemplates:SetSize(resetTemplates:GetFontString():GetStringWidth() + 30, 24)
-	resetTemplates:SetPoint("TOPLEFT", hint, "BOTTOMLEFT", 0, -12)
-	resetTemplates:SetScript("OnClick", function()
+	local resetTemplates = button(p, L.OPT_RESET_TEMPLATES, function()
 		ns.db.templates[currentLang] = nil
 		ns.db.templateNames[currentLang] = nil
 		loadTemplates()
-	end)
+	end, 24)
+	resetTemplates:SetPoint("TOPLEFT", hint, "BOTTOMLEFT", 0, -12)
 
-	local resetFilters = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-	resetFilters:SetText(L.OPT_RESET_FILTERS)
-	resetFilters:SetSize(resetFilters:GetFontString():GetStringWidth() + 30, 24)
-	resetFilters:SetPoint("LEFT", resetTemplates, "RIGHT", 8, 0)
-	resetFilters:SetScript("OnClick", function()
-		ns.FilterBar.ResetFilters()
-	end)
-
-	local restoreBuiltIn = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-	restoreBuiltIn:SetText(L.OPT_RESTORE_DEFAULTS)
-	restoreBuiltIn:SetSize(restoreBuiltIn:GetFontString():GetStringWidth() + 30, 24)
-	-- Same row as the other two; only if the row is too wide for the panel (long translations)
-	-- it goes below, with the row moved up a little so it stays inside the panel.
-	local function layoutResetRow()
-		local w = panel:GetWidth() or 0
-		local buttons = { resetTemplates, resetFilters, restoreBuiltIn }
-		local function sizeAll(pad)
-			local total = 32 + 16
-			for _, b in ipairs(buttons) do
-				b:SetWidth(b:GetFontString():GetStringWidth() + pad)
-				total = total + b:GetWidth()
-			end
-			return total
-		end
-		restoreBuiltIn:ClearAllPoints()
-		resetTemplates:ClearAllPoints()
-		-- 1. normal width, 2. narrower buttons, 3. third button below, row moved up
-		if w == 0 or sizeAll(30) <= w or sizeAll(16) <= w then
-			resetTemplates:SetPoint("TOPLEFT", hint, "BOTTOMLEFT", 0, -12)
-			restoreBuiltIn:SetPoint("LEFT", resetFilters, "RIGHT", 8, 0)
-		else
-			sizeAll(30)
-			resetTemplates:SetPoint("TOPLEFT", hint, "BOTTOMLEFT", 0, -4)
-			restoreBuiltIn:SetPoint("TOPLEFT", resetTemplates, "BOTTOMLEFT", 0, -2)
-		end
-	end
-	layoutResetRow()
-	restoreBuiltIn:SetScript("OnClick", function()
-		ns.FilterBar.RestoreBuiltIn()
-	end)
-	restoreBuiltIn:SetScript("OnEnter", function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_TOP")
-		GameTooltip:SetText(L.OPT_RESTORE_DEFAULTS, 1, 0.82, 0)
-		GameTooltip:AddLine(L.OPT_RESTORE_DEFAULTS_TT, 1, 1, 1, true)
-		GameTooltip:Show()
-	end)
-	restoreBuiltIn:SetScript("OnLeave", function() GameTooltip:Hide() end)
-
-	panel:SetScript("OnShow", function()
-		layoutResetRow()
-		panel.updateFontControls()
+	p:SetScript("OnShow", function()
 		currentLang = currentLang or ns.clientLocale
 		if not ns.DefaultTemplates[currentLang] then currentLang = "enUS" end
 		loadTemplates()
 	end)
+end
+
+local function buildDisplayPage(p, title)
+	local L = ns.L
+	local scores = createCheck(p, L.OPT_SCORES,
+		function() return ns.db.showScores end,
+		function(v) ns.db.showScores = v ns.RequestRefresh() end)
+	scores:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -12)
+	local help = button(p, L.OPT_SCORE_HELP_BUTTON, function() Options.ShowScoreHelp() end)
+	help:SetPoint("LEFT", scores.Label, "RIGHT", 16, 0)
+
+	local reasons = createCheck(p, L.OPT_REASONS,
+		function() return ns.db.showReasons end, function(v) ns.db.showReasons = v end)
+	reasons:SetPoint("TOPLEFT", scores, "BOTTOMLEFT", 0, -4)
+
+	-- Font
+	local fontLabel = p:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	fontLabel:SetPoint("TOPLEFT", reasons, "BOTTOMLEFT", 4, -16)
+	fontLabel:SetText(L.OPT_FONT)
+	local preview = p:CreateFontString(nil, "ARTWORK")
+	local fontButton = CreateFrame("Button", nil, p, "UIPanelButtonTemplate")
+	fontButton:SetSize(200, 22)
+	local function updatePreview()
+		preview:SetFontObject(ns.Fonts.Get(12))
+		-- the button shows the chosen font's name in that font
+		if fontButton.SetNormalFontObject then
+			pcall(fontButton.SetNormalFontObject, fontButton, ns.Fonts.Get(12))
+			pcall(fontButton.SetHighlightFontObject, fontButton, ns.Fonts.Get(12))
+		end
+		preview:SetText("Höhlen des Wehklagens · Aldarin Schattentanz 26 · 46")
+		preview:SetTextColor(1, 0.82, 0)
+	end
+	-- Own font list (not Blizzard's dropdown menu, see UI/Popup.lua); every entry is written
+	-- in its own font.
+	local function fontItems()
+		local items = {}
+		for _, f in ipairs(ns.Fonts.List()) do
+			items[#items + 1] = {
+				kind = "button", text = f.name, checked = ns.db.font == f.key, fontObject = ns.Fonts.GetFor(f.key, 12),
+				fn = function()
+					ns.Fonts.Set(f.key)
+					fontButton:SetText(ns.Fonts.Name())
+					updatePreview()
+				end,
+			}
+		end
+		return items
+	end
+	fontButton:SetScript("OnClick", function(self) ns.Popup.Open(self, fontItems()) end)
+	fontButton:SetText(ns.Fonts.Name())
+	fontButton:SetPoint("LEFT", fontLabel, "RIGHT", 10, 0)
+	Options.FontItems = fontItems
+	preview:SetPoint("TOPLEFT", fontLabel, "BOTTOMLEFT", 0, -14)
+	p:SetScript("OnShow", updatePreview)
+end
+
+local function buildMainPage(p, title)
+	local L = ns.L
+	title:SetText(L.OPT_TITLE .. "  |cff808080" .. ns.VERSION .. "|r")
+	local desc = p:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -12)
+	desc:SetWidth(600)
+	desc:SetJustifyH("LEFT")
+	desc:SetText(L.OPT_MAIN_DESC)
+
+	local whatsNew = createCheck(p, L.OPT_WHATSNEW,
+		function() return ns.db.showWhatsNew ~= false end, function(v) ns.db.showWhatsNew = v end)
+	whatsNew:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", -2, -16)
+	local whatsNewButton = button(p, L.OPT_WHATSNEW_BUTTON, function() ns.WhatsNew.ShowPage(ns.VERSION) end)
+	whatsNewButton:SetPoint("LEFT", whatsNew.Label, "RIGHT", 16, 0)
+
+	local sub = p:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	sub:SetPoint("TOPLEFT", whatsNew, "BOTTOMLEFT", 2, -20)
+	sub:SetText(L.OPT_MAIN_PAGES)
+	local prev = sub
+	for _, key in ipairs({ "display", "chips", "templates" }) do
+		local b = button(p, L["OPT_PAGE_" .. key], function() Options.Open(key) end)
+		b:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", prev == sub and 0 or 0, -8)
+		prev = b
+	end
+	local slash = p:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+	slash:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, -16)
+	slash:SetWidth(600)
+	slash:SetJustifyH("LEFT")
+	slash:SetText(L.SLASH_HELP)
+end
+
+local container, containerTabs
+local function build()
+	local L = ns.L
+	local main, mainTitle = newPage("main", L.OPT_TITLE)
+	panel = main
+	buildMainPage(main, mainTitle)
+	buildDisplayPage(newPage("display", L.OPT_PAGE_display))
+	buildChipsPage(newPage("chips", L.OPT_PAGE_chips))
+	buildTemplatesPage(newPage("templates", L.OPT_PAGE_templates))
 
 	if Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory then
-		local ok, cat = pcall(Settings.RegisterCanvasLayoutCategory, panel, L.OPT_TITLE)
+		local ok, cat = pcall(Settings.RegisterCanvasLayoutCategory, main, L.OPT_TITLE)
 		if ok and cat then
 			category = cat
+			if Settings.RegisterCanvasLayoutSubcategory then
+				for _, key in ipairs({ "display", "chips", "templates" }) do
+					local okSub, subcat = pcall(Settings.RegisterCanvasLayoutSubcategory, cat, pages[key], pages[key].name)
+					if okSub then subcategories[key] = subcat end
+				end
+			end
 			pcall(Settings.RegisterAddOnCategory, cat)
-			return
+			if Settings.RegisterCanvasLayoutSubcategory then return end
 		end
 	end
-	-- Fallback: standalone window
-	panel:SetParent(UIParent)
-	panel:SetSize(660, 700)
-	panel:SetPoint("CENTER")
-	panel:SetFrameStrata("DIALOG")
-	panel:EnableMouse(true)
-	panel:SetMovable(true)
-	panel:RegisterForDrag("LeftButton")
-	panel:SetScript("OnDragStart", panel.StartMoving)
-	panel:SetScript("OnDragStop", panel.StopMovingOrSizing)
-	local bg = panel:CreateTexture(nil, "BACKGROUND")
+	-- Fallback: standalone window with one tab per page
+	container = CreateFrame("Frame", "BGFOptionsWindow", UIParent, "BackdropTemplate")
+	container:SetSize(700, 640)
+	container:SetPoint("CENTER")
+	container:SetFrameStrata("DIALOG")
+	container:EnableMouse(true)
+	container:SetMovable(true)
+	container:RegisterForDrag("LeftButton")
+	container:SetScript("OnDragStart", container.StartMoving)
+	container:SetScript("OnDragStop", container.StopMovingOrSizing)
+	local bg = container:CreateTexture(nil, "BACKGROUND")
 	bg:SetAllPoints()
 	bg:SetColorTexture(0.05, 0.04, 0.03, 0.95)
-	local close = CreateFrame("Button", nil, panel, "UIPanelCloseButton")
+	local close = CreateFrame("Button", nil, container, "UIPanelCloseButton")
 	close:SetPoint("TOPRIGHT", -2, -2)
-	ns.Popup.CloseOnEscape(panel)
-	panel:Hide()
+	ns.Popup.CloseOnEscape(container)
+	containerTabs = {}
+	local prev
+	for _, key in ipairs(pageOrder) do
+		local p = pages[key]
+		p:SetParent(container)
+		p:ClearAllPoints()
+		p:SetPoint("TOPLEFT", 0, -34)
+		p:SetPoint("BOTTOMRIGHT")
+		p:Hide()
+		local tab = button(container, key == "main" and "BGF" or p.name, function() Options.Open(key) end)
+		if prev then tab:SetPoint("LEFT", prev, "RIGHT", 4, 0) else tab:SetPoint("TOPLEFT", 10, -8) end
+		containerTabs[key] = tab
+		prev = tab
+	end
+	container:Hide()
 end
 
 -- Window explaining how the points are calculated.
@@ -475,121 +581,25 @@ function Options.ShowScoreHelp()
 	return helpFrame
 end
 
--- "Shown chips": rows, categories and single chips can be hidden. Hidden = ignored.
-local chipsFrame
-local function chipsChanged()
-	if ns.UI and ns.UI.ApplyLayout then ns.UI.ApplyLayout() end
-	ns.RequestRefresh()
-	if chipsFrame and chipsFrame.Refresh then chipsFrame.Refresh() end
-end
-
-function Options.ShowChipsWindow()
-	if not chipsFrame then
-		local L = ns.L
-		local COL_W, COLS = 190, 3
-		local WIDTH = COL_W * COLS
-		chipsFrame = CreateFrame("Frame", "BGFChipsWindow", UIParent, "BackdropTemplate")
-		chipsFrame:SetPoint("CENTER")
-		chipsFrame:SetFrameStrata("FULLSCREEN_DIALOG")
-		chipsFrame:EnableMouse(true)
-		chipsFrame:SetMovable(true)
-		chipsFrame:RegisterForDrag("LeftButton")
-		chipsFrame:SetScript("OnDragStart", chipsFrame.StartMoving)
-		chipsFrame:SetScript("OnDragStop", chipsFrame.StopMovingOrSizing)
-		if chipsFrame.SetBackdrop then
-			chipsFrame:SetBackdrop({
-				bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1,
-			})
-			chipsFrame:SetBackdropColor(0.05, 0.04, 0.03, 0.97)
-			chipsFrame:SetBackdropBorderColor(0.6, 0.48, 0.25, 1)
-		end
-		local title = chipsFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-		title:SetPoint("TOPLEFT", 16, -14)
-		title:SetText(L.OPT_CHIPS_TITLE)
-		local hint = chipsFrame:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
-		hint:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
-		hint:SetWidth(WIDTH)
-		hint:SetJustifyH("LEFT")
-		hint:SetText(L.OPT_CHIPS_HINT)
-
-		local checks = {}
-		local y = -62
-		local function header(text)
-			local fs = chipsFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-			fs:SetPoint("TOPLEFT", 16, y)
-			fs:SetText(text)
-			y = y - 20
-		end
-		local function check(x, text, get, set, isEnabled)
-			local cb = createCheck(chipsFrame, text, get, function(v) set(v) chipsChanged() end)
-			cb:SetPoint("TOPLEFT", x, y)
-			cb.get, cb.isEnabled = get, isEnabled
-			checks[#checks + 1] = cb
-			return cb
-		end
-
-		header(L.OPT_CHIPS_ROWS)
-		check(16, L.OPT_CHIPS_FAVROW, function() return ns.db.showFavRow end, function(v) ns.db.showFavRow = v end)
-		check(16 + COL_W + 40, L.OPT_CHIPS_ABILITYROW, function() return ns.db.showAbilityRow end,
-			function(v) ns.db.showAbilityRow = v end)
-		y = y - 30
-		for _, cat in ipairs(ns.CATEGORY_ORDER) do
-			check(16, "|cffffd100" .. L["CAT_" .. cat] .. "|r", function() return not ns.db.hiddenCategories[cat] end,
-				function(v) ns.db.hiddenCategories[cat] = (not v) or nil end)
-			y = y - 26
-			local col = 0
-			for _, ability in ipairs(ns.ABILITIES) do
-				if ability.category == cat then
-					local id = ability.id
-					check(36 + col * COL_W, ns.AbilityName(id), function() return not ns.db.hiddenChips[id] end,
-						function(v) ns.db.hiddenChips[id] = (not v) or nil end,
-						function() return not ns.db.hiddenCategories[cat] end)
-					col = col + 1
-					if col == COLS then col = 0 y = y - 24 end
-				end
-			end
-			if col > 0 then y = y - 24 end
-			y = y - 6
-		end
-
-		local showAll = CreateFrame("Button", nil, chipsFrame, "UIPanelButtonTemplate")
-		showAll:SetText(L.OPT_CHIPS_SHOWALL)
-		showAll:SetSize(showAll:GetFontString():GetStringWidth() + 30, 22)
-		showAll:SetPoint("TOPLEFT", 16, y - 4)
-		showAll:SetScript("OnClick", function()
-			ns.db.showFavRow, ns.db.showAbilityRow = true, true
-			ns.db.hiddenCategories, ns.db.hiddenChips = {}, {}
-			chipsChanged()
-		end)
-		chipsFrame:SetSize(WIDTH + 60, -y + 40)
-
-		chipsFrame.Refresh = function()
-			for _, cb in ipairs(checks) do
-				cb:SetChecked(cb.get() and true or false)
-				local on = not cb.isEnabled or cb.isEnabled()
-				cb:SetEnabled(on)
-				cb.Label:SetAlpha(on and 1 or 0.4)
-			end
-		end
-		chipsFrame:SetScript("OnShow", chipsFrame.Refresh)
-		local close = CreateFrame("Button", nil, chipsFrame, "UIPanelCloseButton")
-		close:SetPoint("TOPRIGHT", -2, -2)
-		ns.Popup.CloseOnEscape(chipsFrame)
-	end
-	chipsFrame:Show()
-	chipsFrame.Refresh()
-	return chipsFrame
-end
-
-function Options.Open()
+-- Opens the options, optionally on a sub page ("display", "chips", "templates").
+function Options.Open(key)
 	if not panel then build() end
-	if category and Settings and Settings.OpenToCategory then
-		local id = category.GetID and category:GetID() or category.ID
+	key = (key and pages[key]) and key or "main"
+	local target = (key ~= "main" and subcategories[key]) or category
+	if target and Settings and Settings.OpenToCategory then
+		local id = target.GetID and target:GetID() or target.ID
 		local ok = pcall(Settings.OpenToCategory, id)
 		if ok then return end
 	end
-	panel:Show()
+	if container then
+		for k, p in pairs(pages) do
+			p:SetShown(k == key)
+			if containerTabs[k] then containerTabs[k]:SetEnabled(k ~= key) end
+		end
+		container:Show()
+	end
 end
+Options.Pages = pages
 
 -- Register the settings category once the saved variables are ready.
 local loader = CreateFrame("Frame")

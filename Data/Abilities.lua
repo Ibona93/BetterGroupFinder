@@ -27,6 +27,8 @@ Source status (October 2026, beta build 1.60.1):
 ns.CLASS_ORDER = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID" }
 ns.CLASS_WEIGHT = 6
 ns.CATEGORY_ORDER = { "class", "buff", "dispel", "combat", "loot" }
+-- categories without a toggle chip: their chips stand directly in the abilities row
+ns.INLINE_CATEGORIES = { loot = true }
 
 ns.ABILITIES = {}
 for _, class in ipairs(ns.CLASS_ORDER) do

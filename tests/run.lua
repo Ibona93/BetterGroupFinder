@@ -481,6 +481,26 @@ do
 	ns.db.abilityStates.dungeon.class_WARRIOR = "ignore"
 end
 
+print("Levels (0.9.0)")
+do
+	local targets = ns.GetRoleTargets("dungeon", 5)
+	local act = { minLevel = 10, minSuggest = 13, maxSuggest = 20 }
+	local function ev(selfIsGuest, host, guest)
+		return S.Evaluate({ host = host, guest = guest, selfIsGuest = selfIsGuest, maxPlayers = 5, profileKey = "dungeon",
+			roleTargets = targets, strictRoles = true, states = ns.CopyTable(ns.DEFAULT_ABILITY_STATES.dungeon), activity = act })
+	end
+	local group = { M("WARRIOR", 18, "TANK"), M("PRIEST", 17, "HEALER"), M("MAGE", 16, "DAMAGER") }
+	local meHigh = ev(true, group, { M("HUNTER", 23, nil, { dps = true }) })
+	check("21a your own level above the range: no minus points", not hasReason(meHigh, "R_LEVEL_UNDER") and not meHigh.excluded, reasonsText(meHigh))
+	local mine = { M("HUNTER", 23, "DAMAGER"), M("WARRIOR", 20, "TANK") }
+	local high = ev(false, mine, { M("PRIEST", 25, nil, { healer = true }) })
+	check("21b another player above the range: no minus points", not hasReason(high, "R_LEVEL_UNDER"), reasonsText(high))
+	local low = ev(false, mine, { M("PRIEST", 11, nil, { healer = true }) })
+	check("21c another player below the suggested range: minus points", hasReason(low, "R_LEVEL_UNDER", 11), reasonsText(low))
+	local tooLow = ev(false, mine, { M("PRIEST", 8, nil, { healer = true }) })
+	check("21d below the minimum level: sorted out", tooLow.excluded and tooLow.excludeReason[2] == "R_LEVEL_LOW", reasonsText(tooLow))
+end
+
 print("Locale tests (Sprachdateien)")
 do
 	local base = ns.Locales.enUS

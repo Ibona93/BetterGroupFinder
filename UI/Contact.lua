@@ -136,7 +136,7 @@ function Contact.MenuItems(entry)
 		if ChatFrameUtil and ChatFrameUtil.SendTell then ChatFrameUtil.SendTell(target) end
 	end }
 	items[#items + 1] = { kind = "button", text = L.MENU_EDIT, fn = function()
-		if ns.Options and ns.Options.Open then ns.Options.Open() end
+		if ns.Options and ns.Options.Open then ns.Options.Open("templates") end
 	end }
 	return items
 end

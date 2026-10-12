@@ -88,7 +88,8 @@ function ns.ChipVisible(id)
 	if not db then return true end
 	local ability = ns.ABILITY_BY_ID[id]
 	if not ability then return false end
-	if db.hiddenChips[id] or db.hiddenCategories[ability.category] then return false end
+	if db.hiddenChips[id] then return false end
+	if db.hiddenCategories[ability.category] and not ns.INLINE_CATEGORIES[ability.category] then return false end
 	if db.showAbilityRow then return true end
 	return db.showFavRow and db.favorites[id] and true or false
 end

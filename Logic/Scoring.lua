@@ -414,17 +414,19 @@ function S.Evaluate(ctx)
 		end
 	end
 
-	-- 7. Levels of the joining side
+	-- 7. Levels of the joining side: below the minimum level is sorted out. Minus points only
+	-- for other players below the suggested range - never for your own side (you chose the
+	-- instance) and never for players above it.
 	local act = ctx.activity
 	if act then
 		for _, m in ipairs(guest) do
 			if m.level then
 				if act.minLevel and act.minLevel > 0 and m.level < act.minLevel then
 					exclude(result, "R_LEVEL_LOW", m.level, act.minLevel)
-				elseif act.minSuggest and act.maxSuggest and act.maxSuggest > 0
-					and (m.level < act.minSuggest or m.level > act.maxSuggest) then
+				elseif not ctx.selfIsGuest and act.minSuggest and act.maxSuggest and act.maxSuggest > 0
+					and m.level < act.minSuggest then
 					result.score = result.score - P.levelRange
-					addReason(result, "minus", "R_LEVEL_RANGE", m.level, act.minSuggest, act.maxSuggest)
+					addReason(result, "minus", "R_LEVEL_UNDER", m.level, act.minSuggest, act.maxSuggest)
 				end
 			end
 		end

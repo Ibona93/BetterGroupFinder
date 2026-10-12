@@ -551,7 +551,7 @@ ns.db.filterOpen = false
 pcall(ns.UI.filterButton.__scripts.OnClick)
 local f = ns.FilterBar.frame
 local function shownByCategory()
-	local count = { class = 0, buff = 0, dispel = 0, combat = 0 }
+	local count = { class = 0, buff = 0, dispel = 0, combat = 0, loot = 0 }
 	for _, c in ipairs(f.AbilityChips) do
 		if c.__shown then local g = ns.ABILITY_BY_ID[c.ability].category count[g] = count[g] + 1 end
 	end
@@ -565,6 +565,7 @@ end
 local v = shownByCategory()
 check("all categories closed: no category chips, 6 default favourites (incl. loot)", v.class + v.buff + v.dispel + v.combat == 0 and shownFavorites() == 6,
 	shownFavorites())
+check("loot chip stands directly in the abilities row (no '+ Loot' toggle)", v.loot == 1 and not f.CategoryToggles.loot.__shown)
 check("category toggles", f.CategoryToggles.class.label == "+ Klassen" and f.CategoryToggles.buff.label == "+ Buffs"
 	and f.CategoryToggles.dispel.label == "+ Dispells" and f.CategoryToggles.combat.label == "+ Kampf & Hilfsmittel (2)", f.CategoryToggles.combat.label)
 local profile = ns.FilterBar.CurrentProfile()
@@ -668,9 +669,11 @@ ns.Popup.Close()
 check("unticking yourself: chip shows 'nobody'", ns.db.lootFor["@self"] == false and plain(f.FavChips.loot.label) == "Loot (niemand)", f.FavChips.loot.label)
 ns.db.lootFor = {}
 -- options "Shown chips": window, hidden rows and categories
-local chipsWin
-ok, chipsWin = pcall(ns.Options.ShowChipsWindow)
-check("shown chips window opens", ok and chipsWin, chipsWin)
+local chipsPage = ns.Options.Pages.chips
+check("Filter & Chips page has the checks (filter active, rows, categories, chips)", chipsPage and #chipsPage.Checks == 1 + 2 + 4 + 27 + 1,
+	chipsPage and #chipsPage.Checks)
+ok, err = pcall(chipsPage.Refresh)
+check("... refresh without errors", ok, err)
 ns.db.showFavRow = false
 ns.UI.ApplyLayout()
 check("favourites row can be hidden", shownFavorites() == 0 and not f.FavLabel.__shown)
@@ -849,6 +852,10 @@ check("option 'show points' off hides all points", not anyScore and ns.List.sect
 ns.db.showScores = true
 local helpWin
 ok, helpWin = pcall(ns.Options.ShowScoreHelp)
+check("options: main page plus display, chips and templates pages", ns.Options.Pages.main and ns.Options.Pages.display
+	and ns.Options.Pages.chips and ns.Options.Pages.templates and ns.Options.Pages.templates.LangButtons ~= nil)
+local okOpen, errOpen = pcall(ns.Options.Open, "templates")
+check("options open on a sub page", okOpen, errOpen)
 check("points explanation window opens", ok and helpWin, helpWin)
 local fontList = ns.Options.FontItems and ns.Options.FontItems()
 check("font list is BGF's own popup with one font object per entry", fontList and #fontList >= 8 and fontList[3].fontObject ~= fontList[1].fontObject

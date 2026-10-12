@@ -139,7 +139,8 @@ local function create()
 	frame.OptionsButton:SetSize(130, 26)
 	frame.OptionsButton:SetScript("OnClick", function()
 		frame:Hide()
-		if ns.Options and ns.Options.Open then ns.Options.Open() end
+		local page = ns.NEWS[frame.version or ""]
+		if ns.Options and ns.Options.Open then ns.Options.Open(page and page.options) end
 	end)
 
 	frame:SetScript("OnHide", function() if ns.Popup then ns.Popup.Close() end end)
