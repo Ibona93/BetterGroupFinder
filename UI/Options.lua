@@ -19,7 +19,8 @@ local function createCheck(parent, text, getter, setter)
 	cb.Label = cb:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	cb.Label:SetPoint("LEFT", cb, "RIGHT", 4, 0)
 	cb.Label:SetText(text)
-	cb:SetScript("OnShow", function(self) self:SetChecked(getter()) end)
+	if ns.db then cb:SetChecked(getter() and true or false) end
+	cb:SetScript("OnShow", function(self) self:SetChecked(getter() and true or false) end)
 	cb:SetScript("OnClick", function(self) setter(self:GetChecked() and true or false) end)
 	return cb
 end
@@ -57,8 +58,15 @@ local function loadTemplates()
 	end
 	local tp = Options.Pages and Options.Pages.templates
 	if tp and tp.LangButtons then
+		-- the chosen language: check mark and gold text, both buttons stay clickable
 		for _, b in ipairs(tp.LangButtons) do
-			b:SetEnabled(b.lang ~= currentLang)
+			local chosen = b.lang == currentLang
+			b.Check:SetShown(chosen)
+			local fs = b:GetFontString()
+			if fs then
+				if chosen then fs:SetTextColor(1, 0.82, 0) else fs:SetTextColor(0.85, 0.85, 0.85) end
+			end
+			if chosen and b.LockHighlight then b:LockHighlight() elseif b.UnlockHighlight then b:UnlockHighlight() end
 		end
 	end
 end
@@ -75,6 +83,7 @@ local function newPage(key, name)
 	title:SetPoint("TOPLEFT", 16, -16)
 	title:SetText(name)
 	p.Title = title
+	p:Hide()   -- the settings window shows it (OnShow then refreshes the values)
 	pages[key] = p
 	return p, title
 end
@@ -197,6 +206,7 @@ local function buildChipsPage(p, title)
 		end
 	end
 	p:SetScript("OnShow", p.Refresh)
+	p.Init = p.Refresh
 end
 
 local function buildTemplatesPage(p, title)
@@ -216,7 +226,12 @@ local function buildTemplatesPage(p, title)
 			currentLang = lang
 			loadTemplates()
 		end)
-		b:SetWidth(math.max(70, b:GetFontString():GetStringWidth() + 20))
+		b:SetWidth(math.max(80, b:GetFontString():GetStringWidth() + 40))
+		b.Check = b:CreateTexture(nil, "OVERLAY")
+		b.Check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+		b.Check:SetSize(18, 18)
+		b.Check:SetPoint("LEFT", 6, 0)
+		b.Check:Hide()
 		if i == 1 then
 			b:SetPoint("LEFT", langLabel, "RIGHT", 8, 0)
 		else
@@ -288,11 +303,13 @@ local function buildTemplatesPage(p, title)
 	end, 24)
 	resetTemplates:SetPoint("TOPLEFT", hint, "BOTTOMLEFT", 0, -12)
 
-	p:SetScript("OnShow", function()
+	local function show()
 		currentLang = currentLang or ns.clientLocale
 		if not ns.DefaultTemplates[currentLang] then currentLang = "enUS" end
 		loadTemplates()
-	end)
+	end
+	p:SetScript("OnShow", show)
+	p.Init = show
 end
 
 local function buildDisplayPage(p, title)
@@ -347,37 +364,63 @@ local function buildDisplayPage(p, title)
 	Options.FontItems = fontItems
 	preview:SetPoint("TOPLEFT", fontLabel, "BOTTOMLEFT", 0, -14)
 	p:SetScript("OnShow", updatePreview)
+	p.Init = updatePreview
 end
 
+-- Main page: short description, the "What's new" switch and the release notes right on the
+-- page (version badge to look at earlier releases), the slash commands at the bottom.
 local function buildMainPage(p, title)
 	local L = ns.L
+	local WIDTH = 600
 	title:SetText(L.OPT_TITLE .. "  |cff808080" .. ns.VERSION .. "|r")
 	local desc = p:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -12)
-	desc:SetWidth(600)
+	desc:SetWidth(WIDTH)
 	desc:SetJustifyH("LEFT")
 	desc:SetText(L.OPT_MAIN_DESC)
 
 	local whatsNew = createCheck(p, L.OPT_WHATSNEW,
 		function() return ns.db.showWhatsNew ~= false end, function(v) ns.db.showWhatsNew = v end)
-	whatsNew:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", -2, -16)
-	local whatsNewButton = button(p, L.OPT_WHATSNEW_BUTTON, function() ns.WhatsNew.ShowPage(ns.VERSION) end)
-	whatsNewButton:SetPoint("LEFT", whatsNew.Label, "RIGHT", 16, 0)
+	whatsNew:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", -2, -12)
 
-	local sub = p:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	sub:SetPoint("TOPLEFT", whatsNew, "BOTTOMLEFT", 2, -20)
-	sub:SetText(L.OPT_MAIN_PAGES)
-	local prev = sub
-	for _, key in ipairs({ "display", "chips", "templates" }) do
-		local b = button(p, L["OPT_PAGE_" .. key], function() Options.Open(key) end)
-		b:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", prev == sub and 0 or 0, -8)
-		prev = b
-	end
+	local newsTitle = p:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+	newsTitle:SetPoint("TOPLEFT", whatsNew, "BOTTOMLEFT", 2, -22)
+	local items = {}
+	local holder = CreateFrame("Frame", nil, p)
+	holder:SetPoint("TOPLEFT", newsTitle, "BOTTOMLEFT", -20, -14)
+	holder:SetSize(WIDTH + 20, 10)
 	local slash = p:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
-	slash:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, -16)
-	slash:SetWidth(600)
+	slash:SetWidth(WIDTH)
 	slash:SetJustifyH("LEFT")
 	slash:SetText(L.SLASH_HELP)
+
+	local badge
+	local function render(version)
+		local page = ns.NEWS[version] or ns.NEWS[ns.NEWS_ORDER[1]]
+		local texts = page[ns.NewsLang()] or page.enUS
+		newsTitle:SetText(texts.title)
+		badge:SetVersion(version)
+		local y = 0
+		for i, item in ipairs(texts.items) do
+			local it = items[i] or ns.WhatsNew.NewItem(holder, WIDTH + 20)
+			items[i] = it
+			it:ClearAllPoints()
+			it:SetPoint("TOPLEFT", 0, y)
+			it:SetPoint("TOPRIGHT", 0, y)
+			local h = ns.WhatsNew.FillItem(it, item, i == #texts.items)
+			y = y - h - 26
+		end
+		for i = #texts.items + 1, #items do items[i]:Hide() end
+		holder:SetHeight(-y)
+		slash:ClearAllPoints()
+		slash:SetPoint("TOPLEFT", holder, "BOTTOMLEFT", 20, -4)
+		p.newsVersion = version
+	end
+	badge = ns.WhatsNew.NewBadge(p, render)
+	badge:SetPoint("LEFT", newsTitle, "RIGHT", 14, 0)
+	p.Badge = badge
+	p.RenderNews = render
+	p.Init = function() render(p.newsVersion or ns.VERSION) end
 end
 
 local container, containerTabs
@@ -389,6 +432,9 @@ local function build()
 	buildDisplayPage(newPage("display", L.OPT_PAGE_display))
 	buildChipsPage(newPage("chips", L.OPT_PAGE_chips))
 	buildTemplatesPage(newPage("templates", L.OPT_PAGE_templates))
+	for _, key in ipairs(pageOrder) do
+		if pages[key].Init then pcall(pages[key].Init) end
+	end
 
 	if Settings and Settings.RegisterCanvasLayoutCategory and Settings.RegisterAddOnCategory then
 		local ok, cat = pcall(Settings.RegisterCanvasLayoutCategory, main, L.OPT_TITLE)

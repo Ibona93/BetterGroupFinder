@@ -82,10 +82,10 @@ Aufbau des Menüs: weiße Überschrift (was passiert), darunter die Sprachen in 
 | `/bgf debug` | Debug-Ausgabe an/aus. Beim Hovern über einen Eintrag werden dessen Rohdaten (inkl. `mapID`, Spezialisierung) in den Chat geschrieben. |
 
 ### Optionen (`/bgf` oder Optionen → AddOns → BGF - Better Group Finder Forever)
-- **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen (plus Knopf zum Öffnen), Links zu den Unterseiten, Befehle.
+- **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen, darunter die Neuerungen der aktuellen Version direkt auf der Seite (Versionsabzeichen öffnet frühere Releases), Befehle.
 - **Anzeige:** **Punkte anzeigen** (mit Button „Wie entstehen die Punkte?“), BGF-Bewertung im Tooltip, Schriftart.
 - **Filter & Chips:** BGF-Filter aktiv, angezeigte Zeilen/Kategorien/Chips, „Alle anzeigen“, „Filter zurücksetzen“, „Standards wiederherstellen“.
-- **Nachrichtenvorlagen:** Sofort senden, Vorlagen je Sprache, „Vorlagen dieser Sprache zurücksetzen“.
+- **Nachrichtenvorlagen:** Sofort senden, Vorlagen je Sprache (die eigene Sprache ist vorausgewählt und mit Haken markiert), „Vorlagen dieser Sprache zurücksetzen“.
 - **Schriftart** (Anzeige) mit Vorschau:
   - im Spiel enthalten: Friz Quadrata (Standard), Arial Narrow, Morpheus, Skurri
   - mitgeliefert: Philosopher, PT Sans Narrow, Roboto Condensed, Noto Sans
@@ -291,7 +291,7 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 - Optionen aufgeteilt in eine Hauptseite und die Unterseiten „Anzeige“, „Filter & Chips“ (mit den Häkchen für angezeigte Zeilen, Kategorien und Chips; ersetzt das Fenster „Angezeigte Chips“) und „Nachrichtenvorlagen“.
 - Stufen: kein Abzug mehr für deine eigene Stufe bzw. die deiner Gruppe und für überlevelte Spieler; nur andere Spieler unter dem empfohlenen Bereich bekommen −8.
 - Der Loot-Chip steht ohne eigenen Klapp-Chip direkt in der Fähigkeiten-Zeile.
-- Fenster „Neu in BGF“: erscheint einmal pro neuer Version direkt beim Einloggen (nach einem Kampf, falls du kämpfend einloggst; nicht bei Instanz-Ladebildschirmen). Neue Nutzer sehen „Willkommen bei BGF“. Ein Klick auf die Version oben rechts zeigt die Seiten früherer Releases (ab 0.8.0). Deutsch bei deutschem Client, sonst Englisch. Abschaltbar im Fenster und in den Optionen, dort auch ein Knopf zum erneuten Öffnen.
+- Fenster „Neu in BGF“: erscheint einmal pro neuer Version direkt beim Einloggen (nach einem Kampf, falls du kämpfend einloggst; nicht bei Instanz-Ladebildschirmen). Neue Nutzer sehen „Willkommen bei BGF“. Ein Klick auf die Version oben rechts zeigt die Seiten früherer Releases (ab 0.8.0). Deutsch bei deutschem Client, sonst Englisch. Abschaltbar im Fenster und in den Optionen; die Hauptseite der Optionen zeigt dieselben Inhalte.
 
 **0.8.2**
 - Chip-Tooltips kurz: Fähigkeiten zeigen die Klassen (darunter „evtl.:“ für Talent, Begleiter, Form), Klassen eine Zeile pro Bereich. Umschalt gedrückt halten zeigt die Details (Zauber, Stufe, Bedingungen), live; ein Hinweis steht im Tooltip.

@@ -856,6 +856,14 @@ check("options: main page plus display, chips and templates pages", ns.Options.P
 	and ns.Options.Pages.chips and ns.Options.Pages.templates and ns.Options.Pages.templates.LangButtons ~= nil)
 local okOpen, errOpen = pcall(ns.Options.Open, "templates")
 check("options open on a sub page", okOpen, errOpen)
+local mainPage = ns.Options.Pages.main
+check("main page shows the release notes of this version (no 'What's new' button)", mainPage.newsVersion == ns.VERSION
+	and mainPage.Badge and mainPage.Badge.version == ns.VERSION)
+pcall(mainPage.RenderNews, "0.8.0")
+check("... the version badge switches to earlier releases", mainPage.newsVersion == "0.8.0" and mainPage.Badge.version == "0.8.0")
+local langs = ns.Options.Pages.templates.LangButtons
+check("templates: your own language is chosen right away (check mark), both buttons clickable",
+	langs[1].lang == "deDE" and langs[1].Check.__shown and not langs[2].Check.__shown)
 check("points explanation window opens", ok and helpWin, helpWin)
 local fontList = ns.Options.FontItems and ns.Options.FontItems()
 check("font list is BGF's own popup with one font object per entry", fontList and #fontList >= 8 and fontList[3].fontObject ~= fontList[1].fontObject

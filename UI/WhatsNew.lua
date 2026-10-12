@@ -11,7 +11,6 @@ local News = {}
 ns.WhatsNew = News
 
 local WIDTH, PAD, ICON_SIZE = 560, 22, 40
-local TEXT_X = PAD + ICON_SIZE + 16
 local frame
 local itemFrames = {}
 
@@ -31,10 +30,11 @@ local function line(parent)
 	return t
 end
 
-local function getItem(i)
-	local it = itemFrames[i]
-	if it then return it end
-	it = CreateFrame("Frame", nil, frame)
+-- One news entry (icon, title, text, tip); also used on the options main page.
+function News.NewItem(parent, width)
+	local textX = PAD + ICON_SIZE + 16
+	local it = CreateFrame("Frame", nil, parent)
+	it.width = width
 	it.IconBorder = it:CreateTexture(nil, "BORDER")
 	it.IconBorder:SetColorTexture(0.6, 0.48, 0.25, 1)
 	it.IconBorder:SetSize(ICON_SIZE + 4, ICON_SIZE + 4)
@@ -43,13 +43,78 @@ local function getItem(i)
 	it.Icon:SetSize(ICON_SIZE, ICON_SIZE)
 	it.Icon:SetPoint("TOPLEFT", PAD, 0)
 	it.Title = fontString(it, "GameFontNormalLarge", 1, 0.82, 0)
-	it.Title:SetPoint("TOPLEFT", TEXT_X, 0)
+	it.Title:SetPoint("TOPLEFT", textX, 0)
 	it.Text = fontString(it, "GameFontHighlight", 0.92, 0.9, 0.86)
-	it.Text:SetWidth(WIDTH - TEXT_X - PAD)
+	it.Text:SetWidth(width - textX - PAD)
 	it.Text:SetWordWrap(true)
 	it.Tip = fontString(it, "GameFontHighlightSmall", 0.47, 0.82, 0.47)
-	it.Tip:SetWidth(WIDTH - TEXT_X - PAD)
+	it.Tip:SetWidth(width - textX - PAD)
 	it.Sep = line(it)
+	return it
+end
+
+-- Fills an entry; returns its height.
+function News.FillItem(it, item, isLast)
+	local textX = PAD + ICON_SIZE + 16
+	it.Icon:SetTexture(item.icon)
+	it.Title:SetText(item.title)
+	it.Text:ClearAllPoints()
+	it.Text:SetPoint("TOPLEFT", it.Title, "BOTTOMLEFT", 0, -6)
+	it.Text:SetText(item.text)
+	local h = (it.Title:GetStringHeight() or 16) + 6 + (it.Text:GetStringHeight() or 14)
+	if item.tip then
+		it.Tip:ClearAllPoints()
+		it.Tip:SetPoint("TOPLEFT", it.Text, "BOTTOMLEFT", 0, -5)
+		it.Tip:SetText("› " .. item.tip)
+		it.Tip:Show()
+		h = h + 5 + (it.Tip:GetStringHeight() or 12)
+	else
+		it.Tip:Hide()
+	end
+	h = math.max(h, ICON_SIZE)
+	it:SetHeight(h)
+	it.Sep:ClearAllPoints()
+	it.Sep:SetPoint("TOPLEFT", textX, -(h + 12))
+	it.Sep:SetPoint("TOPRIGHT", -PAD, -(h + 12))
+	it.Sep:SetShown(not isLast)
+	it:Show()
+	return h
+end
+
+-- Version badge (window and options page): "v0.9.0" with an arrow, opens the release list.
+function News.NewBadge(parent, onPick)
+	local badge = CreateFrame("Button", nil, parent, "BackdropTemplate")
+	badge:SetSize(96, 24)
+	if badge.SetBackdrop then
+		badge:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
+		badge:SetBackdropColor(0.12, 0.09, 0.03, 0.9)
+		badge:SetBackdropBorderColor(1, 0.82, 0, 1)
+	end
+	badge.Text = fontString(badge, "GameFontNormal", 1, 0.82, 0)
+	badge.Text:SetPoint("CENTER", -6, 0)
+	badge.Arrow = badge:CreateTexture(nil, "ARTWORK")
+	badge.Arrow:SetTexture("Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up")
+	badge.Arrow:SetSize(18, 18)
+	badge.Arrow:SetPoint("LEFT", badge.Text, "RIGHT", 0, -1)
+	badge:SetScript("OnEnter", function(self)
+		if self.SetBackdropColor then self:SetBackdropColor(0.25, 0.19, 0.05, 0.95) end
+	end)
+	badge:SetScript("OnLeave", function(self)
+		if self.SetBackdropColor then self:SetBackdropColor(0.12, 0.09, 0.03, 0.9) end
+	end)
+	badge.SetVersion = function(self, version)
+		self.version = version
+		self.Text:SetText("v" .. version)
+		self:SetWidth(math.ceil(self.Text:GetStringWidth()) + 40)
+	end
+	badge:SetScript("OnClick", function(self) News.OpenVersionMenu(self, self.version, onPick) end)
+	return badge
+end
+
+local function getItem(i)
+	local it = itemFrames[i]
+	if it then return it end
+	it = News.NewItem(frame, WIDTH)
 	itemFrames[i] = it
 	return it
 end
@@ -90,28 +155,8 @@ local function create()
 	frame.Subtitle:SetPoint("TOPLEFT", frame.Title, "BOTTOMLEFT", 1, -6)
 
 	-- version badge: click opens the list of releases
-	local badge = CreateFrame("Button", nil, frame, "BackdropTemplate")
-	badge:SetSize(96, 24)
-	badge:SetPoint("TOPRIGHT", -44, -26)
-	if badge.SetBackdrop then
-		badge:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8", edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = 1 })
-		badge:SetBackdropColor(0.12, 0.09, 0.03, 0.9)
-		badge:SetBackdropBorderColor(1, 0.82, 0, 1)
-	end
-	badge.Text = fontString(badge, "GameFontNormal", 1, 0.82, 0)
-	badge.Text:SetPoint("CENTER", -6, 0)
-	badge.Arrow = badge:CreateTexture(nil, "ARTWORK")
-	badge.Arrow:SetTexture("Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up")
-	badge.Arrow:SetSize(18, 18)
-	badge.Arrow:SetPoint("LEFT", badge.Text, "RIGHT", 0, -1)
-	badge:SetScript("OnEnter", function(self)
-		if self.SetBackdropColor then self:SetBackdropColor(0.25, 0.19, 0.05, 0.95) end
-	end)
-	badge:SetScript("OnLeave", function(self)
-		if self.SetBackdropColor then self:SetBackdropColor(0.12, 0.09, 0.03, 0.9) end
-	end)
-	badge:SetScript("OnClick", function(self) News.OpenVersionMenu(self) end)
-	frame.Badge = badge
+	frame.Badge = News.NewBadge(frame, function(v) News.ShowPage(v) end)
+	frame.Badge:SetPoint("TOPRIGHT", -44, -26)
 
 	frame.TopLine = line(frame)
 	frame.TopLine:SetPoint("TOPLEFT", PAD, -98)
@@ -159,8 +204,7 @@ function News.ShowPage(version)
 	frame.version = version
 	frame.Title:SetText(texts.title)
 	frame.Subtitle:SetText(u.subtitle)
-	frame.Badge.Text:SetText("v" .. version)
-	frame.Badge:SetWidth(math.ceil(frame.Badge.Text:GetStringWidth()) + 40)
+	frame.Badge:SetVersion(version)
 	frame.CheckText:SetText(u.show)
 	frame.CheckHint:SetText(u.hint)
 	frame.Ok:SetText(u.ok)
@@ -173,28 +217,7 @@ function News.ShowPage(version)
 		it:ClearAllPoints()
 		it:SetPoint("TOPLEFT", 0, y)
 		it:SetPoint("TOPRIGHT", 0, y)
-		it.Icon:SetTexture(item.icon)
-		it.Title:SetText(item.title)
-		it.Text:ClearAllPoints()
-		it.Text:SetPoint("TOPLEFT", it.Title, "BOTTOMLEFT", 0, -6)
-		it.Text:SetText(item.text)
-		local h = (it.Title:GetStringHeight() or 16) + 6 + (it.Text:GetStringHeight() or 14)
-		if item.tip then
-			it.Tip:ClearAllPoints()
-			it.Tip:SetPoint("TOPLEFT", it.Text, "BOTTOMLEFT", 0, -5)
-			it.Tip:SetText("› " .. item.tip)
-			it.Tip:Show()
-			h = h + 5 + (it.Tip:GetStringHeight() or 12)
-		else
-			it.Tip:Hide()
-		end
-		h = math.max(h, ICON_SIZE)
-		it:SetHeight(h)
-		it.Sep:ClearAllPoints()
-		it.Sep:SetPoint("TOPLEFT", TEXT_X, -(h + 12))
-		it.Sep:SetPoint("TOPRIGHT", -PAD, -(h + 12))
-		it.Sep:SetShown(i < #texts.items)
-		it:Show()
+		local h = News.FillItem(it, item, i == #texts.items)
 		y = y - h - 26
 	end
 	for i = #texts.items + 1, #itemFrames do itemFrames[i]:Hide() end
@@ -216,15 +239,17 @@ function News.ShowPage(version)
 end
 
 -- Version badge: all releases, the shown one marked.
-function News.OpenVersionMenu(owner)
+function News.OpenVersionMenu(owner, current, onPick)
 	local u = ui()
+	onPick = onPick or function(v) News.ShowPage(v) end
+	current = current or (frame and frame.version)
 	local items = { { kind = "title", text = u.versions } }
 	for i, v in ipairs(ns.NEWS_ORDER) do
 		local note = (i == 1 and u.latest) or (v == ns.NEWS_FIRST and u.first) or nil
 		items[#items + 1] = {
-			kind = "button", checked = (frame and frame.version == v) or false,
+			kind = "button", checked = current == v,
 			text = "v" .. v .. (note and ("  |cff9d9d9d" .. note .. "|r") or ""),
-			fn = function() News.ShowPage(v) end,
+			fn = function() onPick(v) end,
 		}
 	end
 	ns.Popup.Open(owner, items)
