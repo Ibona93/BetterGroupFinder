@@ -202,6 +202,7 @@ ns.RegisterLocale("koKR", {
 	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "템플릿 선택 시 바로 보내기",
 	OPT_REASONS = "툴팁에 BGF 평가 표시",
+	OPT_CLASS_RINGS = "역할 아이콘에 직업 색상 테두리 표시",
 	OPT_TEMPLATES = "메시지 템플릿",
 	OPT_LANGUAGE = "템플릿 언어:",
 	OPT_PLACEHOLDERS = "치환자: {name} 받는 사람, {me} 나, {class}, {role}, {level}, {instance}, {group} 내 파티",

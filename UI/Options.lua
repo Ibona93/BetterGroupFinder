@@ -320,9 +320,14 @@ local function buildDisplayPage(p, title)
 		function() return ns.db.showReasons end, function(v) ns.db.showReasons = v end)
 	reasons:SetPoint("TOPLEFT", scores, "BOTTOMLEFT", 0, -4)
 
+	local rings = createCheck(p, L.OPT_CLASS_RINGS,
+		function() return ns.db.classColorRings ~= false end,
+		function(v) ns.db.classColorRings = v ns.RequestRefresh() end)
+	rings:SetPoint("TOPLEFT", reasons, "BOTTOMLEFT", 0, -4)
+
 	-- Font
 	local fontLabel = p:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	fontLabel:SetPoint("TOPLEFT", reasons, "BOTTOMLEFT", 4, -16)
+	fontLabel:SetPoint("TOPLEFT", rings, "BOTTOMLEFT", 4, -16)
 	fontLabel:SetText(L.OPT_FONT)
 	local preview = p:CreateFontString(nil, "ARTWORK")
 	local fontButton = CreateFrame("Button", nil, p, "UIPanelButtonTemplate")

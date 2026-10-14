@@ -206,6 +206,7 @@ ns.RegisterLocale("enUS", {
 	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Send immediately when a template is chosen",
 	OPT_REASONS = "Show the BGF rating in the tooltip",
+	OPT_CLASS_RINGS = "Class colour ring around the role icons",
 	OPT_TEMPLATES = "Message templates",
 	OPT_LANGUAGE = "Template language:",
 	OPT_PLACEHOLDERS = "Placeholders: {name} target, {me} you, {class}, {role}, {level}, {instance}, {group} your group",

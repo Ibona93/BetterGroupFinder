@@ -202,6 +202,7 @@ ns.RegisterLocale("zhCN", {
 	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "选择模板后立即发送",
 	OPT_REASONS = "在鼠标提示中显示 BGF 评估",
+	OPT_CLASS_RINGS = "用职业颜色为角色图标描边",
 	OPT_TEMPLATES = "消息模板",
 	OPT_LANGUAGE = "模板语言：",
 	OPT_PLACEHOLDERS = "占位符：{name} 接收者，{me} 你，{class}，{role}，{level}，{instance}，{group} 你的队伍",

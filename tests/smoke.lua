@@ -864,6 +864,17 @@ do
 		if slot.__shown and slot.Icon.__alpha and slot.Icon.__alpha < 1 then faded = faded + 1 end
 	end
 	check("... 4 class-coloured icons and 1 faded tank slot", rings == 4 and faded == 1, rings .. "/" .. faded)
+	check("class colour rings are on by default", ns.db.classColorRings == true)
+	ns.db.classColorRings = false
+	rowFrame:Init({ kind = "row", entry = own })
+	local ringsOff, iconsOff = 0, 0
+	for _, slot in ipairs(rowFrame.Slots) do
+		if slot.__shown then iconsOff = iconsOff + 1 end
+		if slot.__shown and slot.Ring.__shown then ringsOff = ringsOff + 1 end
+	end
+	check("option off: no class colour rings, role icons stay", ringsOff == 0 and iconsOff == 5, ringsOff .. "/" .. iconsOff)
+	ns.db.classColorRings = true
+	rowFrame:Init({ kind = "row", entry = own })
 	check("... line 2 names the activity", (rowFrame.Activity.__text or ""):find("·", 1, true) ~= nil, rowFrame.Activity.__text)
 	check("no BGF window in Blizzard's Escape list (UISpecialFrames)", specialFrameInserts == 0, specialFrameInserts)
 end

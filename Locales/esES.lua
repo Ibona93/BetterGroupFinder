@@ -202,6 +202,7 @@ local strings = {
 	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Enviar al instante al elegir una plantilla",
 	OPT_REASONS = "Mostrar la valoración de BGF en la descripción emergente",
+	OPT_CLASS_RINGS = "Rodear los iconos de rol con el color de clase",
 	OPT_TEMPLATES = "Plantillas de mensaje",
 	OPT_LANGUAGE = "Idioma de las plantillas:",
 	OPT_PLACEHOLDERS = "Variables: {name} destinatario, {me} tú, {class}, {role}, {level}, {instance}, {group} tu grupo",

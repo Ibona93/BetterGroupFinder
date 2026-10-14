@@ -202,6 +202,7 @@ ns.RegisterLocale("frFR", {
 	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Envoyer immédiatement lorsqu'un modèle est choisi",
 	OPT_REASONS = "Afficher l'évaluation BGF dans l'infobulle",
+	OPT_CLASS_RINGS = "Entourer les icônes de rôle de la couleur de classe",
 	OPT_TEMPLATES = "Modèles de message",
 	OPT_LANGUAGE = "Langue des modèles :",
 	OPT_PLACEHOLDERS = "Variables : {name} destinataire, {me} vous, {class}, {role}, {level}, {instance}, {group} votre groupe",

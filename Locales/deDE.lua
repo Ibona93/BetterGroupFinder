@@ -202,6 +202,7 @@ ns.RegisterLocale("deDE", {
 	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Sofort senden, wenn eine Vorlage gewählt wird",
 	OPT_REASONS = "BGF-Bewertung im Tooltip anzeigen",
+	OPT_CLASS_RINGS = "Rollensymbole in Klassenfarbe umranden",
 	OPT_TEMPLATES = "Nachrichtenvorlagen",
 	OPT_LANGUAGE = "Sprache der Vorlagen:",
 	OPT_PLACEHOLDERS = "Platzhalter: {name} Empfänger, {me} du, {class}, {role}, {level}, {instance}, {group} deine Gruppe",

@@ -17,9 +17,10 @@ local ICON = {
 	whisper = "Interface\\Icons\\INV_Letter_01",
 	map = "Interface\\Icons\\INV_Misc_Map_01",
 	zone = "Interface\\Icons\\Ability_Hunter_Pathfinding",
+	colors = "Interface\\Icons\\INV_Misc_Gem_Variety_01",
 }
 
-ns.NEWS_ORDER = { "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
+ns.NEWS_ORDER = { "0.10.1", "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
 ns.NEWS_FIRST = "0.8.0"   -- welcome page for new users
 
 ns.NEWS_UI = {
@@ -38,6 +39,19 @@ ns.NEWS_UI = {
 }
 
 ns.NEWS = {
+	["0.10.1"] = {
+		options = "display",
+		enUS = { title = "What's new in BGF", items = {
+			{ icon = ICON.colors, title = "Plain role icons if you like",
+				text = "New option: turn off the class colour ring around the role icons in the list. Names keep their class colour.",
+				tip = "Options › Display › Class colour ring around the role icons" },
+		} },
+		deDE = { title = "Neu in BGF", items = {
+			{ icon = ICON.colors, title = "Rollensymbole ohne Farbring",
+				text = "Neue Option: Den Ring in Klassenfarbe um die Rollensymbole in der Liste kannst du jetzt abschalten. Namen bleiben in Klassenfarbe.",
+				tip = "Optionen › Anzeige › Rollensymbole in Klassenfarbe umranden" },
+		} },
+	},
 	["0.10.0"] = {
 		options = "chips",
 		enUS = { title = "What's new in BGF", items = {

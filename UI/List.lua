@@ -150,7 +150,7 @@ local function SetSlot(slot, size, role, class, faded)
 	if role then
 		setAtlasSafe(slot.Icon, ROLE_ATLAS[role] or ROLE_ATLAS.DAMAGER)
 		slot.Icon:SetSize(size - 3, size - 3)
-		if class then
+		if class and ns.db.classColorRings ~= false then
 			slot.Ring:SetVertexColor(classColor(class))
 			slot.Ring:Show()
 		else

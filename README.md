@@ -1,4 +1,4 @@
-# BGF - Better Group Finder Forever 0.10.0
+# BGF - Better Group Finder Forever 0.10.1
 
 Autor: **Ibona93** · Kontakt über die Projektseite · Lizenz: MIT (siehe `LICENSE`; mitgelieferte Schriften: SIL OFL 1.1). – WoW Forever
 
@@ -33,7 +33,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 |---|---|
 | Ergebnisliste | Eigene Liste im Gruppenfinder-Fenster in Blizzards Optik. Bereiche: **Gruppen**, **Spieler**, **Aussortiert** (eingeklappt, mit Begründung). Sortiert nach BGF-Punkten. |
 | Fenstergröße | Das Fenster behält **Blizzards Originalbreite und -höhe**. Es wird nur höher, solange die Filterleiste offen ist (außerhalb des Kampfes). |
-| Einträge | Zweizeilig: Name (+ Stufe, „Neue Spieler willkommen“) oben, Instanz darunter. Spielstil und Rollen-Icons mittig in der Zeile, jedes Rollen-Icon mit Ring in Klassenfarbe. Bei Schlachtzügen erscheinen Rollenzahlen statt Einzel-Icons. |
+| Einträge | Zweizeilig: Name (+ Stufe, „Neue Spieler willkommen“) oben, Instanz darunter. Spielstil und Rollen-Icons mittig in der Zeile, jedes Rollen-Icon mit Ring in Klassenfarbe (abschaltbar unter Optionen › Anzeige). Bei Schlachtzügen erscheinen Rollenzahlen statt Einzel-Icons. |
 | Punkte | Rechts der Nutzen („30“), farbig wie die M+-Wertung in Retail: grün = passt gut (ab 40), gelb = passt (15–39), grau = wenig Nutzen; bei Quests & Zonen neutral weiß. Der **Gruppenwert** („72 %“, wie vollständig die Gruppe schon ist) steht im Tooltip direkt unter dem Urteil. Abschaltbar in den Optionen; dort erklärt „Wie entstehen die Punkte?“ die Berechnung. |
 | Schrift | Feste Größen wie bei Blizzard: Namen 14, alles andere 12. Schriftart wählbar (Standard: die WoW-Schrift). |
 | Eigener Eintrag | Zeigt die Mitglieder deiner Gruppe (Klassenfarbe, Rolle), die noch fehlende Rolle als blasses Symbol und in Zeile 2 „Eure Einträge · Aktivität“. Ohne Punkte. |
@@ -84,7 +84,7 @@ Aufbau des Menüs: weiße Überschrift (was passiert), darunter die Sprachen in 
 
 ### Optionen (`/bgf` oder Optionen → AddOns → BGF - Better Group Finder Forever)
 - **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen, darunter die Neuerungen der aktuellen Version direkt auf der Seite (Versionsabzeichen öffnet frühere Releases), Befehle.
-- **Anzeige:** **Punkte anzeigen** (mit Button „Wie entstehen die Punkte?“), BGF-Bewertung im Tooltip, Schriftart.
+- **Anzeige:** **Punkte anzeigen** (mit Button „Wie entstehen die Punkte?“), BGF-Bewertung im Tooltip, **Rollensymbole in Klassenfarbe umranden** (aus = kein Ring, wie bei Blizzard), Schriftart.
 - **Filter & Chips:** BGF-Filter aktiv, angezeigte Zeilen/Kategorien/Chips, „Alle anzeigen“, „Filter zurücksetzen“, „Standards wiederherstellen“.
 - **Nachrichtenvorlagen:** Sofort senden, Vorlagen je Sprache (die eigene Sprache ist vorausgewählt und hervorgehoben), „Vorlagen dieser Sprache zurücksetzen“.
 - **Schriftart** (Anzeige) mit Vorschau:
@@ -285,6 +285,9 @@ Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\B
 ---
 
 ## 8. Änderungen
+
+**0.10.1**
+- Neue Option „Rollensymbole in Klassenfarbe umranden“ (Optionen › Anzeige, standardmäßig an). Aus = die Rollensymbole in der Liste haben keinen Ring in Klassenfarbe mehr, wie bei Blizzard. Namen bleiben in Klassenfarbe.
 
 **0.10.0**
 - Aktuelle Zone in der Liste (grün = deine Zone) und im Tooltip (bei Gruppen die des Anführers); neuer Chip „Gleiche Zone“ (bevorzugt: Pluspunkte, benötigt: nur Spieler in deiner Zone).

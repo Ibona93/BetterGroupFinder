@@ -202,6 +202,7 @@ ns.RegisterLocale("ruRU", {
 	OPT_TITLE = "BGF - Better Group Finder Forever",
 	OPT_AUTOSEND = "Отправлять сразу при выборе шаблона",
 	OPT_REASONS = "Показывать оценку BGF в подсказке",
+	OPT_CLASS_RINGS = "Обводить значки ролей цветом класса",
 	OPT_TEMPLATES = "Шаблоны сообщений",
 	OPT_LANGUAGE = "Язык шаблонов:",
 	OPT_PLACEHOLDERS = "Подстановки: {name} получатель, {me} вы, {class}, {role}, {level}, {instance}, {group} ваша группа",

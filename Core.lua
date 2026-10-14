@@ -27,6 +27,7 @@ ns.DEFAULTS = {
 	hiddenChips = {},                  --   [chip] = true
 	autoSend = true,
 	showReasons = true,
+	classColorRings = true,           -- 0.10.1: class colour ring around the role icons in the list
 	abilityStates = ns.DEFAULT_ABILITY_STATES,
 	roleChips = {},
 	collapsed = { excluded = true },
