@@ -155,6 +155,8 @@ local function SetSlot(slot, size, role, class, faded)
 			slot.Ring:Show()
 		else
 			slot.Ring:Hide()
+			-- ring switched off in the options: the icon fills the whole slot instead
+			if class then slot.Icon:SetSize(size, size) end
 		end
 	else
 		setAtlasSafe(slot.Icon, "groupfinder-icon-emptyslot")
