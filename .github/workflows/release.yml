@@ -55,7 +55,7 @@ jobs:
                 echo "::error::CF_API_TOKEN secret missing"; exit 1
               fi
               if [ -z "$gameVersionId" ]; then
-                curl -sf -H "X-Api-Token: $CF_API_TOKEN" "$CF_API/game/versions" > /tmp/versions.json
+                curl -sS --fail-with-body -H "X-Api-Token: $CF_API_TOKEN" "$CF_API/game/versions" > /tmp/versions.json
                 matches=$(jq -c --arg v "$CF_GAME_VERSION" '[.[] | select(.name == $v)]' /tmp/versions.json)
                 echo "game versions named $CF_GAME_VERSION: $matches"
                 count=$(echo "$matches" | jq 'length')
@@ -71,7 +71,7 @@ jobs:
                 --argjson gv "$gameVersionId" \
                 '{changelog: $changelog, changelogType: "markdown", displayName: $name, gameVersions: [$gv], releaseType: $type}')
               echo "uploading $zip to CurseForge as '$display' ($rtype)"
-              curl -sf -H "X-Api-Token: $CF_API_TOKEN" -F "metadata=$metadata" -F "file=@$zip" \
+              curl -sS --fail-with-body -H "X-Api-Token: $CF_API_TOKEN" -F "metadata=$metadata" -F "file=@$zip" \
                 "$CF_API/projects/$CF_PROJECT_ID/upload-file" | tee /tmp/upload.json
               echo
               echo "uploaded by the workflow ($rtype): $(cat /tmp/upload.json)" > "$marker"
