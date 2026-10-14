@@ -38,7 +38,6 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          changed=0
           gameVersionId=""
 
           while read -r version sha rtype rest; do
@@ -66,7 +65,7 @@ jobs:
                 fi
                 gameVersionId=$(echo "$matches" | jq '.[0].id')
               fi
-              display="BGF - Better Group Finder Forever ${version}"
+              display="BGF v${version}"
               metadata=$(jq -n --rawfile changelog "$notes" --arg name "$display" --arg type "$rtype" \
                 --argjson gv "$gameVersionId" \
                 '{changelog: $changelog, changelogType: "markdown", displayName: $name, gameVersions: [$gv], releaseType: $type}')
@@ -74,9 +73,12 @@ jobs:
               curl -sS --fail-with-body -H "X-Api-Token: $CF_API_TOKEN" --form-string "metadata=$metadata" -F "file=@$zip" \
                 "$CF_API/projects/$CF_PROJECT_ID/upload-file" | tee /tmp/upload.json
               echo
+              # record the upload right away, so a later failure can never upload it twice
               echo "uploaded by the workflow ($rtype): $(cat /tmp/upload.json)" > "$marker"
               git add "$marker"
-              changed=1
+              git commit -m "Record CurseForge upload of $version [skip ci]"
+              git pull --rebase
+              git push
             else
               echo "$version already on CurseForge"
             fi
@@ -87,12 +89,8 @@ jobs:
                 echo "v$version exists on GitHub"
               else
                 gh release create "v$version" "$zip" --target "$sha" \
-                  --title "BGF - Better Group Finder Forever $version" --notes-file "$notes"
+                  --title "BGF v$version" --notes-file "$notes"
               fi
             fi
           done < releases/notes/releases.txt
 
-          if [ "$changed" = 1 ]; then
-            git commit -m "Record CurseForge uploads [skip ci]"
-            git push
-          fi
