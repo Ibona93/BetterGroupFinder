@@ -1,10 +1,21 @@
 # Publishes the versions listed in releases/notes/releases.txt:
 #   * uploads the ZIP from releases/ to CurseForge (once per line; a marker file in
 #     releases/notes/uploaded/ records it), with the changelog from releases/notes/<version>.md
+#   * announces a fresh "release" upload on Discord: English part of the changelog to
+#     #announcements (pings the Release Ping role), German part to #deutsch, both linking
+#     to CurseForge. Runs only right after the upload, so old versions are never re-posted.
+#     A Discord failure never fails the run (the upload is already recorded).
 #   * creates the GitHub release (tag at the listed commit) for type "release"
 # Line format: <version> <commit> [release|beta|alpha]   (default: release)
 # A line is only added after Felix tested the version and said to upload it.
 # Runs when the notes change on main, or by hand (Actions -> Releases -> Run workflow).
+# By hand with "announce" set to a version: only posts that version's Discord
+# announcement again (no upload, no GitHub release) - for testing the webhooks.
+#
+# Discord settings (repo Settings -> Secrets and variables -> Actions):
+#   secrets   DISCORD_WEBHOOK_EN, DISCORD_WEBHOOK_DE   (webhook URLs; a missing one is skipped)
+#   variables DISCORD_RELEASE_ROLE_ID                  (role to ping in English; optional)
+#             CF_PROJECT_URL                           (CurseForge page; optional, see below)
 name: Releases
 
 on:
@@ -14,6 +25,11 @@ on:
       - "releases/notes/**"
       - ".github/workflows/release.yml"
   workflow_dispatch:
+    inputs:
+      announce:
+        description: "Only post the Discord announcement for this version (e.g. 0.10.1). Leave empty for a normal run."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -34,11 +50,54 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          DISCORD_WEBHOOK_EN: ${{ secrets.DISCORD_WEBHOOK_EN }}
+          DISCORD_WEBHOOK_DE: ${{ secrets.DISCORD_WEBHOOK_DE }}
+          DISCORD_ROLE_ID: ${{ vars.DISCORD_RELEASE_ROLE_ID }}
+          CF_PROJECT_URL: ${{ vars.CF_PROJECT_URL }}
+          ANNOUNCE_ONLY: ${{ github.event.inputs.announce }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           gameVersionId=""
+          cfUrl="${CF_PROJECT_URL:-https://www.curseforge.com/projects/$CF_PROJECT_ID}"
+
+          # post one Discord message: discord_post <webhook> <title> <changelog text> <link line> [role id]
+          discord_post() {
+            local hook="$1" title="$2" body="$3" link="$4" role="${5:-}" payload
+            if [ -z "$hook" ]; then
+              echo "no webhook set for '$title', skipped"
+              return 0
+            fi
+            payload=$(jq -n --arg title "$title" --arg body "$body" --arg link "$link" --arg role "$role" '
+              ($body | gsub("^\\s+|\\s+$"; "")) as $b
+              | (if ($b | length) > 1500 then ($b[0:1500] | sub("\n[^\n]*$"; "")) + "\n…" else $b end) as $t
+              | { content: ((if $role != "" then "<@&\($role)> " else "" end)
+                            + "**\($title)**\n\n\($t)\n\n➜ \($link)"),
+                  allowed_mentions: { parse: [], roles: (if $role != "" then [$role] else [] end) } }') || return 1
+            curl -sS --fail-with-body -H "Content-Type: application/json" -d "$payload" "$hook" || return 1
+            echo "posted '$title' to Discord"
+          }
+
+          # announce <version> <notes file>: English part (before ---) and German part (after ---)
+          announce() {
+            local v="$1" notes="$2" en de ok=0
+            en=$(awk '/^---[[:space:]]*$/ {exit} {print}' "$notes")
+            de=$(awk 'f {print} /^---[[:space:]]*$/ {f=1}' "$notes")
+            [ -n "$de" ] || de="$en"
+            discord_post "${DISCORD_WEBHOOK_EN:-}" "BGF v$v is out!" "$en" "Download on CurseForge: $cfUrl" "${DISCORD_ROLE_ID:-}" || ok=1
+            discord_post "${DISCORD_WEBHOOK_DE:-}" "BGF v$v ist da!" "$de" "Download auf CurseForge: $cfUrl" || ok=1
+            return $ok
+          }
+
+          # manual run with "announce": only re-post that version's announcement
+          if [ -n "${ANNOUNCE_ONLY:-}" ]; then
+            if ! [[ "$ANNOUNCE_ONLY" =~ ^[0-9A-Za-z.-]+$ ]] || [ ! -f "releases/notes/$ANNOUNCE_ONLY.md" ]; then
+              echo "::error::no changelog releases/notes/$ANNOUNCE_ONLY.md"; exit 1
+            fi
+            announce "$ANNOUNCE_ONLY" "releases/notes/$ANNOUNCE_ONLY.md" || { echo "::error::Discord announcement failed"; exit 1; }
+            exit 0
+          fi
 
           while read -r version sha rtype rest; do
             case "$version" in ""|\#*) continue ;; esac
@@ -79,6 +138,10 @@ jobs:
               git commit -m "Record CurseForge upload of $version [skip ci]"
               git pull --rebase
               git push
+              # 1b. Discord announcement (real releases only; never fails the run)
+              if [ "$rtype" = "release" ]; then
+                announce "$version" "$notes" || echo "::warning::Discord announcement for $version failed (upload is fine)"
+              fi
             else
               echo "$version already on CurseForge"
             fi
