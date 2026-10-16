@@ -1,11 +1,11 @@
 # <version> <commit> [release|beta|alpha]  - only add a line after Felix tested the version
 # and said to upload it. Uploads to CurseForge once (marker in uploaded/) and creates the
 # GitHub release for type "release".
-0.8.0 1058ac046e98ea59c208eeb7f054c574cff48f13
-0.8.1 224426735f53340db5367528f5785b72964d6bc9
-0.8.2 8698dee77b090fead57241c2922d46bb73a36593
-0.9.0 e11f7673068a067d4669448be88324fd6a75eaab
-0.10.0 60aebcd91b847dd5ddccdf37ae1f98b093d8d532
+0.8.0 6e2ea5f89a279b2ab24f23d462a0d5cfa9239217
+0.8.1 8d3eb93392b5d416d4d5677670ae504216ceab4d
+0.8.2 96228585a6962739ff0976edda2f0d5968d23743
+0.9.0 d701891ff48114fa716f3ce23370d88c1c3aedf0
+0.10.0 fd290fc2e7077ae3097816bd4790aef7ed23d5c9
 # test of the automatic upload (alpha, not visible to normal users; delete it on CurseForge)
-0.10.0-test 60aebcd91b847dd5ddccdf37ae1f98b093d8d532 alpha
-0.10.1 aa686ee7e97e84350a02a1f1a1345232db3926e1
+0.10.0-test fd290fc2e7077ae3097816bd4790aef7ed23d5c9 alpha
+0.10.1 c06172fc9de98ace0cee2bddecf75b0f65a93d72
