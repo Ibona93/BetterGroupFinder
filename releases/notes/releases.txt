@@ -9,3 +9,4 @@
 # test of the automatic upload (alpha, not visible to normal users; delete it on CurseForge)
 0.10.0-test fd290fc2e7077ae3097816bd4790aef7ed23d5c9 alpha
 0.10.1 c06172fc9de98ace0cee2bddecf75b0f65a93d72
+0.10.2 9ff96c3ae0564f8be8f6f0c432254bedd7b3d179
