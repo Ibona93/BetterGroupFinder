@@ -1,405 +1,255 @@
-# BGF - Better Group Finder Forever 0.10.1
+# BGF - Better Group Finder Forever
 
-Autor: **Ibona93** · Kontakt über die Projektseite · Lizenz: MIT (siehe `LICENSE`; mitgelieferte Schriften: SIL OFL 1.1). – WoW Forever
+🇩🇪 [Deutsche Version](README.de.md)
 
-Erweiterung für den Gruppenfinder von WoW Forever:
-- intelligente Filter
-- Bewertung der Gruppenzusammensetzung
-- Nachrichtenvorlagen mit automatischem Versand
-- übersichtliche zweizeilige Liste mit farbigen Punkten
+An addon for the Group Finder of **WoW Forever**:
+- smart filters for classes, buffs, dispels, crowd control and more
+- a rating of how well each listing fits you or your group, with the reason in the tooltip
+- message templates that whisper or invite with one click
+- a clear two-line list with coloured points
 
-Ziel-Version: WoW Forever **1.60.1, Interface 16001** (Beta-Stand 9. Oktober 2026).
+Author: **Ibona93** · License: MIT (see [`LICENSE`](LICENSE); bundled fonts: SIL OFL 1.1)
+Game version: WoW Forever **1.60.1, Interface 16001**
+
+**Download:** [CurseForge](https://www.curseforge.com/projects/1736838) · **Feedback:** [Discord](https://discord.gg/4nPNJMYetV) · [GitHub Issues](https://github.com/Ibona93/BetterGroupFinder/issues)
 
 ---
 
 ## 1. Installation
 
-1. Das Spiel schließen (oder später `/reload` eingeben).
-2. Das ZIP entpacken. Heraus kommt der Ordner `BetterGroupFinder`.
-3. Den Ordner in den AddOns-Ordner des Forever-Clients kopieren. In der Beta ist das:
-   `World of Warcraft\_classic_beta_\Interface\AddOns\BetterGroupFinder`
-   Nach dem Release heißt der Client-Ordner voraussichtlich anders. Entscheidend ist der Ordner, aus dem du Forever startest.
-4. Der Ordner muss direkt `BetterGroupFinder.toc` enthalten. Ein Ordner `BetterGroupFinder\BetterGroupFinder\…` funktioniert nicht.
-5. Im Charakterauswahl-Bildschirm unter **AddOns** „BGF - Better Group Finder Forever“ aktivieren.
-6. Empfohlen für die ersten Tests: **BugSack + BugGrabber** installieren, damit eventuelle Lua-Fehler gesammelt werden.
+**Recommended:** install BGF with the CurseForge app. It also keeps the addon up to date.
 
-Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch die Interface-Nummer geändert. Prüfen mit `/dump (select(4, GetBuildInfo()))` und die Zahl in der ersten Zeile der `.toc` anpassen.
+**Manual:**
+1. Close the game (or type `/reload` afterwards).
+2. Unzip the file. You get a folder named `BetterGroupFinder`.
+3. Copy this folder into the `Interface\AddOns` folder of your WoW Forever client, i.e. inside the client folder you start Forever from.
+4. The folder must contain `BetterGroupFinder.toc` directly. `BetterGroupFinder\BetterGroupFinder\…` does not work.
+5. On the character selection screen, open **AddOns** and enable "BGF - Better Group Finder Forever".
+
+If the game marks the addon as "out of date", the interface number changed with a patch. Check it with `/dump (select(4, GetBuildInfo()))` and update the number in the first line of the `.toc` file, or wait for the next BGF update.
 
 ---
 
-## 2. Funktionen im Überblick
+## 2. Features
 
-| Bereich | Was BGF macht |
+| Area | What BGF does |
 |---|---|
-| Ergebnisliste | Eigene Liste im Gruppenfinder-Fenster in Blizzards Optik. Bereiche: **Gruppen**, **Spieler**, **Aussortiert** (eingeklappt, mit Begründung). Sortiert nach BGF-Punkten. |
-| Fenstergröße | Das Fenster behält **Blizzards Originalbreite und -höhe**. Es wird nur höher, solange die Filterleiste offen ist (außerhalb des Kampfes). |
-| Einträge | Zweizeilig: Name (+ Stufe, „Neue Spieler willkommen“) oben, Instanz darunter. Spielstil und Rollen-Icons mittig in der Zeile, jedes Rollen-Icon mit Ring in Klassenfarbe (abschaltbar unter Optionen › Anzeige). Bei Schlachtzügen erscheinen Rollenzahlen statt Einzel-Icons. |
-| Punkte | Rechts der Nutzen („30“), farbig wie die M+-Wertung in Retail: grün = passt gut (ab 40), gelb = passt (15–39), grau = wenig Nutzen; bei Quests & Zonen neutral weiß. Der **Gruppenwert** („72 %“, wie vollständig die Gruppe schon ist) steht im Tooltip direkt unter dem Urteil. Abschaltbar in den Optionen; dort erklärt „Wie entstehen die Punkte?“ die Berechnung. |
-| Schrift | Feste Größen wie bei Blizzard: Namen 14, alles andere 12. Schriftart wählbar (Standard: die WoW-Schrift). |
-| Eigener Eintrag | Zeigt die Mitglieder deiner Gruppe (Klassenfarbe, Rolle), die noch fehlende Rolle als blasses Symbol und in Zeile 2 „Eure Einträge · Aktivität“. Ohne Punkte. |
-| Abkürzungen | Passt ein Text nicht, kürzt BGF zuerst sinnvoll: „Höhlen d. Wehklagens“, „Ruinen v. Lordaeron“, „Aldarin S.“. Erst dann wird mit „…“ abgeschnitten. Der Tooltip zeigt immer die vollen Namen. |
-| Filterleiste | Filter-Button neben „Aktualisieren“ (bleibt eingedrückt, solange die Leiste offen ist). Abgerundete Chips, Punkt = benötigt, Halbkreis = bevorzugt, Häkchen = gewählte Rolle, Stern = Favorit, türkiser Rand = mit ausgewählt. Eine eigene Zeile **Favoriten**, darunter die Kategorien **Klassen**, **Buffs**, **Dispells** und **Kampf & Hilfsmittel** zum Aufklappen. Zugeklappte Kategorien stehen nebeneinander (grau), mit Zähler für aktive Chips („+ Buffs (2)“); eine geöffnete bekommt eigene Zeilen und einen goldenen Kategorie-Chip. |
-| Filter aus | Haken „BGF-Filter aktiv“ entfernen: die BGF-Ansicht bleibt, aber ohne Punkte, ohne Aussortieren, in Blizzards Reihenfolge. Die Leiste bleibt offen (Filter ausgegraut). |
-| Notausgang | `/bgf off` zeigt Blizzards Originalliste (ohne Filterleiste und Filter-Button), `/bgf on` holt BGF zurück. |
-| Logo | Erscheint in der Addon-Liste. |
-| Bewertung | Automatisch aus deiner Sicht: solo „passe ich rein?“, in einer Gruppe „passt der zu uns?“. Zwei Gruppen werden auf einen Zusammenschluss geprüft. |
-| Tooltip | Blizzards Tooltip (Mitglieder, Voicechat, Aktivität) plus darunter die BGF-Begründung: grün = Vorteil, rot = Abzug, grau = Lücke, orange = Ausschlussgrund. |
-| Vorlagen-Button | Im Footer zwischen „Nachricht senden“ und „Gruppeneinladung“. Öffnet das Vorlagen-Menü; ein Klick auf eine Vorlage **sendet sofort**. |
-| Rechtsklick auf Eintrag | Eigenes Kontextmenü: Nachricht senden, Einladen (wenn möglich), Vorlagen …, dazu „Melden …“ als Hinweis: Melden erlaubt Blizzard Addons nicht (`C_ReportSystem.SendReport` „Not allowed to be called by addons“), es geht in Blizzards Liste nach `/bgf off`. |
-| Sprachen | Oberfläche in allen 11 Clientsprachen. Vorlagen: deine Spielsprache plus Englisch. |
+| Result list | Its own list inside the Group Finder window, styled like Blizzard's. Sections: **Groups**, **Players**, **Sorted out** (collapsed, with the reason). Sorted by BGF points. |
+| Window size | The window keeps **Blizzard's original width and height**. It only grows taller while the filter bar is open (outside of combat). |
+| Listings | Two lines: name (+ level, "New players welcome") on top, instance below. Playstyle and role icons in the middle, each role icon with a ring in class colour (can be turned off under Options › Display). Raids show role counts instead of single icons. |
+| Points | On the right, the value a listing brings ("30"), coloured like the M+ rating in Retail: green = good fit (40+), yellow = fits (15–39), grey = little value; neutral white for quests & zones. The **group value** ("72 %", how complete the group already is) is in the tooltip right below the verdict. Can be turned off in the options; "How are points calculated?" explains the rating there. |
+| Font | Fixed sizes like Blizzard's: names 14, everything else 12. Font face selectable (default: the WoW font). |
+| Your own listing | Shows your group members (class colour, role), the missing role as a faded icon and, in line 2, "Your listings · activity". No points. |
+| Abbreviations | If a text does not fit, BGF first shortens it sensibly (German example: "Höhlen d. Wehklagens"). Only then is it cut off with "…". The tooltip always shows the full names. |
+| Filter bar | Filter button next to "Refresh" (stays pressed while the bar is open). Rounded chips: dot = required, half circle = preferred, tick = selected role, star = favourite, turquoise border = selected along with another chip. A **Favourites** row, below it the categories **Classes**, **Buffs**, **Dispels** and **Combat & utility** to expand. Collapsed categories sit side by side (grey) with a counter for active chips ("+ Buffs (2)"); an open one gets its own rows and a golden category chip. |
+| Filter off | Untick "BGF filter active": the BGF view stays, but without points, without sorting out, in Blizzard's order. The bar stays open (filters greyed out). |
+| Emergency exit | `/bgf off` shows Blizzard's original list (without filter bar and filter button), `/bgf on` brings BGF back. |
+| Rating | Automatically from your point of view: solo "do I fit in?", in a group "does this player fit us?". Two groups are checked for a merge. |
+| Tooltip | Blizzard's tooltip (members, voice chat, activity) plus the BGF reasoning below it: green = advantage, red = penalty, grey = gap, orange = reason for sorting out. |
+| Templates button | In the footer between "Send message" and "Group invite". Opens the template menu; clicking a template **sends it right away**. |
+| Right-click on a listing | Own context menu: send message, invite (if possible), templates…, plus "Report…" as a note: Blizzard does not allow addons to report (`C_ReportSystem.SendReport`), so reporting works in Blizzard's list after `/bgf off`. |
+| What's new | After an update, a short "What's new in BGF" window appears once at login. Can be switched off; the options main page shows the same content. |
+| Languages | Interface in all WoW client languages (10 translations). Templates: your game language plus English. |
 
 ---
 
-## 3. Bedienung
+## 3. Usage
 
-### Filterleiste
-- **Speichern · Zurücksetzen** (rechts in der ersten Zeile): „Speichern“ legt die Chips der gerade angezeigten Gruppenfinder-Kategorie als deinen eigenen Standard fest. „Zurücksetzen“ stellt die Chips dieser Kategorie auf deinen Standard zurück (ohne gespeicherten Standard: auf den eingebauten) und die Rollen auf automatisch; Favoriten und die anderen Kategorien bleiben. „Filter zurücksetzen“ in den Optionen setzt alle Kategorien zurück, „Standards wiederherstellen“ löscht deine eigenen Standards.
-- **BGF-Filter aktiv:** schaltet Bewertung, Sortierung und Aussortieren ein oder aus. Die BGF-Ansicht und die Leiste bleiben.
-- **Bewertung für:** deine Perspektive, z. B. „Jäger 22 · DPS“ oder „Deine Gruppe (3)“. Bei wenig Platz entfällt das Wort „Bewertung für:“.
-- **Profil:** wird nicht angezeigt, folgt aber der Kategorie oben im Fenster (Dungeons, Schlachtzüge, sonstige). Jede Kategorie hat eigene Chip-Einstellungen.
-- **Freier Platz für / Gesucht:** automatisch gesetzt (solo deine Rollen aus dem Gruppenfinder, in einer Gruppe die fehlenden Rollen). Ein Klick wechselt auf manuelle Auswahl; „Filter zurücksetzen“ in den Optionen stellt wieder auf automatisch. Das erklärt auch der Tooltip der Rollen-Chips. Solo gelten die Chips für dich: bei Gruppen als die Rolle, mit der du beitrittst; bei anderen Einzelspielern (ihr würdet eine Gruppe aufmachen) schränken sie den anderen nicht ein.
-- **Chips:** Linksklick wechselt zwischen *egal* (grau), *bevorzugt* (weiß, Halbkreis) und *benötigt* (gold, Punkt). **Rechtsklick** macht einen Chip zum Favoriten (Stern) oder entfernt ihn wieder; Favoriten stehen zusätzlich in der Favoriten-Zeile, es ist derselbe Chip. Start-Favoriten: Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft, Mana. Der Tooltip eines Chips ist kurz: welche Klassen die Fähigkeit mitbringen, darunter „evtl.:“ für Klassen, die sie nur mit Talent, Begleiter, Form o. ä. haben, und der Hinweis „Umschalt gedrückt halten: Details“. Mit gedrückter Umschalttaste (live) zeigt er Klasse, Zauber und Lernstufe, bei Bedingungen mit Hinweis (z. B. „Krieger – Schildhieb ab Stufe 12 (nur mit Schild)“, „Priester – Stille ab Stufe 30 (Talent)“). Die Zaubernamen kommen aus dem Spiel, also in deiner Clientsprache.
-- **Loot-Konkurrenz** (Chip „Loot“, Kategorie *Loot*, Start-Favorit): *bevorzugt* = Minuspunkte pro Konkurrent (−8, „evtl.“ −4), *benötigt* = Gruppen mit Konkurrent werden aussortiert („evtl.“ senkt nur die Punkte). Konkurrent ist, wer die gleiche Klasse hat oder die gleiche Rüstungsart (unter/ab Stufe 40: Jäger/Schamane Leder/Kette, Krieger/Paladin Kette/Platte) mit gleichem Hauptwert (aus Klasse und Rolle; Schamane als DD nur „evtl.“). Ringe, Halsketten, Umhänge und Waffen zählen nicht. Standardmäßig wird nur für dich geprüft; **Umschalt-Klick** auf den Chip öffnet ein Menü mit dir und deinen Gruppenmitgliedern zum An- und Abhaken (z. B. nur für einen Freund). Der Chip zeigt, für wen er gilt: „Loot (ich)“, „Loot (Thoradin)“, „Loot (2)“, „Loot (niemand)“.
-- **Zonen:** Jeder Eintrag zeigt neben der Aktivität die aktuelle Zone (bei Gruppen die des Anführers – das Spiel meldet nur dessen Zone; auch im Tooltip), grün = deine Zone, grau = woanders. Chip **„Gleiche Zone“** (standardmäßig egal, direkt in der Fähigkeiten-Zeile): *bevorzugt* +6 für Spieler in deiner Zone, *benötigt* = nur Spieler in deiner Zone (unbekannte Zonen werden nicht aussortiert).
-- **Angezeigte Chips** (Optionen → „Filter & Chips“): Favoriten-Zeile, Fähigkeiten-Zeile, einzelne Kategorien und Chips ausblenden. Ausgeblendet zählt als *egal*, auch über Verknüpfungen und Instanz-Hinweise; ohne Fähigkeiten-Zeile bleiben nur die Favoriten nutzbar.
-- **Kategorien:** *Klassen* (9 Chips, „diese Klasse in der Gruppe“, von Haus aus *egal*), *Buffs* (Angriffskraft, Mana, Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Segen der Könige, Segen der Rettung, Göttlicher Willen, Furchtzauberschutz), *Dispells* (Fluch, Magie, Gift, Krankheit), *Kampf & Hilfsmittel* (Kontrolle, Unterbrechen, Kampfwiederbelebung, Gesundheitsstein, Beschwören). Der Tooltip eines Klassen-Chips zeigt kurz eine Zeile pro Bereich (nur bedingt verfügbare Fähigkeiten grau); mit Umschalt die Vollansicht mit allem, was die Klasse der Gruppe bringt: Bereiche Kampf & Hilfsmittel, Dispells, Buffs (goldene Überschriften), ein Zauber pro Zeile, Name weiß, Stufe grau, Bedingung orange, dahinter der Chip („– Kontrolle“) oder bei Buffs der Effekt in Hellblau („· Ausdauer +“). Am Ende steht türkis, was die Klasse mit auswählt.
-- **Verknüpfung:** Ein Klassen-Chip wählt die Buffs seiner Klasse im gleichen Zustand mit aus (Krieger *benötigt* → Angriffskraft *benötigt*; Hexenmeister → Gesundheitsstein und Beschwören). Ein Chip, den nur eine Klasse bringt, wählt die Klasse mit aus (Seelenstärke → Priester). Keine Kettenreaktion. Mit ausgewählte Chips haben einen türkisen Rand; ein Klick darauf schaltet sie trotzdem ab („abgewählt trotz …“, gedämpft türkiser Rand und durchgestrichen), bis der auslösende Chip wieder aus ist. Mit ausgewählte Chips geben Punkte und Abzüge, sortieren aber nicht allein aus.
-- **Vorrang:** Einträge, die alle Chips erfüllen, die du selbst auf *benötigt* gestellt hast, stehen in Gruppen und Spielern immer oben; die übrigen folgen mit dem Hinweis „Nachrangig“.
+### Filter bar
+- **Save · Reset** (right side of the first row): "Save" stores the chips of the Group Finder category currently shown as your own default. "Reset" sets the chips of this category back to your default (without a saved default: to the built-in one) and the roles to automatic; favourites and other categories stay. "Reset filters" in the options resets all categories, "Restore defaults" deletes your own defaults.
+- **BGF filter active:** turns rating, sorting and sorting out on or off. The BGF view and the bar stay.
+- **Rating for:** your perspective, e.g. "Hunter 22 · DPS" or "Your group (3)".
+- **Profile:** not shown, but follows the category at the top of the window (dungeons, raids, other). Each category has its own chip settings.
+- **Open slot for / Looking for:** set automatically (solo: your roles from the Group Finder; in a group: the missing roles). A click switches to manual selection; "Reset filters" in the options switches back to automatic. Solo, the chips apply to you: for groups as the role you join with; for other single players (you would start a group together) they don't restrict the other player.
+- **Chips:** left-click cycles between *ignored* (grey), *preferred* (white, half circle) and *required* (gold, dot). **Right-click** makes a chip a favourite (star) or removes it; favourites also appear in the favourites row, it is the same chip. Starting favourites: crowd control, interrupt, battle res, attack power, mana. A chip's tooltip is short: which classes bring the ability, below it "maybe:" for classes that only have it with a talent, pet, form or similar, and the hint "Hold Shift: details". With Shift held (live) it shows class, spell and level learned, with conditions where they apply (e.g. "Warrior – Shield Bash from level 12 (shield only)", "Priest – Silence from level 30 (talent)"). Spell names come from the game, so they are in your client language.
+- **Loot competition** ("Loot" chip, starting favourite): *preferred* = minus points per competitor (−8, "maybe" −4), *required* = groups with a competitor are sorted out ("maybe" only lowers the points). A competitor is someone with the same class, or the same armour type (below/from level 40: Hunter/Shaman leather/mail, Warrior/Paladin mail/plate) with the same main stat (from class and role; Shaman as DPS only "maybe"). Rings, necklaces, cloaks and weapons don't count. By default BGF only checks for you; **Shift-click** on the chip opens a menu with you and your group members to tick (e.g. only for a friend). The chip shows who it applies to: "Loot (me)", "Loot (Thoradin)", "Loot (2)", "Loot (nobody)".
+- **Zones:** every listing shows the current zone next to the activity (for groups the leader's, the game only reports that one; also in the tooltip), green = your zone, grey = elsewhere. **"Same zone"** chip (ignored by default, directly in the abilities row): *preferred* +6 for players in your zone, *required* = only players in your zone (unknown zones are never sorted out).
+- **Shown chips** (Options › Filter & Chips): hide the favourites row, the abilities row, single categories or chips. Hidden counts as *ignored*, also for links and instance hints; without the abilities row only the favourites remain usable.
+- **Categories:** *Classes* (9 chips, "this class in the group", *ignored* by default), *Buffs* (attack power, mana, Fortitude, Arcane Intellect, Mark of the Wild, Blessing of Kings, Blessing of Salvation, Divine Spirit, Fear Ward), *Dispels* (curse, magic, poison, disease), *Combat & utility* (crowd control, interrupt, battle res, healthstone, summon). A class chip's tooltip shows one line per category; with Shift, the full view of everything the class brings to the group.
+- **Links:** a class chip selects its class's buffs in the same state (Warrior *required* → attack power *required*; Warlock → healthstone and summon). A chip only one class brings selects that class (Fortitude → Priest). No chain reactions. Chips selected this way have a turquoise border; clicking them turns them off anyway ("deselected despite …", muted turquoise border, struck through) until the triggering chip is off again. Linked chips give points and penalties but never sort anything out on their own.
+- **Priority:** listings that meet all chips you set to *required* yourself always come first in groups and players; the rest follow with the note "Lower priority".
 
-### Vorlagen-Button
-| Auswahl | Was passiert | Menü-Überschrift |
+### Templates button
+| Selection | What happens | Menu heading |
 |---|---|---|
-| Gruppe, du bist solo | Beitrittsanfrage an den Gruppenleiter | „Beitrittsanfrage an …“ |
-| Gruppe, du bist in einer Gruppe | Anfrage als Gruppe (Zusammenschluss) | „Anfrage als Gruppe an …“ |
-| Einzelspieler, du darfst einladen | Einladung **und** Einladungsnachricht | „Einladen + Nachricht an …“ |
+| Group, you are solo | Join request to the group leader | "Join request to …" |
+| Group, you are in a group | Request as a group (merge) | "Request as group to …" |
+| Single player, you may invite | Invite **and** invite message | "Invite + message to …" |
 
-Aufbau des Menüs: weiße Überschrift (was passiert), darunter die Sprachen in Gold (deine Spielsprache, dann Englisch), darunter eingerückt die Vorlagen. Wer mit der Maus über eine Vorlage fährt, sieht den fertigen Text. Ist der Chat gerade gesperrt (Kampf in Instanzen) oder schlägt das Senden fehl, steht der Text fertig im Chatfenster; dann genügt Enter.
+Menu layout: white heading (what happens), below it the languages in gold (your game language, then English), below that the indented templates. Hover a template to see the finished text. If the chat is locked (combat in instances) or sending fails, the text is ready in the chat box; just press Enter.
 
-### Befehle
-| Befehl | Wirkung |
+### Commands
+| Command | Effect |
 |---|---|
-| `/bgf` | Optionen öffnen |
-| `/bgf off` / `/bgf on` | Notausgang: Blizzards Originalliste / BGF wieder an |
-| `/bgf debug` | Debug-Ausgabe an/aus. Beim Hovern über einen Eintrag werden dessen Rohdaten (inkl. `mapID`, Spezialisierung) in den Chat geschrieben. |
+| `/bgf` | Open the options |
+| `/bgf off` / `/bgf on` | Emergency exit: Blizzard's original list / BGF back on |
+| `/bgf debug` | Debug output on/off. Hovering a listing prints its raw data (incl. `mapID`, specialisation) to the chat. |
 
-### Optionen (`/bgf` oder Optionen → AddOns → BGF - Better Group Finder Forever)
-- **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen, darunter die Neuerungen der aktuellen Version direkt auf der Seite (Versionsabzeichen öffnet frühere Releases), Befehle.
-- **Anzeige:** **Punkte anzeigen** (mit Button „Wie entstehen die Punkte?“), BGF-Bewertung im Tooltip, **Rollensymbole in Klassenfarbe umranden** (aus = kein Ring, wie bei Blizzard), Schriftart.
-- **Filter & Chips:** BGF-Filter aktiv, angezeigte Zeilen/Kategorien/Chips, „Alle anzeigen“, „Filter zurücksetzen“, „Standards wiederherstellen“.
-- **Nachrichtenvorlagen:** Sofort senden, Vorlagen je Sprache (die eigene Sprache ist vorausgewählt und hervorgehoben), „Vorlagen dieser Sprache zurücksetzen“.
-- **Schriftart** (Anzeige) mit Vorschau:
-  - im Spiel enthalten: Friz Quadrata (Standard), Arial Narrow, Morpheus, Skurri
-  - mitgeliefert: Philosopher, PT Sans Narrow, Roboto Condensed, Noto Sans
-  - zusätzlich alle Schriften aus **LibSharedMedia**, falls ein anderes Addon (z. B. Details, WeakAuras, ElvUI) sie mitbringt. Umgekehrt stellt BGF seine Schriften dort auch anderen Addons bereit.
-  - Koreanische und chinesische Clients verwenden immer die Spielschrift.
-- **Vorlagen** je Sprache (Spielsprache und Englisch): pro Vorlage ein **Name** (erscheint im Menü) und der **Text**. Leeres Feld = Standard. „Vorlagen dieser Sprache zurücksetzen“ setzt Namen und Texte zurück.
+### Options (`/bgf` or Options › AddOns › BGF - Better Group Finder Forever)
+- **Main page:** version, short description, "Show what's new after updates", the news of the current version (the version badge opens earlier releases), commands.
+- **Display:** **Show points** (with the button "How are points calculated?"), BGF rating in the tooltip, **class colour ring around the role icons** (off = no ring, like Blizzard's), font.
+- **Filter & Chips:** BGF filter active, shown rows/categories/chips, "Show all", "Reset filters", "Restore defaults".
+- **Message templates:** send immediately, templates per language (your own language is preselected and highlighted), "Reset templates of this language".
+- **Font** with preview:
+  - included in the game: Friz Quadrata (default), Arial Narrow, Morpheus, Skurri
+  - bundled: Philosopher, PT Sans Narrow, Roboto Condensed, Noto Sans
+  - plus all fonts from **LibSharedMedia** if another addon (e.g. Details, WeakAuras, ElvUI) brings them. In return, BGF offers its fonts to other addons there.
+  - Korean and Chinese clients always use the game font.
+- **Templates** per language (game language and English): each template has a **name** (shown in the menu) and a **text**. Empty field = default.
 
-Platzhalter in Vorlagen:
+Placeholders in templates:
 
-| Platzhalter | Wird ersetzt durch |
+| Placeholder | Replaced with |
 |---|---|
-| `{name}` | Empfänger |
-| `{me}` | deinen Namen |
-| `{class}` | deine Klasse (in der Sprache der Vorlage) |
-| `{role}` | deine Rolle |
-| `{level}` | deine Stufe |
-| `{instance}` | die Aktivität; im englischen Text mit englischem Namen (eigene Namenstabelle nach Karten-ID, z. B. „Shadowfang Keep“ statt „Burg Shadowfang“) |
-| `{group}` | deine Gruppe, z. B. „Krieger (Tank), Priester (Heiler)“ |
+| `{name}` | recipient |
+| `{me}` | your name |
+| `{class}` | your class (in the template's language) |
+| `{role}` | your role |
+| `{level}` | your level |
+| `{instance}` | the activity; in the English text with the English name (own name table by map ID, e.g. "Shadowfang Keep" instead of "Burg Shadowfang") |
+| `{group}` | your group, e.g. "Warrior (Tank), Priest (Healer)" |
+
+All settings are saved account-wide in `WTF\Account\<Account>\SavedVariables\BetterGroupFinder.lua`.
 
 ---
 
-## 4. Filter- und Bewertungslogik
+## 4. Filter and rating logic
 
-Die Logik liegt in `Logic/Scoring.lua` und ist reines Lua ohne Spiel-API (offline getestet).
+The logic lives in `Logic/Scoring.lua` and is plain Lua without game API (tested offline).
 
-**Wer ist Gastgeber, wer Gast?** Die größere Seite ist der Gastgeber, bei Gleichstand deine.
-- Solo vs. Gruppe: Die Gruppe nimmt dich auf.
-- Deine Gruppe vs. Einzelspieler: Ihr nehmt ihn auf.
-- Gruppe vs. Gruppe: Zusammenschluss.
+**Who is host, who is guest?** The bigger side is the host; on a tie, yours.
+- Solo vs. group: the group takes you in.
+- Your group vs. single player: you take them in.
+- Group vs. group: merge.
 
-**Rollenziele:**
-- Dungeon (5er): 1 Tank / 1 Heiler / 3 DPS, **streng**. Überzählige Rollen werden aussortiert.
-- Schlachtzug:
-  - 10er: 2 / 3 / 5
-  - 20er: 3 / 5 / 12
-  - 40er: 4 / 10 / 26
-  - Andere Größen werden anteilig skaliert. Überzählige Rollen geben nur Abzug.
-- Quests & Zonen / Benutzerdefiniert: keine Rollenziele, keine Rollenprüfung (Rollen-Chips ausgegraut), keine Abzüge für gleiche Klasse oder fehlenden Nutzen, kein Aussortieren wegen 0 Punkten.
+**Role targets:**
+- Dungeon (5 players): 1 tank / 1 healer / 3 DPS, **strict**. Surplus roles are sorted out.
+- Raid:
+  - 10: 2 / 3 / 5
+  - 20: 3 / 5 / 12
+  - 40: 4 / 10 / 26
+  - Other sizes are scaled proportionally. Surplus roles only give a penalty.
+- Quests & zones / custom: no role targets, no role check (role chips greyed out), no penalties for same class or missing value, nothing sorted out for 0 points.
 
-Spieler mit mehreren angebotenen Rollen bekommen zuerst einen freien Tank- oder Heilerplatz (knappe Rollen), dann DPS.
+Players offering several roles get a free tank or healer slot first (scarce roles), then DPS.
 
-**Punkte:**
+**Points:**
 
-| Faktor | Punkte |
+| Factor | Points |
 |---|---|
-| Füllt fehlenden Tank / Heiler | +40 |
-| Füllt fehlenden DPS-Platz | +20 |
-| Bringt fehlende Fähigkeit | + Gewicht (×1,5 bei „benötigt“, ×1,5 bei Instanz-Hinweis) |
-| Fähigkeit nur „möglich“ (Talent/Begleiter/Schild/Kreaturtyp) | + halbes Gewicht; im Tooltip mit der echten Bedingung, z. B. „bringt evtl. Unterbrechen (Talent)“ |
-| Gruppe wäre vollständig | +10 |
-| Zusammenschluss möglich | +5 |
-| Weitere gleiche Klasse ohne neuen Nutzen | −10 (Schlachtzug −5) |
-| Kein neuer Nutzen | −5 (Schlachtzug −2) |
-| Stufe außerhalb der Empfehlung | −8 |
-| Überzählige Rolle im Schlachtzug | −8 |
-| „Benötigt“ fehlt noch oder ist nur „möglich“, aber es sind Plätze frei | − halbes Gewicht |
+| Fills a missing tank / healer | +40 |
+| Fills a missing DPS slot | +20 |
+| Brings a missing ability | + weight (×1.5 when "required", ×1.5 with an instance hint) |
+| Ability only "possible" (talent/pet/shield/creature type) | + half weight; the tooltip names the real condition, e.g. "maybe brings interrupt (talent)" |
+| Group would be complete | +10 |
+| Merge possible | +5 |
+| Another player of the same class without new value | −10 (raid −5) |
+| No new value | −5 (raid −2) |
+| Level outside the recommended range (other players below it) | −8 |
+| Surplus role in a raid | −8 |
+| "Required" still missing or only "possible", but slots are free | − half weight |
 
-**Gewichte der Fähigkeiten:**
+**Ability weights:**
 
-| Fähigkeit | Gewicht |
+| Ability | Weight |
 |---|---|
-| Kontrolle | 10 |
-| Unterbrechen | 8 |
-| Beschwören | 7 |
-| Fluch entfernen, Magie bannen, Kampfwiederbelebung, jede Klasse (Klassen-Chips) | 6 |
-| Gift heilen, Krankheit heilen | 5 |
-| Seelenstärke, Furchtzauberschutz | 4 |
-| Mal der Wildnis, Segen der Könige, Gesundheitsstein | 3 |
-| Angriffskraft, Mana, Arkane Intelligenz, Segen der Rettung, Göttlicher Willen | 2 |
+| Crowd control | 10 |
+| Interrupt | 8 |
+| Summon | 7 |
+| Remove curse, dispel magic, battle res, each class (class chips) | 6 |
+| Cure poison, cure disease | 5 |
+| Fortitude, Fear Ward | 4 |
+| Mark of the Wild, Blessing of Kings, healthstone | 3 |
+| Attack power, mana, Arcane Intellect, Blessing of Salvation, Divine Spirit | 2 |
 
-Im Schlachtzug zählt eine Klasse nur einmal: Ist schon ein Druide dabei, bringt ein zweiter für den Druiden-Chip nichts mehr.
+In a raid a class only counts once: with a Druid already in, a second one brings nothing more for the Druid chip.
 
-**Aussortiert** (in den Bereich „Aussortiert“, nie unsichtbar) werden:
-- zu viele Spieler zusammen
-- kein Platz für die Rolle (mit Angabe, welche Rolle noch gesucht wird)
-- Rolle nicht gesucht (manuelle Rollen-Auswahl)
-- eine selbst auf *benötigt* gestellte Fähigkeit oder Klasse fehlt (oder ist nur „möglich“) und kann nicht mehr dazukommen: kein Platz frei, oder keine Klasse, die sie mitbringt, kann eine der noch offenen Rollen spielen („Benötigt: Magier passt auf keinen freien Platz mehr“)
-- Stufe unter der Mindeststufe der Aktivität
-- passt nicht zum Aktivitätsfilter, nicht mehr gelistet
-- **0 Punkte oder weniger** („Kein echter Mehrwert“)
+**Sorted out** (moved to the "Sorted out" section, never hidden) are:
+- too many players combined
+- no slot for the role (naming which role is still wanted)
+- role not wanted (manual role selection)
+- an ability or class you set to *required* yourself is missing (or only "possible") and can't be added anymore: no free slot, or no class that brings it can play one of the open roles ("Required: Mage doesn't fit any free slot")
+- level below the activity's minimum level
+- doesn't match the activity filter, no longer listed
+- **0 points or less** ("No real benefit")
 
-**Gruppenwert** (nur bei Gruppen, nur mit Rollenzielen, also nicht bei Quests & Zonen):
-- 60 % Rollen: besetzte Plätze im Verhältnis zum Ziel, Tank- und Heilerplätze zählen doppelt.
-- 40 % Fähigkeiten: alle Fähigkeiten, die nicht auf „egal“ stehen (plus Instanz-Hinweise), gewichtet wie oben; „möglich“ zählt halb.
-- Der Tooltip zeigt die Details: „Gruppenwert 72 %: Rollen 3/5, Fähigkeiten 2/3“.
+**Group value** (groups only, only with role targets, so not for quests & zones):
+- 60 % roles: filled slots relative to the target, tank and healer slots count double.
+- 40 % abilities: all abilities not set to "ignored" (plus instance hints), weighted as above; "possible" counts half.
+- The tooltip shows the details: "Group value 72 %: roles 3/5, abilities 2/3".
 
-Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wurden aussortiert – Filter lockern?“.
+If all results are sorted out, a note appears at the top: "All X results were sorted out – loosen the filters?".
 
-**Fähigkeiten:**
-- Eigener Charakter: BGF prüft dein Zauberbuch. Das gilt aber nur, wenn die Klassik-Spell-IDs in Forever erkannt werden. Sonst fällt BGF auf Klasse + Stufe zurück, siehe `/bgf debug` → „spellbook check“.
-- Andere Spieler: Klasse + Stufe. Talente, Begleiter, Schild oder Kreaturtyp machen eine Fähigkeit nur „möglich“.
-- Talente stammen aus den Talentbäumen der Forever-Beta (Build 1.60.1.70291): frühestens ab Stufe 10 + 5 × (Reihe − 1). Hast du selbst das Talent gelernt, zählt es bei dir als sicher.
-- Aufgenommene Talente: Erschütternder Schlag (Krieger), Buße (Paladin), Streuschuss, Einschüchterung und Aura des Volltreffers (Jäger), Stille (Priester), Totem der Manaflut (Schamane), Wilde Attacke (Druide).
-- Eine vorhandene Fähigkeit wird nicht noch einmal als fehlend oder als Vorteil gezählt.
+**Abilities:**
+- Your own character: BGF checks your spellbook, as long as the Classic spell IDs are recognised in Forever. Otherwise BGF falls back to class + level, see `/bgf debug` → "spellbook check".
+- Other players: class + level. Talents, pets, shield or creature type make an ability only "possible".
+- Talents come from the talent trees of the Forever beta (build 1.60.1.70291): at the earliest from level 10 + 5 × (row − 1). If you learned the talent yourself, it counts as certain for you.
+- Included talents: Concussion Blow (Warrior), Repentance (Paladin), Scatter Shot, Intimidation and Trueshot Aura (Hunter), Silence (Priest), Mana Tide Totem (Shaman), Feral Charge (Druid).
+- An ability already present is not counted again as missing or as an advantage.
 
-**Instanz-Hinweise** (`Data/Profiles.lua`): Für bekannte Instanzen werden bestimmte Fähigkeiten höher gewichtet und auch dann berücksichtigt, wenn sie auf „egal“ stehen. Beispiele sind Gift und Magie in den Höhlen des Wehklagens oder Krankheit und Fluch in Stratholme. Für Furcht-Instanzen (Schwarzfelstiefen, Geschmolzener Kern, Onyxias Hort, Pechschwingenhort) wird Furchtzauberschutz berücksichtigt. Neue Forever-Instanzen kannst du dort ergänzen. Die `mapID` liefert `/bgf debug`.
+**Instance hints** (`Data/Profiles.lua`): for known instances certain abilities get a higher weight and count even when set to "ignored". Examples: poison and magic in Wailing Caverns, disease and curse in Stratholme. For fear-heavy instances (Blackrock Depths, Molten Core, Onyxia's Lair, Blackwing Lair) Fear Ward is taken into account.
 
-**Unbekannte Daten:**
-- Fehlen Klasse oder Rolle, wird das als „? …“ gekennzeichnet und nicht geraten.
-- Sind die Mitgliederdaten gesperrt (Chat-Sperre im Kampf in Instanzen), zeigt BGF das als Hinweis an und bewertet erst danach wieder.
-
----
-
-## 5. Bekannte Einschränkungen
-
-- **Nicht im Spiel getestet.** BGF wurde gegen Blizzards veröffentlichten Forever-UI-Code (1.60.1) und die offizielle API-Dokumentation gebaut, aber ohne Client. Siehe Abschnitt 6.
-- **Sprache des Gegenübers** liefert die API nicht. Darum wählst du im Menü zwischen deiner Sprache und Englisch.
-- **Spezialisierung und Talente** fremder Spieler sind nicht verfügbar: Das Feld `specName` enthält in der Beta nur den Klassennamen. Talentabhängige Fähigkeiten zählen deshalb nur als „möglich“.
-- **Talentdaten** stammen aus [talentsforever.com](https://talentsforever.com/) (Daten aus dem Beta-Client, Build 1.60.1.70291, Lizenz CC BY 4.0), geprüft an einzelnen Wowhead-Forever-Zauberseiten. Bis zum Release (4. November 2026) können sich Talente noch ändern. Die Lernstufe von Hieb (Druide) ist aus Classic übernommen und nicht für Forever bestätigt.
-- **Fähigkeitentabelle** (`Data/Abilities.lua`): Lernstufen und Spell-IDs stammen aus WoW Classic.
-  - Zaubernamen im Tooltip liefert das Spiel (`C_Spell.GetSpellName`). Kennt Forever eine ID nicht, zeigt BGF den Namen aus der Tabelle: auf Deutsch, in allen anderen Sprachen auf Englisch.
-  - Für Forever bestätigt: kein Kampfrausch/Heldentum, Furchtzauberschutz für alle Priester ab 20, Segen der Könige (20) und der Rettung (26) sowie Göttlicher Willen (30) ohne Talent, kein Stich des Flügeldrachen.
-  - Nach Klassenpatches muss die Tabelle eventuell angepasst werden.
-- **Schlachtzüge** gibt es in der Beta noch nicht; die Schlachtzug-Logik ist nur offline getestet.
-- **Karten-IDs:** Forever nutzt die Classic-IDs (geprüft: Burg Shadowfang 33, Todesminen 36, Höhlen des Wehklagens 43); Ruinen von Lordaeron hat 2999. Instanz-Hinweise und Namenstabelle bauen darauf auf. Flügel werden nur aus dem Deutschen übersetzt.
-- **Eigene Menüs:** Vorlagen-Menü und Schriftarten-Liste sind eigene, einfache Fenster (`UI/Popup.lua`), nicht Blizzards Menüsystem. Mit `/console taintLog 1` stürzte der Beta-Client (1.60.1.70291) ab, wenn ein Addon-Knopf ein Blizzard-Menü öffnete (Assertion in `ldebug.c`). Auch das Rechtsklick-Menü auf Einträgen ist ein eigenes Menü. Escape schließt BGF-Fenster über eine eigene Tastenabfrage (außerhalb des Kampfes), nicht über Blizzards Liste `UISpecialFrames`.
-- **Keine Kategorie vorausgewählt:** Blizzard startet ohne Kategorie, BGF zeigt dann den Hinweis „Wähle oben links eine Kategorie“. Vorauswählen kann BGF sie nicht: Die Suche ist geschützt und würde durch einen Addon-Wert blockiert.
-- **Keine Hooks auf Blizzard-Funktionen:** BGF folgt dem Gruppenfinder über dessen Ereignisse (Suchergebnisse empfangen, Suche fehlgeschlagen, Eintrag geändert) und hängt sich nur an Fenster-Skripte (Öffnen, Schließen, Aktualisieren-Knopf). Mit eingeschaltetem Taint-Log brach der Beta-Client sonst Blizzards Aufrufkette beim Öffnen des Reiters ab.
-- **Sprachen außer Deutsch/Englisch** sind von mir übersetzt und sollten vor einer Veröffentlichung von Muttersprachlern geprüft werden.
-- **Fensterhöhe:** Mit offener Filterleiste ändert BGF die Höhe von Blizzards Fenster, nur außerhalb des Kampfes, um Taint zu vermeiden. Siehe Taint-Test unten.
-- **Spaltenbreiten und Abkürzungen** sind gegen geschätzte Schriftbreiten getestet, nicht im Client gemessen.
-- **Die Suche** selbst startet BGF nie. Sie bleibt geschützt und läuft über Blizzards Aktualisieren-Button.
-- **Einladen** ist wie bei Blizzard nur für Einzelspieler möglich. Gruppen erreicht man über die Anfrage an den Leiter.
+**Unknown data:**
+- If class or role is missing, it is marked as "? …" and not guessed.
+- If member data is locked (chat lockdown in instance combat), BGF shows a note and rates again afterwards.
 
 ---
 
-## 6. Tests
+## 5. Known limitations
 
-### Durchgeführt (ohne Spielclient)
-
-| Test | Umfang | Ergebnis |
-|---|---|---|
-| `luacheck` (Lua 5.1) | alle 26 Lua-Dateien | 0 Warnungen, 0 Fehler |
-| `tests/run.lua` | Bewertungslogik, Szenarien 1–7 und 12, Pflicht-Fähigkeiten, Stufen, Rollenwahl, Instanz-Hinweise, fehlende/gesperrte API, Gruppenwert, zusammengefasste Fähigkeiten und Umstellung alter Einstellungen, Mana-Buffs, Zauber je Klasse vollständig, Klassen-Chips, Talente als „möglich“ (eigene gelernte sicher), strengeres „benötigt“, Bedingung in der Begründung, Verknüpfungen und Überstimmen, offene Rollen bei „benötigt“, Instanznamen für englische Vorlagen, Abkürzungen, Vorlagensprachen und -namen; Vollständigkeit aller 11 Sprachdateien | 118/118 bestanden |
-| `tests/smoke.lua` | komplettes Addon in TOC-Reihenfolge mit nachgebildeter WoW-Oberfläche: Laden, Events, Liste mit Daten wie in den Beta-Screenshots, Spaltenbreiten und Abkürzungen bei Originalbreite (Schrift 12/14), Aussortieren, Filterleiste (Fenster nur höher, nicht breiter), Chips, „+ mehr“, Haken aus/an (BGF-Ansicht bleibt, keine Punkte, nichts aussortiert), Gruppenwert nur bei Gruppen, Chip-Tooltips (Klasse – Zauber ab Stufe, Bedingungen, Talente, Zaubernamen aus dem Spiel), Klassen-Tooltips nach Bereichen, Favoriten per Rechtsklick, Kategorien mit Zähler und eigenen Zeilen, Verknüpfung Krieger → Angriffskraft mit Überstimmen, Tooltip-Zeilen mit Farben und Effekten, goldener Chip für geöffnete Kategorien, Vorrang für „benötigt“ in der Liste, englischer Instanzname in der Vorlage, Rollen-Tooltip, keine Profilanzeige, Erklärungsfenster mit Abschnitten, Option „Punkte anzeigen“, Erklärungsfenster, `/bgf off` ohne Leiste und Button, Schriftarten inkl. LibSharedMedia, Vorlagen-Menü (Überschrift, nur zwei Sprachen, eigene Namen), Platzhalter, automatisches Senden, Fallback bei Chat-Sperre, Einladen + Nachricht, Tooltip, `/bgf`-Befehle | alle bestanden |
-
-Die Tests lassen sich mit Lua 5.1 erneut ausführen: `lua tests/run.lua` und `lua tests/smoke.lua` aus dem Addon-Ordner.
-
-### Nur konzeptionell geprüft, bitte im Spiel testen
-
-Vorher `/console taintLog 1` eingeben. Nach dem Test liegt die Datei `Logs\taint.log` im Client-Ordner.
-
-| # | Test | Erwartung |
-|---|---|---|
-| 1 | Gruppenfinder öffnen → Suche → Dungeons | BGF-Liste in Blizzard-Optik, Fenster in Originalgröße, +/- in den Bereichsköpfen korrekt |
-| 2 | Filter-Button | Filterleiste klappt auf, Fenster wird länger, Liste gleich hoch, Button bleibt eingedrückt, Zahnrad frei |
-| 3 | Fähigkeit auf „benötigt“ stellen | Punkt im Chip; Treffer ohne diese Fähigkeit rutschen nach unten bzw. zu „Aussortiert“ |
-| 4 | Liste ansehen | Spielstil auf Höhe der Rollen-Icons; rechts nur die Punkte ohne „+“, grün/gelb/grau; nichts überlappt |
-| 5 | Über Fähigkeiten-Chips fahren | kurzer Tooltip mit Klassen und Hinweis; Umschalt gedrückt: „Klasse – Zauber ab Stufe …“, Talente mit „(Talent)“; Loslassen wieder kurz |
-| 5a | Kategorien auf- und zuklappen, Rechtsklick auf Chips | geöffnete Kategorie in eigenen Zeilen; Stern und Favoriten-Zeile; Krieger *benötigt* → Angriffskraft mit türkisem Rand |
-| 5c | Optionen → Schriftart aufklappen | jeder Eintrag in seiner eigenen Schrift |
-| 5d | Englische Vorlage an eine Gruppe in Burg Shadowfang | Text nennt „Shadowfang Keep“ |
-| 5b | Optionen → „Wie entstehen die Punkte?“ | Abschnitte mit goldenen Überschriften, Plus grün, Abzüge rot, Aussortiert orange; scrollbar, falls zu lang |
-| 6 | Optionen → Schriftart wechseln | Liste, Filterleiste und Tooltip übernehmen die Schrift |
-| 7 | Eintrag hovern | Blizzard-Tooltip + BGF-Begründung darunter, Urteil farbig, bei Gruppen der Gruppenwert direkt darunter |
-| 8 | Gruppe wählen → Vorlagen → Freundlich | Flüsternachricht wird gesendet, Platzhalter korrekt |
-| 9 | Als Gruppenleiter Einzelspieler → Vorlagen | Einladung + Nachricht |
-| 10 | Haken „BGF-Filter aktiv“ aus/an | BGF-Ansicht bleibt, ohne Punkte/Aussortieren; nichts verschwindet hinter der Leiste. `/bgf off` → Originalliste |
-| 11 | Nach dem Test: Dungeon betreten, kämpfen, Aktionsleisten benutzen | **Bestanden (0.7.8, 10.10.2026):** Dungeon mit Kampf, Taint-Log Stufe 1 ohne einen Eintrag zu BetterGroupFinder. Einladen + Nachricht über die Vorlagen im echten Einsatz bestätigt. |
-| 12 | `/bgf debug`, über Einträge fahren | Rohdaten erscheinen. Bitte prüfen, ob `spec` gefüllt ist und welche `mapID` die Forever-Instanzen haben |
-
-Fehlermeldungen (BugSack) und Auffälligkeiten bitte mit Screenshot melden.
+- **Raids** were not available in the beta; the raid logic is only tested offline.
+- **The other player's language** is not provided by the API. That's why the menu lets you choose between your language and English.
+- **Specialisation and talents** of other players are not available: in the beta the `specName` field only contains the class name. Talent-based abilities therefore only count as "possible".
+- **Talent data** comes from [talentsforever.com](https://talentsforever.com/) (data from the beta client, build 1.60.1.70291, license CC BY 4.0), checked against individual Wowhead Forever spell pages. Talents may still change until launch (4 November 2026). The level for Bash (Druid) is taken from Classic and not confirmed for Forever.
+- **Ability table** (`Data/Abilities.lua`): levels and spell IDs come from WoW Classic.
+  - Spell names in the tooltip come from the game (`C_Spell.GetSpellName`). If Forever doesn't know an ID, BGF shows the name from the table: in German on German clients, in English everywhere else.
+  - Confirmed for Forever: no Bloodlust/Heroism, Fear Ward for all priests from 20, Blessing of Kings (20) and Salvation (26) as well as Divine Spirit (30) without talent, no Wyvern Sting.
+- **Map IDs:** Forever uses the Classic IDs (checked: Shadowfang Keep 33, Deadmines 36, Wailing Caverns 43); Ruins of Lordaeron is 2999. Instance hints and the name table rely on them.
+- **Own menus:** the template menu, the font list and the right-click menu are BGF's own simple windows (`UI/Popup.lua`), not Blizzard's menu system. With `/console taintLog 1`, the beta client crashed when an addon button opened a Blizzard menu. Escape closes BGF windows via its own key handling (outside of combat), not via Blizzard's `UISpecialFrames`.
+- **No category preselected:** Blizzard starts without a category; BGF then shows the hint "Choose a category at the top left". BGF can't preselect one: the search is protected and would be blocked by an addon value.
+- **No hooks on Blizzard functions:** BGF follows the Group Finder through its events (results received, search failed, listing changed) and only hooks window scripts (show, hide, refresh button).
+- **Languages other than German/English** are machine-assisted translations. Corrections from native speakers are very welcome.
+- **Window height:** with the filter bar open, BGF changes the height of Blizzard's window, only outside of combat, to avoid taint.
+- **The search** itself is never started by BGF. It stays protected and runs through Blizzard's refresh button.
+- **Inviting** only works for single players, like in Blizzard's UI. Groups are reached through a request to the leader.
 
 ---
 
-## 7. Dateien
+## 6. Feedback and contributing
 
-```
-BetterGroupFinder.toc   Interface 16001, SavedVariables BetterGroupFinderDB
-Init.lua                Namensraum, Hilfsfunktionen, Sprachlisten
-Locales/*.lua           11 Sprachen: Oberfläche, Klassen-/Rollenwörter, Standardvorlagen
-Data/Abilities.lua      Fähigkeiten je Klasse (Stufe, Spell-IDs, sicher/möglich)
-Data/Profiles.lua       Rollenziele, Standard-Filter je Profil, Instanz-Hinweise
-Data/Abbreviations.lua  Abkürzungsregeln je Sprache (des -> d., von -> v. ...)
-Data/Instances.lua      Instanznamen Englisch/Deutsch nach Karten-ID (für {instance})
-Logic/Scoring.lua       Bewertung (ohne Spiel-API)
-Logic/Engine.lua        Liest Gruppenfinder-Daten, Perspektive, Zauberbuchprüfung
-Core.lua                Einstellungen, Events, /bgf, Sprache, Vorlagen
-UI/Fonts.lua            Schriftarten (Spiel, mitgeliefert, LibSharedMedia)
-UI/List.lua             BGF-Liste, Zeilen, Bereiche, Spaltenbreiten, Abkürzen
-UI/Templates.xml        Zeilen-/Kopf-Vorlagen
-UI/Tooltip.lua          Tooltip mit Begründung
-UI/FilterBar.lua        Filterleiste
-UI/Popup.lua            eigenes kleines Menü (Vorlagen, Schriftarten)
-UI/Contact.lua          Vorlagen-Button und -Menü, Platzhalter, Versand
-UI/Options.lua          Optionen und Vorlagen-Editor
-UI/Main.lua             Einbindung in Blizzards Fenster, Header-Buttons, Fensterhöhe
-Media/Circle.tga        Kreis-Textur für Chips und Symbole
-Media/Logo.tga          Logo für die Addon-Liste (64x64), Quelle: Media/bgf_logo.svg
-Media/Fonts/            mitgelieferte Schriften + Lizenzen (SIL OFL, siehe FONTS.txt)
-tests/                  Offline-Tests (vom Spiel nicht geladen)
-```
+- **Discord:** [discord.gg/4nPNJMYetV](https://discord.gg/4nPNJMYetV) (forums for bugs and suggestions, plus a German channel)
+- **GitHub Issues:** [github.com/Ibona93/BetterGroupFinder/issues](https://github.com/Ibona93/BetterGroupFinder/issues)
+- **CurseForge:** comments on the project page
 
-Alle Einstellungen werden accountweit in `WTF\Account\<Account>\SavedVariables\BetterGroupFinder.lua` gespeichert.
+For Lua errors, please include a screenshot or the text from BugSack. Tests, file layout and the in-game test checklist are in [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 ---
 
-## 8. Änderungen
+## 7. Changelog
 
 **0.10.1**
-- Neue Option „Rollensymbole in Klassenfarbe umranden“ (Optionen › Anzeige, standardmäßig an). Aus = die Rollensymbole in der Liste haben keinen Ring in Klassenfarbe mehr, wie bei Blizzard. Namen bleiben in Klassenfarbe.
+- New option "Class colour ring around the role icons" (Options › Display, on by default). Turn it off for plain role icons in the list, like Blizzard's; the icons then fill the whole slot. Names keep their class colour.
 
 **0.10.0**
-- Aktuelle Zone in der Liste (grün = deine Zone) und im Tooltip (bei Gruppen die des Anführers); neuer Chip „Gleiche Zone“ (bevorzugt: Pluspunkte, benötigt: nur Spieler in deiner Zone).
+- Every listing now shows the current zone next to the activity (for groups the leader's zone). Green = your zone.
+- New "Same zone" chip: plus points for players in your zone (preferred) or only players in your zone (required). Off by default.
 
 **0.9.0**
-- Neuer Chip „Loot“ (Loot-Konkurrenz vermeiden): Minuspunkte oder Aussortieren für Spieler mit gleicher Klasse bzw. gleicher Rüstung und gleichem Hauptwert; Umschalt-Klick wählt, für wen geprüft wird (du, Gruppenmitglieder).
-- Optionen „Angezeigte Chips“: Favoriten-Zeile, Fähigkeiten-Zeile, Kategorien und einzelne Chips ausblenden (zählen dann als egal).
-- Optionen aufgeteilt in eine Hauptseite und die Unterseiten „Anzeige“, „Filter & Chips“ (mit den Häkchen für angezeigte Zeilen, Kategorien und Chips; ersetzt das Fenster „Angezeigte Chips“) und „Nachrichtenvorlagen“.
-- Stufen: kein Abzug mehr für deine eigene Stufe bzw. die deiner Gruppe und für überlevelte Spieler; nur andere Spieler unter dem empfohlenen Bereich bekommen −8.
-- Der Loot-Chip steht ohne eigenen Klapp-Chip direkt in der Fähigkeiten-Zeile.
-- Fenster „Neu in BGF“: erscheint einmal pro neuer Version direkt beim Einloggen (nach einem Kampf, falls du kämpfend einloggst; nicht bei Instanz-Ladebildschirmen). Neue Nutzer sehen „Willkommen bei BGF“. Ein Klick auf die Version oben rechts zeigt die Seiten früherer Releases (ab 0.8.0). Deutsch bei deutschem Client, sonst Englisch. Abschaltbar im Fenster und in den Optionen; die Hauptseite der Optionen zeigt dieselben Inhalte.
+- New "Loot" chip (avoid loot competition): minus points or sorted out for players with the same class, or the same armour type and main stat (from class, role and level; armour changes at level 40). Shift-click the chip to choose who to check for: you and/or your group members.
+- Options split into pages: Display, Filter & Chips, Message templates. The main page shows what's new.
+- Filter & Chips: hide the favourites row, the abilities row, whole categories or single chips. Hidden chips count as ignored.
+- New "What's new" window at login after an update (click the version to see earlier releases). Can be switched off in the window or in the options.
+- No more level penalty for your own level or for higher-level players.
 
 **0.8.2**
-- Chip-Tooltips kurz: Fähigkeiten zeigen die Klassen (darunter „evtl.:“ für Talent, Begleiter, Form), Klassen eine Zeile pro Bereich. Umschalt gedrückt halten zeigt die Details (Zauber, Stufe, Bedingungen), live; ein Hinweis steht im Tooltip.
-- Punkte ohne „+“ und farbig: grün ab 40, gelb 15–39, grau darunter (Quests neutral). Der Gruppenwert in Prozent steht jetzt im Tooltip statt in der Liste.
-- Eigener Standard: „Speichern“ in der Filterleiste legt die Chips einer Kategorie als deinen Standard fest, „Zurücksetzen“ kehrt dorthin zurück. In den Optionen: „Standards wiederherstellen“.
+- Chip tooltips are now short: abilities show which classes bring them, classes show one line per category. Hold Shift for full details (spells, levels, conditions).
+- Points are coloured (green 40+, yellow 15–39, grey below) and shown without "+". The group value moved into the group tooltip.
+- New "Save" button in the filter bar: store your own default filters per category. "Reset" now goes back to them. Options: "Restore defaults".
 
 **0.8.1**
-- Neuer Name: „BGF - Better Group Finder Forever“ (Addon-Liste, Optionen); Chat-Präfix und Filter-Tooltip heißen jetzt „BGF“. Ordner, Einstellungen und `/bgf` bleiben gleich.
+- Renamed to "BGF - Better Group Finder Forever" (addon list and options). Chat messages and the filter button tooltip now say "BGF". Folder, settings and `/bgf` stay the same.
 
-**0.8.0** – erste öffentliche Beta
-- MIT-Lizenz (`LICENSE`), Release-ZIP ohne Testdateien.
+**0.8.0** – first public release on CurseForge
+- Group Finder list sorted by how well a listing fits you or your group, filter chips, explained scores in the tooltip, message templates with invite + whisper in one click.
 
-**0.7.9**
-- Eigener Eintrag zeigt die Mitglieder deiner Gruppe, die fehlende Rolle blass und die Aktivität („Eure Einträge · Todesminen“).
-
-**0.7.8**
-- Rollenanzeige: bis 5 Mitglieder Icons (auch bei Quests, die 40 melden), Zahlen erst ab 6; „/40“ nur bei Schlachtzügen; Spielstil überlappt die Zahlen nicht mehr.
-- Eigenes Kontextmenü beim Rechtsklick auf Einträge (Nachricht, Einladen, Vorlagen, Hinweis zum Melden) statt Blizzards Menü.
-- Escape ohne Blizzards `UISpecialFrames`-Liste: BGF erscheint im Taint-Log nur noch beim Slash-Befehl und beim Öffnen der Optionen.
-
-**0.7.7**
-- Hinweis in der leeren Liste, solange keine Kategorie gewählt ist.
-- Filterleiste wird bei jeder Aktualisierung neu angeordnet: keine zu großen oder zu kleinen Abstände zwischen Chips mehr nach einem Kategoriewechsel.
-
-**0.7.6**
-- Ereignisse statt Hooks auf Blizzards Listen- und Knopf-Funktionen: kein Fehler mehr beim Öffnen des Reiters mit eingeschaltetem Taint-Log.
-
-**0.7.5**
-- „Zurücksetzen“ direkt in der Filterleiste (nur die angezeigte Kategorie).
-- Vorlagen-Menü und Schriftarten-Liste als eigene Menüs statt Blizzards Menüsystem: behebt den Spielabsturz mit eingeschaltetem Taint-Log.
-
-**0.7.4**
-- Quests & Zonen / Benutzerdefiniert: keine Rollenprüfung (Rollen-Chips ausgegraut), keine Abzüge für gleiche Klasse, nichts wird wegen 0 Punkten aussortiert.
-- Rollen-Chips je nach Blickrichtung: Solo gegenüber anderen Einzelspielern schränken sie deren Rolle nicht mehr ein (Heiler wurden fälschlich aussortiert).
-- Autor: Ibona93.
-
-**0.7.3**
-- Schriftarten-Auswahl zeigt jeden Eintrag jetzt wirklich in seiner eigenen Schrift (0.7.0 nutzte eine Funktion, die Blizzards Menü verbietet).
-
-**0.7.2**
-- Chips, die trotz Verknüpfung abgewählt sind, haben einen gedämpft türkisen Rand und sind durchgestrichen.
-
-**0.7.1**
-- Geöffnete Kategorie-Chips sind golden statt grau.
-- Tooltips ohne Fließtext: ein Zauber pro Zeile, farbig (Name weiß, Stufe grau, Bedingung orange, Effekt hellblau). Klassen-Tooltips in Bereichen wie die Filterleiste, mit dem Chip, für den der Zauber zählt, und „Wählt mit aus: …“.
-- Kurze Effekte bei Buffs und Hilfsmitteln („Ausdauer +“, „Alle Werte +10 %“, „Bedrohung −30 %“ …) in allen 11 Sprachen.
-
-**0.7.0**
-- Chips in Kategorien: Favoriten (eigene Zeile), Klassen, Buffs, Dispells, Kampf & Hilfsmittel. Kategorien klappen auf; eine geöffnete bekommt eigene Zeilen, zugeklappte zeigen die Zahl aktiver Chips.
-- Favoriten per Rechtsklick (Stern), Start: Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft, Mana.
-- Wieder da: Gesundheitsstein, Beschwören; neue Buff-Chips Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Segen der Könige, Segen der Rettung, Göttlicher Willen, Furchtzauberschutz.
-- Verknüpfung: Klasse → ihre Buffs, Buff einer einzigen Klasse → Klasse; mit ausgewählte Chips türkis, per Klick trotzdem abwählbar.
-- „Benötigt“ prüft die offenen Rollen: Ein Magier passt nicht auf einen Heilerplatz.
-- Vorrang: Einträge, die alles Benötigte bringen, stehen oben.
-- Englische Vorlagen nennen den englischen Instanznamen.
-- Schriftarten-Auswahl zeigt jede Schrift in ihrer eigenen Schrift.
-
-**0.6.0**
-- Filterleiste: sichtbar sind nur noch Kontrolle, Unterbrechen, Kampfwiederbelebung, Angriffskraft und Mana. „+ mehr“ (Fluch, Magie, Gift, Krankheit) und neu „+ Klassen“ klappen auf; zugeklappt ist alles versteckt, die Zahl am Klappchip zeigt aktive Chips.
-- Neue Klassen-Chips für alle 9 Klassen („diese Klasse in der Gruppe“, Gewicht 6, Standard *egal*). Der Tooltip zeigt, was die Klasse bringt. Die bisherigen Chips Priester/Magier/Druide (Buffs) und „Beschwören & Gesundheitssteine“ gehen darin auf; ihre alten Einstellungen werden nicht übernommen.
-- Paladin: Segen der Könige und der Rettung; Priester: Göttlicher Willen ergänzt.
-- Talente der Forever-Beta als „möglich (Talent)“: Erschütternder Schlag, Buße, Streuschuss, Einschüchterung, Aura des Volltreffers, Stille, Totem der Manaflut, Wilde Attacke. Dazu Zaubersperre und Verführung (Begleiter), Hieb (Bärform), Winterschlaf (Wildtiere/Drachkin).
-- Begründung im Tooltip nennt die echte Bedingung statt „Talent oder Begleiter“.
-- „Benötigt“ ist strenger: „möglich“ reicht nicht mehr.
-- Grauer Rollen-Hinweis und Profilanzeige aus der Filterleiste entfernt; der Hinweis steht jetzt im Tooltip der Rollen-Chips.
-- Quelle der Talentdaten: talentsforever.com (CC BY 4.0).
-
-**0.5.0**
-- Buff-Chips, die nur eine Klasse bringt, heißen wie die Klasse: Priester, Magier, Druide. Buffs mehrerer Klassen nach dem Zweck: Angriffskraft und neu **Mana** (Segen der Weisheit, Totem der Manaquelle; in Schlachtzügen bevorzugt, sonst egal).
-- Alle Chip-Tooltips im Format „Klasse – Zauber ab Stufe N“, mit Bedingung (nur mit Schild, nur Untote, Teufelsjäger …). Zaubernamen aus dem Spiel.
-- Priester-Chip: Furchtzauberschutz als eigener Zauber ab Stufe 20 aufgeführt.
-- Erklärung „Wie entstehen die Punkte?“ neu gegliedert: Abschnitte mit Überschriften, Werte in eigener Spalte, Farben (Plus grün, Abzüge rot, Aussortiert orange), Gewichtstabelle aus den aktuellen Chip-Namen. Alle 11 Sprachen.
-
-**0.4.0**
-- Kompaktansicht entfernt; nur noch die zweizeilige Ansicht. Zeile „Ansicht“ aus der Filterleiste entfernt.
-- Gruppenwert in Prozent unter dem Nutzen (nur bei Gruppen), Details im Tooltip. Bei Einzelspielern steht der Nutzen mittig. „Punkte anzeigen: aus“ blendet beides aus.
-- Spielstil vertikal mittig auf Höhe der Rollen-Icons.
-- Filter zusammengefasst: „Beschwören & Gesundheitssteine“ und „Ausdauer & Furchtschutz“. Alte Einstellungen werden übernommen (die stärkere gewinnt).
-- Tooltip auf den Fähigkeiten-Chips: welche Klassen, ab welcher Stufe, was nur „möglich“ ist.
-- Schriftgröße fest (Namen 14, Rest 12): Einstellung und `/bgf font` entfernt. Schriftart bleibt wählbar.
-- Erklärung „Wie entstehen die Punkte?“ in allen 11 Sprachen angepasst.
-
-**0.3.0**
-- Logo in der Addon-Liste.
-- Schrift wie Blizzard: Namen 14, Rest 12; Grundgröße 9–14 einstellbar. Bestehende Einstellungen werden einmalig auf 12 gesetzt.
-- Zusätzliche Abkürzungsstufe für lange Wörter („Höhlen d. Wehkl.“).
-- Filter-Button kleiner (Zahnrad frei) und eingedrückt statt umrahmt; Ansichts-Button entfernt, Ansicht wieder als Zeile in der Filterleiste.
-- „BGF-Filter aktiv“ aus: BGF-Ansicht bleibt (ohne Punkte, ohne Aussortieren, Blizzards Reihenfolge). Blizzards Liste erscheint nie mehr unter der Filterleiste.
-- `/bgf off` als Notausgang zu Blizzards Originalliste.
-- Option „Punkte anzeigen“ und Erklärung „Wie entstehen die Punkte?“ (11 Sprachen).
-
-**0.2.0**
-- Fenster bleibt in Originalbreite; kein Greifpunkt/Skalieren mehr. Höher wird es nur mit offener Filterleiste.
-- Einheitliche Schriftgröße (9–11), `/bgf font`; Spalten neu verteilt; Abkürzungen für Instanzen und Namen.
-- Schriftart wählbar (Spiel, mitgeliefert, LibSharedMedia), Standard: WoW-Schrift.
-- Filterleiste im Stil des Mockups: Pillen-Chips, Symbole, „+ mehr“.
-- Filter-Button ohne Doppelrahmen, neuer Ansichts-Button; Zeile „Ansicht“ entfernt.
-- „BGF-Filter aktiv“ abwählen lässt die Leiste offen (ausgegraut); gelber Rahmen zeigt den echten Zustand.
-- +/- in den Bereichsköpfen korrigiert; Murloc-Symbol direkt hinter dem Namen; Spielstil in der Normalansicht in Zeile 1.
-- Button „Anfrage“ heißt jetzt „Vorlagen“; Menü mit weißer Überschrift, Sprachen als Zwischenüberschriften, eingerückten Vorlagen; nur Spielsprache + Englisch.
-- Vorlagen-Namen in den Optionen editierbar.
-- Fehler behoben: LibSharedMedia wurde falsch angesprochen (vom Rauchtest gefunden).
-
-**0.1.0** – erste Version.
+**0.1.0 – 0.7.9** – development versions before the public release. The detailed history is in the [German README](README.de.md#7-änderungen).
