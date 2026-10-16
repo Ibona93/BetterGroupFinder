@@ -172,7 +172,7 @@ local strings = {
 	AB_buff_int = "Intelecto Arcano",
 	AB_buff_wild = "Marca de lo Salvaje",
 	AB_buff_kings = "Bendición de reyes",
-	AB_buff_salvation = "Bendición de salvación",
+	AB_buff_salvation = "Salvación",
 	AB_buff_spirit = "Espíritu divino",
 	AB_buff_fearward = "Custodia de miedo",
 	AB_healthstone = "Piedra de salud",
@@ -216,6 +216,12 @@ local strings = {
 	OPT_T_invite_short = "Invitación - breve",
 
 	SLASH_HELP = "Comandos: /bgf (opciones), /bgf on, /bgf off, /bgf debug",
+
+	OPT_DISCORD = "Discord:",
+
+	OPT_DISCORD_DESC = "Informar de errores, sugerencias, preguntas",
+
+	OPT_DISCORD_HINT = "Haz clic en el campo y pulsa Ctrl+C para copiar (WoW no puede abrir enlaces)",
 	SLASH_ON = "BGF activado.",
 	SLASH_OFF = "BGF desactivado, se muestra la lista original de Blizzard. /bgf on lo reactiva.",
 	DEBUG_ON = "Depuración activada. Pasa el ratón sobre un resultado para ver sus datos.",

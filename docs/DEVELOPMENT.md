@@ -47,6 +47,7 @@ Offline tests can't replace the game. Before testing, enter `/console taintLog 1
 | 12 | Untick / tick "BGF filter active" | BGF view stays, without points/sorting out; nothing hidden behind the bar. `/bgf off` → original list |
 | 13 | Afterwards: enter a dungeon, fight, use action bars | no taint log entries for BetterGroupFinder (passed with 0.7.8, 10 Oct 2026) |
 | 14 | `/bgf debug`, hover listings | raw data appears; check whether `spec` is filled and which `mapID` the Forever instances have |
+| 15 | Options main page, at the bottom: click the Discord field, Ctrl+C, then type | link gets highlighted and can be copied; typing does not change it |
 
 ## Files
 

@@ -172,7 +172,7 @@ ns.RegisterLocale("deDE", {
 	AB_buff_int = "Arkane Intelligenz",
 	AB_buff_wild = "Mal der Wildnis",
 	AB_buff_kings = "Segen der Könige",
-	AB_buff_salvation = "Segen der Rettung",
+	AB_buff_salvation = "Rettung",
 	AB_buff_spirit = "Göttlicher Willen",
 	AB_buff_fearward = "Furchtzauberschutz",
 	AB_healthstone = "Gesundheitsstein",
@@ -216,6 +216,12 @@ ns.RegisterLocale("deDE", {
 	OPT_T_invite_short = "Einladung - kurz",
 
 	SLASH_HELP = "Befehle: /bgf (Optionen), /bgf on, /bgf off, /bgf debug",
+
+	OPT_DISCORD = "Discord:",
+
+	OPT_DISCORD_DESC = "Fehler melden, Wünsche, Fragen",
+
+	OPT_DISCORD_HINT = "Feld anklicken, dann Strg+C zum Kopieren (WoW kann keine Links öffnen)",
 	SLASH_ON = "BGF eingeschaltet.",
 	SLASH_OFF = "BGF ausgeschaltet, Blizzards Originalliste wird angezeigt. /bgf on schaltet es wieder ein.",
 	DEBUG_ON = "Debug-Ausgabe an. Fahre über einen Treffer, um seine Rohdaten auszugeben.",

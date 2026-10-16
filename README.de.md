@@ -65,7 +65,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 - **Loot-Konkurrenz** (Chip „Loot“, Kategorie *Loot*, Start-Favorit): *bevorzugt* = Minuspunkte pro Konkurrent (−8, „evtl.“ −4), *benötigt* = Gruppen mit Konkurrent werden aussortiert („evtl.“ senkt nur die Punkte). Konkurrent ist, wer die gleiche Klasse hat oder die gleiche Rüstungsart (unter/ab Stufe 40: Jäger/Schamane Leder/Kette, Krieger/Paladin Kette/Platte) mit gleichem Hauptwert (aus Klasse und Rolle; Schamane als DD nur „evtl.“). Ringe, Halsketten, Umhänge und Waffen zählen nicht. Standardmäßig wird nur für dich geprüft; **Umschalt-Klick** auf den Chip öffnet ein Menü mit dir und deinen Gruppenmitgliedern zum An- und Abhaken (z. B. nur für einen Freund). Der Chip zeigt, für wen er gilt: „Loot (ich)“, „Loot (Thoradin)“, „Loot (2)“, „Loot (niemand)“.
 - **Zonen:** Jeder Eintrag zeigt neben der Aktivität die aktuelle Zone (bei Gruppen die des Anführers – das Spiel meldet nur dessen Zone; auch im Tooltip), grün = deine Zone, grau = woanders. Chip **„Gleiche Zone“** (standardmäßig egal, direkt in der Fähigkeiten-Zeile): *bevorzugt* +6 für Spieler in deiner Zone, *benötigt* = nur Spieler in deiner Zone (unbekannte Zonen werden nicht aussortiert).
 - **Angezeigte Chips** (Optionen → „Filter & Chips“): Favoriten-Zeile, Fähigkeiten-Zeile, einzelne Kategorien und Chips ausblenden. Ausgeblendet zählt als *egal*, auch über Verknüpfungen und Instanz-Hinweise; ohne Fähigkeiten-Zeile bleiben nur die Favoriten nutzbar.
-- **Kategorien:** *Klassen* (9 Chips, „diese Klasse in der Gruppe“, von Haus aus *egal*), *Buffs* (Angriffskraft, Mana, Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Segen der Könige, Segen der Rettung, Göttlicher Willen, Furchtzauberschutz), *Dispells* (Fluch, Magie, Gift, Krankheit), *Kampf & Hilfsmittel* (Kontrolle, Unterbrechen, Kampfwiederbelebung, Gesundheitsstein, Beschwören). Der Tooltip eines Klassen-Chips zeigt kurz eine Zeile pro Bereich (nur bedingt verfügbare Fähigkeiten grau); mit Umschalt die Vollansicht mit allem, was die Klasse der Gruppe bringt: Bereiche Kampf & Hilfsmittel, Dispells, Buffs (goldene Überschriften), ein Zauber pro Zeile, Name weiß, Stufe grau, Bedingung orange, dahinter der Chip („– Kontrolle“) oder bei Buffs der Effekt in Hellblau („· Ausdauer +“). Am Ende steht türkis, was die Klasse mit auswählt.
+- **Kategorien:** *Klassen* (9 Chips, „diese Klasse in der Gruppe“, von Haus aus *egal*), *Buffs* (Angriffskraft, Mana, Seelenstärke, Arkane Intelligenz, Mal der Wildnis, Segen der Könige, Rettung, Göttlicher Willen, Furchtzauberschutz), *Dispells* (Fluch, Magie, Gift, Krankheit), *Kampf & Hilfsmittel* (Kontrolle, Unterbrechen, Kampfwiederbelebung, Gesundheitsstein, Beschwören). Der Tooltip eines Klassen-Chips zeigt kurz eine Zeile pro Bereich (nur bedingt verfügbare Fähigkeiten grau); mit Umschalt die Vollansicht mit allem, was die Klasse der Gruppe bringt: Bereiche Kampf & Hilfsmittel, Dispells, Buffs (goldene Überschriften), ein Zauber pro Zeile, Name weiß, Stufe grau, Bedingung orange, dahinter der Chip („– Kontrolle“) oder bei Buffs der Effekt in Hellblau („· Ausdauer +“). Am Ende steht türkis, was die Klasse mit auswählt.
 - **Verknüpfung:** Ein Klassen-Chip wählt die Buffs seiner Klasse im gleichen Zustand mit aus (Krieger *benötigt* → Angriffskraft *benötigt*; Hexenmeister → Gesundheitsstein und Beschwören). Ein Chip, den nur eine Klasse bringt, wählt die Klasse mit aus (Seelenstärke → Priester). Keine Kettenreaktion. Mit ausgewählte Chips haben einen türkisen Rand; ein Klick darauf schaltet sie trotzdem ab („abgewählt trotz …“, gedämpft türkiser Rand und durchgestrichen), bis der auslösende Chip wieder aus ist. Mit ausgewählte Chips geben Punkte und Abzüge, sortieren aber nicht allein aus.
 - **Vorrang:** Einträge, die alle Chips erfüllen, die du selbst auf *benötigt* gestellt hast, stehen in Gruppen und Spielern immer oben; die übrigen folgen mit dem Hinweis „Nachrangig“.
 
@@ -86,7 +86,7 @@ Aufbau des Menüs: weiße Überschrift (was passiert), darunter die Sprachen in 
 | `/bgf debug` | Debug-Ausgabe an/aus. Beim Hovern über einen Eintrag werden dessen Rohdaten (inkl. `mapID`, Spezialisierung) in den Chat geschrieben. |
 
 ### Optionen (`/bgf` oder Optionen → AddOns → BGF - Better Group Finder Forever)
-- **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen, darunter die Neuerungen der aktuellen Version direkt auf der Seite (Versionsabzeichen öffnet frühere Releases), Befehle.
+- **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen, darunter die Neuerungen der aktuellen Version direkt auf der Seite (Versionsabzeichen öffnet frühere Releases), Befehle, ganz unten der Discord-Link zum Kopieren (Feld anklicken, Strg+C).
 - **Anzeige:** **Punkte anzeigen** (mit Button „Wie entstehen die Punkte?“), BGF-Bewertung im Tooltip, **Rollensymbole in Klassenfarbe umranden** (aus = kein Ring, wie bei Blizzard), Schriftart.
 - **Filter & Chips:** BGF-Filter aktiv, angezeigte Zeilen/Kategorien/Chips, „Alle anzeigen“, „Filter zurücksetzen“, „Standards wiederherstellen“.
 - **Nachrichtenvorlagen:** Sofort senden, Vorlagen je Sprache (die eigene Sprache ist vorausgewählt und hervorgehoben), „Vorlagen dieser Sprache zurücksetzen“.
@@ -160,7 +160,7 @@ Spieler mit mehreren angebotenen Rollen bekommen zuerst einen freien Tank- oder 
 | Gift heilen, Krankheit heilen | 5 |
 | Seelenstärke, Furchtzauberschutz | 4 |
 | Mal der Wildnis, Segen der Könige, Gesundheitsstein | 3 |
-| Angriffskraft, Mana, Arkane Intelligenz, Segen der Rettung, Göttlicher Willen | 2 |
+| Angriffskraft, Mana, Arkane Intelligenz, Rettung, Göttlicher Willen | 2 |
 
 Im Schlachtzug zählt eine Klasse nur einmal: Ist schon ein Druide dabei, bringt ein zweiter für den Druiden-Chip nichts mehr.
 
@@ -202,7 +202,7 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
 - **Talentdaten** stammen aus [talentsforever.com](https://talentsforever.com/) (Daten aus dem Beta-Client, Build 1.60.1.70291, Lizenz CC BY 4.0), geprüft an einzelnen Wowhead-Forever-Zauberseiten. Bis zum Release (4. November 2026) können sich Talente noch ändern. Die Lernstufe von Hieb (Druide) ist aus Classic übernommen und nicht für Forever bestätigt.
 - **Fähigkeitentabelle** (`Data/Abilities.lua`): Lernstufen und Spell-IDs stammen aus WoW Classic.
   - Zaubernamen im Tooltip liefert das Spiel (`C_Spell.GetSpellName`). Kennt Forever eine ID nicht, zeigt BGF den Namen aus der Tabelle: auf Deutsch, in allen anderen Sprachen auf Englisch.
-  - Für Forever bestätigt: kein Kampfrausch/Heldentum, Furchtzauberschutz für alle Priester ab 20, Segen der Könige (20) und der Rettung (26) sowie Göttlicher Willen (30) ohne Talent, kein Stich des Flügeldrachen.
+  - Für Forever bestätigt: kein Kampfrausch/Heldentum, Furchtzauberschutz für alle Priester ab 20, Segen der Könige (20), Rettung (26, früher „Segen der Rettung“, seit 16.10.2026 umbenannt, gleiche Zauber-ID) sowie Göttlicher Willen (30) ohne Talent, kein Stich des Flügeldrachen.
   - Nach Klassenpatches muss die Tabelle eventuell angepasst werden.
 - **Schlachtzüge** gibt es in der Beta noch nicht; die Schlachtzug-Logik ist nur offline getestet.
 - **Karten-IDs:** Forever nutzt die Classic-IDs (geprüft: Burg Shadowfang 33, Todesminen 36, Höhlen des Wehklagens 43); Ruinen von Lordaeron hat 2999. Instanz-Hinweise und Namenstabelle bauen darauf auf. Flügel werden nur aus dem Deutschen übersetzt.
@@ -228,6 +228,10 @@ Bei Lua-Fehlern bitte einen Screenshot oder den Text aus BugSack mitschicken. Te
 ---
 
 ## 7. Änderungen
+
+**0.10.2**
+- Discord: Der Einladungslink (discord.gg/4nPNJMYetV) steht zum Kopieren ganz unten auf der Optionen-Hauptseite; Hinweis auf der „Neu in BGF“-Seite 0.10.2 und auf der Willkommensseite.
+- Blizzard hat „Segen der Rettung“ in „Rettung“ umbenannt (Beta-Build vom 16.10.2026, gleiche Zauber-ID 1038). Chip-Name in allen 10 Sprachen angepasst.
 
 **0.10.1**
 - Neue Option „Rollensymbole in Klassenfarbe umranden“ (Optionen › Anzeige, standardmäßig an). Aus = die Rollensymbole in der Liste haben keinen Ring in Klassenfarbe mehr, wie bei Blizzard. Namen bleiben in Klassenfarbe.

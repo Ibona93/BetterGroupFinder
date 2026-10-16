@@ -172,7 +172,7 @@ ns.RegisterLocale("ptBR", {
 	AB_buff_int = "Intelecto Arcano",
 	AB_buff_wild = "Marca do Selvagem",
 	AB_buff_kings = "Bênção dos Reis",
-	AB_buff_salvation = "Bênção da Salvação",
+	AB_buff_salvation = "Salvação",
 	AB_buff_spirit = "Espírito Divino",
 	AB_buff_fearward = "Proteção contra o Medo",
 	AB_healthstone = "Pedra de Vida",
@@ -216,6 +216,12 @@ ns.RegisterLocale("ptBR", {
 	OPT_T_invite_short = "Convite - curto",
 
 	SLASH_HELP = "Comandos: /bgf (opções), /bgf on, /bgf off, /bgf debug",
+
+	OPT_DISCORD = "Discord:",
+
+	OPT_DISCORD_DESC = "Relatar erros, sugestões, perguntas",
+
+	OPT_DISCORD_HINT = "Clique no campo e pressione Ctrl+C para copiar (o WoW não abre links)",
 	SLASH_ON = "BGF ligado.",
 	SLASH_OFF = "BGF desligado, a lista original da Blizzard é exibida. /bgf on o religa.",
 	DEBUG_ON = "Depuração ativada. Passe o mouse sobre um resultado para ver seus dados.",

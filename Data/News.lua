@@ -18,9 +18,11 @@ local ICON = {
 	map = "Interface\\Icons\\INV_Misc_Map_01",
 	zone = "Interface\\Icons\\Ability_Hunter_Pathfinding",
 	colors = "Interface\\Icons\\INV_Misc_Gem_Variety_01",
+	discord = "Interface\\Icons\\INV_Letter_15",
+	blessing = "Interface\\Icons\\Spell_Holy_SealOfSalvation",
 }
 
-ns.NEWS_ORDER = { "0.10.1", "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
+ns.NEWS_ORDER = { "0.10.2", "0.10.1", "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
 ns.NEWS_FIRST = "0.8.0"   -- welcome page for new users
 
 ns.NEWS_UI = {
@@ -39,6 +41,22 @@ ns.NEWS_UI = {
 }
 
 ns.NEWS = {
+	["0.10.2"] = {
+		enUS = { title = "What's new in BGF", items = {
+			{ icon = ICON.discord, title = "BGF is on Discord",
+				text = "Report bugs, suggest features or just ask: join the BGF Discord.",
+				tip = "discord.gg/4nPNJMYetV · copy it from the bottom of the options" },
+			{ icon = ICON.blessing, title = "\"Salvation\" instead of \"Blessing of Salvation\"",
+				text = "Blizzard renamed the paladin buff. The BGF chip now uses the new name, nothing else changes." },
+		} },
+		deDE = { title = "Neu in BGF", items = {
+			{ icon = ICON.discord, title = "BGF auf Discord",
+				text = "Fehler melden, Wünsche äußern oder einfach fragen: Komm auf den BGF-Discord.",
+				tip = "discord.gg/4nPNJMYetV · zum Kopieren unten in den Optionen" },
+			{ icon = ICON.blessing, title = "„Rettung“ statt „Segen der Rettung“",
+				text = "Blizzard hat den Paladin-Buff umbenannt. Der Chip in BGF heißt jetzt auch so, sonst ändert sich nichts." },
+		} },
+	},
 	["0.10.1"] = {
 		options = "display",
 		enUS = { title = "What's new in BGF", items = {
@@ -134,6 +152,9 @@ ns.NEWS = {
 			{ icon = ICON.whisper, title = "Invite + whisper in one click",
 				text = "Message templates in your language, editable in the options.",
 				tip = "Templates button below the list" },
+			{ icon = ICON.discord, title = "Questions? Join the Discord",
+				text = "Bugs, ideas and help: discord.gg/4nPNJMYetV",
+				tip = "Copy the link from the bottom of the options" },
 		} },
 		deDE = { title = "Willkommen bei BGF", items = {
 			{ icon = ICON.list, title = "Eine kompakte Gruppenliste",
@@ -146,6 +167,9 @@ ns.NEWS = {
 			{ icon = ICON.whisper, title = "Einladen + Flüstern mit einem Klick",
 				text = "Nachrichtenvorlagen in deiner Sprache, anpassbar in den Optionen.",
 				tip = "Knopf „Vorlagen“ unter der Liste" },
+			{ icon = ICON.discord, title = "Fragen? Komm auf den Discord",
+				text = "Fehler, Ideen und Hilfe: discord.gg/4nPNJMYetV",
+				tip = "Link zum Kopieren unten in den Optionen" },
 		} },
 	},
 }

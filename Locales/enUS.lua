@@ -176,7 +176,7 @@ ns.RegisterLocale("enUS", {
 	AB_buff_int = "Arcane Intellect",
 	AB_buff_wild = "Mark of the Wild",
 	AB_buff_kings = "Blessing of Kings",
-	AB_buff_salvation = "Blessing of Salvation",
+	AB_buff_salvation = "Salvation",
 	AB_buff_spirit = "Divine Spirit",
 	AB_buff_fearward = "Fear Ward",
 	AB_healthstone = "Healthstone",
@@ -221,6 +221,9 @@ ns.RegisterLocale("enUS", {
 
 	-- Slash command
 	SLASH_HELP = "Commands: /bgf (options), /bgf on, /bgf off, /bgf debug",
+	OPT_DISCORD = "Discord:",
+	OPT_DISCORD_DESC = "Report bugs, suggest features, ask questions",
+	OPT_DISCORD_HINT = "Click the field, then Ctrl+C to copy (WoW cannot open links)",
 	SLASH_ON = "BGF switched on.",
 	SLASH_OFF = "BGF switched off, Blizzard's original list is shown. /bgf on switches it back on.",
 	DEBUG_ON = "Debug output on. Hover a result to print its raw data.",

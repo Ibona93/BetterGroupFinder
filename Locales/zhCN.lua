@@ -172,7 +172,7 @@ ns.RegisterLocale("zhCN", {
 	AB_buff_int = "奥术智慧",
 	AB_buff_wild = "野性印记",
 	AB_buff_kings = "王者祝福",
-	AB_buff_salvation = "拯救祝福",
+	AB_buff_salvation = "拯救",
 	AB_buff_spirit = "神圣之灵",
 	AB_buff_fearward = "防护恐惧结界",
 	AB_healthstone = "治疗石",
@@ -216,6 +216,12 @@ ns.RegisterLocale("zhCN", {
 	OPT_T_invite_short = "邀请 - 简短",
 
 	SLASH_HELP = "命令：/bgf（设置），/bgf on，/bgf off，/bgf debug",
+
+	OPT_DISCORD = "Discord:",
+
+	OPT_DISCORD_DESC = "报告错误、提出建议、提问",
+
+	OPT_DISCORD_HINT = "点击输入框，然后按 Ctrl+C 复制（魔兽世界无法打开链接）",
 	SLASH_ON = "BGF 已开启。",
 	SLASH_OFF = "BGF 已关闭，显示暴雪原始列表。/bgf on 可重新开启。",
 	DEBUG_ON = "调试输出已开启。鼠标悬停结果可输出原始数据。",

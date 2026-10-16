@@ -65,7 +65,7 @@ If the game marks the addon as "out of date", the interface number changed with 
 - **Loot competition** ("Loot" chip, starting favourite): *preferred* = minus points per competitor (−8, "maybe" −4), *required* = groups with a competitor are sorted out ("maybe" only lowers the points). A competitor is someone with the same class, or the same armour type (below/from level 40: Hunter/Shaman leather/mail, Warrior/Paladin mail/plate) with the same main stat (from class and role; Shaman as DPS only "maybe"). Rings, necklaces, cloaks and weapons don't count. By default BGF only checks for you; **Shift-click** on the chip opens a menu with you and your group members to tick (e.g. only for a friend). The chip shows who it applies to: "Loot (me)", "Loot (Thoradin)", "Loot (2)", "Loot (nobody)".
 - **Zones:** every listing shows the current zone next to the activity (for groups the leader's, the game only reports that one; also in the tooltip), green = your zone, grey = elsewhere. **"Same zone"** chip (ignored by default, directly in the abilities row): *preferred* +6 for players in your zone, *required* = only players in your zone (unknown zones are never sorted out).
 - **Shown chips** (Options › Filter & Chips): hide the favourites row, the abilities row, single categories or chips. Hidden counts as *ignored*, also for links and instance hints; without the abilities row only the favourites remain usable.
-- **Categories:** *Classes* (9 chips, "this class in the group", *ignored* by default), *Buffs* (attack power, mana, Fortitude, Arcane Intellect, Mark of the Wild, Blessing of Kings, Blessing of Salvation, Divine Spirit, Fear Ward), *Dispels* (curse, magic, poison, disease), *Combat & utility* (crowd control, interrupt, battle res, healthstone, summon). A class chip's tooltip shows one line per category; with Shift, the full view of everything the class brings to the group.
+- **Categories:** *Classes* (9 chips, "this class in the group", *ignored* by default), *Buffs* (attack power, mana, Fortitude, Arcane Intellect, Mark of the Wild, Blessing of Kings, Salvation, Divine Spirit, Fear Ward), *Dispels* (curse, magic, poison, disease), *Combat & utility* (crowd control, interrupt, battle res, healthstone, summon). A class chip's tooltip shows one line per category; with Shift, the full view of everything the class brings to the group.
 - **Links:** a class chip selects its class's buffs in the same state (Warrior *required* → attack power *required*; Warlock → healthstone and summon). A chip only one class brings selects that class (Fortitude → Priest). No chain reactions. Chips selected this way have a turquoise border; clicking them turns them off anyway ("deselected despite …", muted turquoise border, struck through) until the triggering chip is off again. Linked chips give points and penalties but never sort anything out on their own.
 - **Priority:** listings that meet all chips you set to *required* yourself always come first in groups and players; the rest follow with the note "Lower priority".
 
@@ -86,7 +86,7 @@ Menu layout: white heading (what happens), below it the languages in gold (your 
 | `/bgf debug` | Debug output on/off. Hovering a listing prints its raw data (incl. `mapID`, specialisation) to the chat. |
 
 ### Options (`/bgf` or Options › AddOns › BGF - Better Group Finder Forever)
-- **Main page:** version, short description, "Show what's new after updates", the news of the current version (the version badge opens earlier releases), commands.
+- **Main page:** version, short description, "Show what's new after updates", the news of the current version (the version badge opens earlier releases), commands, and at the very bottom the Discord link to copy (click the field, Ctrl+C).
 - **Display:** **Show points** (with the button "How are points calculated?"), BGF rating in the tooltip, **class colour ring around the role icons** (off = no ring, like Blizzard's), font.
 - **Filter & Chips:** BGF filter active, shown rows/categories/chips, "Show all", "Reset filters", "Restore defaults".
 - **Message templates:** send immediately, templates per language (your own language is preselected and highlighted), "Reset templates of this language".
@@ -160,7 +160,7 @@ Players offering several roles get a free tank or healer slot first (scarce role
 | Cure poison, cure disease | 5 |
 | Fortitude, Fear Ward | 4 |
 | Mark of the Wild, Blessing of Kings, healthstone | 3 |
-| Attack power, mana, Arcane Intellect, Blessing of Salvation, Divine Spirit | 2 |
+| Attack power, mana, Arcane Intellect, Salvation, Divine Spirit | 2 |
 
 In a raid a class only counts once: with a Druid already in, a second one brings nothing more for the Druid chip.
 
@@ -203,7 +203,7 @@ If all results are sorted out, a note appears at the top: "All X results were so
 - **Talent data** comes from [talentsforever.com](https://talentsforever.com/) (data from the beta client, build 1.60.1.70291, license CC BY 4.0), checked against individual Wowhead Forever spell pages. Talents may still change until launch (4 November 2026). The level for Bash (Druid) is taken from Classic and not confirmed for Forever.
 - **Ability table** (`Data/Abilities.lua`): levels and spell IDs come from WoW Classic.
   - Spell names in the tooltip come from the game (`C_Spell.GetSpellName`). If Forever doesn't know an ID, BGF shows the name from the table: in German on German clients, in English everywhere else.
-  - Confirmed for Forever: no Bloodlust/Heroism, Fear Ward for all priests from 20, Blessing of Kings (20) and Salvation (26) as well as Divine Spirit (30) without talent, no Wyvern Sting.
+  - Confirmed for Forever: no Bloodlust/Heroism, Fear Ward for all priests from 20, Blessing of Kings (20) and Salvation (26, formerly "Blessing of Salvation", renamed on 16 Oct 2026, same spell ID) as well as Divine Spirit (30) without talent, no Wyvern Sting.
 - **Map IDs:** Forever uses the Classic IDs (checked: Shadowfang Keep 33, Deadmines 36, Wailing Caverns 43); Ruins of Lordaeron is 2999. Instance hints and the name table rely on them.
 - **Own menus:** the template menu, the font list and the right-click menu are BGF's own simple windows (`UI/Popup.lua`), not Blizzard's menu system. With `/console taintLog 1`, the beta client crashed when an addon button opened a Blizzard menu. Escape closes BGF windows via its own key handling (outside of combat), not via Blizzard's `UISpecialFrames`.
 - **No category preselected:** Blizzard starts without a category; BGF then shows the hint "Choose a category at the top left". BGF can't preselect one: the search is protected and would be blocked by an addon value.
@@ -226,6 +226,10 @@ For Lua errors, please include a screenshot or the text from BugSack. Tests, fil
 ---
 
 ## 7. Changelog
+
+**0.10.2**
+- Discord: the invite link (discord.gg/4nPNJMYetV) can be copied from the bottom of the options main page; mentioned on the "What's new" page 0.10.2 and on the welcome page.
+- Blizzard renamed "Blessing of Salvation" to "Salvation" (beta build of 16 Oct 2026, same spell ID 1038). Chip name updated in all 10 languages.
 
 **0.10.1**
 - New option "Class colour ring around the role icons" (Options › Display, on by default). Turn it off for plain role icons in the list, like Blizzard's; the icons then fill the whole slot. Names keep their class colour.

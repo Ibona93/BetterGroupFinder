@@ -172,7 +172,7 @@ ns.RegisterLocale("ruRU", {
 	AB_buff_int = "Чародейский интеллект",
 	AB_buff_wild = "Знак дикой природы",
 	AB_buff_kings = "Благословение королей",
-	AB_buff_salvation = "Благословение спасения",
+	AB_buff_salvation = "Спасение",
 	AB_buff_spirit = "Божественный дух",
 	AB_buff_fearward = "Защита от страха",
 	AB_healthstone = "Камень здоровья",
@@ -216,6 +216,12 @@ ns.RegisterLocale("ruRU", {
 	OPT_T_invite_short = "Приглашение - коротко",
 
 	SLASH_HELP = "Команды: /bgf (настройки), /bgf on, /bgf off, /bgf debug",
+
+	OPT_DISCORD = "Discord:",
+
+	OPT_DISCORD_DESC = "Ошибки, пожелания, вопросы",
+
+	OPT_DISCORD_HINT = "Щёлкните по полю и нажмите Ctrl+C, чтобы скопировать (WoW не открывает ссылки)",
 	SLASH_ON = "BGF включен.",
 	SLASH_OFF = "BGF выключен, показан исходный список Blizzard. /bgf on включает снова.",
 	DEBUG_ON = "Отладка включена. Наведите курсор на результат, чтобы вывести его данные.",

@@ -14,7 +14,8 @@ Source status (October 2026, beta build 1.60.1):
     your own spellbook check fails and falls back to class + level.
   * Verified Forever changes: no Bloodlust/Heroism for shamans (only a personal
     talent), Fear Ward for all priests at level 20, Blessing of Kings/Salvation and Divine
-    Spirit baseline, no Wyvern Sting.
+    Spirit baseline, no Wyvern Sting. Blessing of Salvation is called "Salvation" since the
+    beta build of 16 October 2026 (same spell ID 1038, no longer exclusive with other blessings).
   * Chips (0.7.0) in four categories: classes ("this class in the group"), buffs,
     dispels, combat & utility. Class chips select their buffs; chips only one class brings
     select that class (ns.LINKS at the end of this file).
@@ -122,7 +123,7 @@ ns.SPELLS = {
 	blessing_might   = { id = 19740, enUS = "Blessing of Might",     deDE = "Segen der Macht" },
 	blessing_wisdom  = { id = 19742, enUS = "Blessing of Wisdom",    deDE = "Segen der Weisheit" },
 	blessing_kings   = { id = 20217, enUS = "Blessing of Kings",     deDE = "Segen der Könige" },
-	blessing_salvation = { id = 1038, enUS = "Blessing of Salvation", deDE = "Segen der Rettung" },
+	blessing_salvation = { id = 1038, enUS = "Salvation",       deDE = "Rettung" },  -- renamed in Forever (Oct 2026), same ID
 	purify           = { id = 1152,  enUS = "Purify",                deDE = "Läutern" },
 	hammer_justice   = { id = 853,   enUS = "Hammer of Justice",     deDE = "Hammer der Gerechtigkeit" },
 	turn_undead      = { id = 2878,  enUS = "Turn Undead",           deDE = "Untote vertreiben" },

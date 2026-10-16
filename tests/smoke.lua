@@ -33,7 +33,7 @@ local function newFrame(kind, name)
 end
 
 local METHOD_PREFIXES = { "Set", "Get", "Is", "Create", "Register", "Enable", "Disable", "Clear", "Add",
-	"Hook", "Show", "Hide", "Raise", "Lower", "Start", "Stop", "Unregister", "Has", "Can", "Copy" }
+	"Hook", "Show", "Hide", "Raise", "Lower", "Start", "Stop", "Unregister", "Has", "Can", "Copy", "Highlight" }
 
 local function isMethodName(key)
 	if type(key) ~= "string" then return false end
@@ -908,6 +908,32 @@ check("options open on a sub page", okOpen, errOpen)
 local mainPage = ns.Options.Pages.main
 check("main page shows the release notes of this version (no 'What's new' button)", mainPage.newsVersion == ns.VERSION
 	and mainPage.Badge and mainPage.Badge.version == ns.VERSION)
+local dbox = mainPage.DiscordBox
+check("main page: Discord field shows the invite link", dbox and dbox:GetText() == ns.DISCORD_URL
+	and ns.DISCORD_URL:match("^https://discord%.gg/%w+$") ~= nil)
+dbox:SetText("oops")
+dbox:GetScript("OnTextChanged")(dbox, true)
+check("... typing in it puts the link back", dbox:GetText() == ns.DISCORD_URL)
+check("... label and hint texts exist in all 10 languages", (function()
+	for loc, t in pairs(ns.Locales) do
+		if not (t.OPT_DISCORD and t.OPT_DISCORD_DESC and t.OPT_DISCORD_HINT) then return false, loc end
+	end
+	return true
+end)())
+check("release notes 0.10.2 and the welcome page mention the Discord link", (function()
+	for _, v in ipairs({ "0.10.2", ns.NEWS_FIRST }) do
+		for _, lang in ipairs({ "enUS", "deDE" }) do
+			local found = false
+			for _, it in ipairs(ns.NEWS[v][lang].items) do
+				if ((it.text or "") .. (it.tip or "")):find("discord.gg/4nPNJMYetV", 1, true) then found = true end
+			end
+			if not found then return false end
+		end
+	end
+	return true
+end)())
+check("Salvation chip uses the new name (Rettung / Salvation)", ns.Locales.deDE.AB_buff_salvation == "Rettung"
+	and ns.Locales.enUS.AB_buff_salvation == "Salvation" and ns.SPELLS.blessing_salvation.id == 1038)
 pcall(mainPage.RenderNews, "0.8.0")
 check("... the version badge switches to earlier releases", mainPage.newsVersion == "0.8.0" and mainPage.Badge.version == "0.8.0")
 local langs = ns.Options.Pages.templates.LangButtons

@@ -172,7 +172,7 @@ ns.RegisterLocale("koKR", {
 	AB_buff_int = "신비한 지능",
 	AB_buff_wild = "야생의 징표",
 	AB_buff_kings = "왕의 축복",
-	AB_buff_salvation = "구원의 축복",
+	AB_buff_salvation = "구원",
 	AB_buff_spirit = "천상의 정신",
 	AB_buff_fearward = "공포의 수호물",
 	AB_healthstone = "생명석",
@@ -216,6 +216,12 @@ ns.RegisterLocale("koKR", {
 	OPT_T_invite_short = "초대 - 짧게",
 
 	SLASH_HELP = "명령어: /bgf (설정), /bgf on, /bgf off, /bgf debug",
+
+	OPT_DISCORD = "Discord:",
+
+	OPT_DISCORD_DESC = "버그 제보, 건의, 질문",
+
+	OPT_DISCORD_HINT = "입력란을 클릭한 뒤 Ctrl+C로 복사하세요 (WoW에서는 링크를 열 수 없습니다)",
 	SLASH_ON = "BGF를 켰습니다.",
 	SLASH_OFF = "BGF를 껐습니다. 블리자드 기본 목록이 표시됩니다. /bgf on으로 다시 켭니다.",
 	DEBUG_ON = "디버그 출력 켜짐. 결과에 마우스를 올리면 원본 데이터를 출력합니다.",

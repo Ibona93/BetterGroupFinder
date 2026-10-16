@@ -172,7 +172,7 @@ ns.RegisterLocale("zhTW", {
 	AB_buff_int = "秘法智力",
 	AB_buff_wild = "野性印記",
 	AB_buff_kings = "王者祝福",
-	AB_buff_salvation = "拯救祝福",
+	AB_buff_salvation = "拯救",
 	AB_buff_spirit = "神聖之靈",
 	AB_buff_fearward = "防護恐懼結界",
 	AB_healthstone = "治療石",
@@ -216,6 +216,12 @@ ns.RegisterLocale("zhTW", {
 	OPT_T_invite_short = "邀請 - 簡短",
 
 	SLASH_HELP = "指令：/bgf（設定），/bgf on，/bgf off，/bgf debug",
+
+	OPT_DISCORD = "Discord:",
+
+	OPT_DISCORD_DESC = "回報錯誤、提出建議、發問",
+
+	OPT_DISCORD_HINT = "點擊輸入框，然後按 Ctrl+C 複製（魔獸世界無法開啟連結）",
 	SLASH_ON = "BGF 已開啟。",
 	SLASH_OFF = "BGF 已關閉，顯示暴雪原始列表。/bgf on 可重新開啟。",
 	DEBUG_ON = "除錯輸出已開啟。滑鼠移到結果上可輸出原始資料。",
