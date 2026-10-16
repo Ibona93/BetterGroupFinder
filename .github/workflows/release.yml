@@ -3,9 +3,11 @@
 #     releases/notes/uploaded/ records it), with the changelog from releases/notes/<version>.md
 #   * announces a fresh "release" upload on Discord: English part of the changelog to
 #     #announcements (pings the Release Ping role), German part to #deutsch, both linking
-#     to CurseForge. Runs only right after the upload, so old versions are never re-posted.
+#     to CurseForge and to the GitHub release (if it exists). Runs only right after the
+#     upload (after the GitHub release step), so old versions are never re-posted.
 #     A Discord failure never fails the run (the upload is already recorded).
-#   * creates the GitHub release (tag at the listed commit) for type "release"
+#   * creates the GitHub release (tag at the listed commit) for type "release"; if that
+#     fails, the announcement still goes out (CurseForge link only) and the run fails.
 # Line format: <version> <commit> [release|beta|alpha]   (default: release)
 # A line is only added after Felix tested the version and said to upload it.
 # Runs when the notes change on main, or by hand (Actions -> Releases -> Run workflow).
@@ -61,8 +63,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           gameVersionId=""
           cfUrl="${CF_PROJECT_URL:-https://www.curseforge.com/projects/$CF_PROJECT_ID}"
+          ghReleaseBase="https://github.com/${GITHUB_REPOSITORY}/releases/tag"
+          ghFailed=0
 
-          # post one Discord message: discord_post <webhook> <title> <changelog text> <link line> [role id]
+          # post one Discord message: discord_post <webhook> <title> <changelog text> <link lines> [role id]
           discord_post() {
             local hook="$1" title="$2" body="$3" link="$4" role="${5:-}" payload
             if [ -z "$hook" ]; then
@@ -73,20 +77,27 @@ jobs:
               ($body | gsub("^\\s+|\\s+$"; "")) as $b
               | (if ($b | length) > 1500 then ($b[0:1500] | sub("\n[^\n]*$"; "")) + "\n…" else $b end) as $t
               | { content: ((if $role != "" then "<@&\($role)> " else "" end)
-                            + "**\($title)**\n\n\($t)\n\n➜ \($link)"),
+                            + "**\($title)**\n\n\($t)\n\n\($link)"),
                   allowed_mentions: { parse: [], roles: (if $role != "" then [$role] else [] end) } }') || return 1
             curl -sS --fail-with-body -H "Content-Type: application/json" -d "$payload" "$hook" || return 1
             echo "posted '$title' to Discord"
           }
 
           # announce <version> <notes file>: English part (before ---) and German part (after ---)
+          # links to CurseForge, plus the GitHub release when it exists
           announce() {
-            local v="$1" notes="$2" en de ok=0
+            local v="$1" notes="$2" en de ok=0 linkEn linkDe
             en=$(awk '/^---[[:space:]]*$/ {exit} {print}' "$notes")
             de=$(awk 'f {print} /^---[[:space:]]*$/ {f=1}' "$notes")
             [ -n "$de" ] || de="$en"
-            discord_post "${DISCORD_WEBHOOK_EN:-}" "BGF v$v is out!" "$en" "Download on CurseForge: $cfUrl" "${DISCORD_ROLE_ID:-}" || ok=1
-            discord_post "${DISCORD_WEBHOOK_DE:-}" "BGF v$v ist da!" "$de" "Download auf CurseForge: $cfUrl" || ok=1
+            linkEn="➜ Download on CurseForge: $cfUrl"
+            linkDe="➜ Download auf CurseForge: $cfUrl"
+            if gh release view "v$v" >/dev/null 2>&1; then
+              linkEn="$linkEn"$'\n'"➜ GitHub: <$ghReleaseBase/v$v>"
+              linkDe="$linkDe"$'\n'"➜ GitHub: <$ghReleaseBase/v$v>"
+            fi
+            discord_post "${DISCORD_WEBHOOK_EN:-}" "BGF v$v is out!" "$en" "$linkEn" "${DISCORD_ROLE_ID:-}" || ok=1
+            discord_post "${DISCORD_WEBHOOK_DE:-}" "BGF v$v ist da!" "$de" "$linkDe" || ok=1
             return $ok
           }
 
@@ -106,6 +117,7 @@ jobs:
             zip="releases/BetterGroupFinder-$version.zip"
             [ -f "$zip" ] || zip="releases/BetterGroupFinder-${version%%-*}.zip"
             marker="releases/notes/uploaded/$version"
+            fresh=0
 
             # 1. CurseForge upload (once)
             if [ ! -f "$marker" ]; then
@@ -138,10 +150,7 @@ jobs:
               git commit -m "Record CurseForge upload of $version [skip ci]"
               git pull --rebase
               git push
-              # 1b. Discord announcement (real releases only; never fails the run)
-              if [ "$rtype" = "release" ]; then
-                announce "$version" "$notes" || echo "::warning::Discord announcement for $version failed (upload is fine)"
-              fi
+              fresh=1
             else
               echo "$version already on CurseForge"
             fi
@@ -151,9 +160,18 @@ jobs:
               if gh release view "v$version" >/dev/null 2>&1; then
                 echo "v$version exists on GitHub"
               else
-                gh release create "v$version" "$zip" --target "$sha" \
-                  --title "BGF v$version" --notes-file "$notes"
+                if ! gh release create "v$version" "$zip" --target "$sha" \
+                  --title "BGF v$version" --notes-file "$notes"; then
+                  echo "::error::GitHub release v$version failed - create it by hand"
+                  ghFailed=1
+                fi
+              fi
+
+              # 3. Discord announcement (only right after a fresh upload; never fails the run)
+              if [ "$fresh" = 1 ]; then
+                announce "$version" "$notes" || echo "::warning::Discord announcement for $version failed (upload is fine)"
               fi
             fi
           done < releases/notes/releases.txt
+          exit $ghFailed
 
