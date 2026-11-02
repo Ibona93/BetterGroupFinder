@@ -203,7 +203,7 @@ Werden alle Treffer aussortiert, erscheint oben der Hinweis „Alle X Treffer wu
 - **Talentdaten** stammen aus [talentsforever.com](https://talentsforever.com/) (Daten aus dem Beta-Client, Build 1.60.1.70291, Lizenz CC BY 4.0), geprüft an einzelnen Wowhead-Forever-Zauberseiten. Bis zum Release (4. November 2026) können sich Talente noch ändern. Die Lernstufe von Hieb (Druide) ist aus Classic übernommen und nicht für Forever bestätigt.
 - **Fähigkeitentabelle** (`Data/Abilities.lua`): Lernstufen und Spell-IDs stammen aus WoW Classic.
   - Zaubernamen im Tooltip liefert das Spiel (`C_Spell.GetSpellName`). Kennt Forever eine ID nicht, zeigt BGF den Namen aus der Tabelle: auf Deutsch, in allen anderen Sprachen auf Englisch.
-  - Für Forever bestätigt: kein Kampfrausch/Heldentum, Furchtzauberschutz für alle Priester ab 20, Segen der Könige (20) sowie Göttlicher Willen (30) ohne Talent, kein Stich des Flügeldrachen. Rettung wird im Launch-Client nicht mehr gelehrt (Server-Hotfixes vom 30./31.10.2026, per Datamining), deshalb ist ihr Chip seit 1.0.0 weg. Neue Gruppen-Buffs per Talent: Mondkingestalt (Gleichgewicht, 40) und Rudelführer (Wilder Kampf, 30), +3 % Krit, als Chip *Krit-Buff* („evtl.“). Untote vertreiben wirkt mit dem Vergeltungs-Talent „Turn Evil“ auch auf Dämonen.
+  - Für Forever bestätigt: kein Kampfrausch/Heldentum, Furchtzauberschutz für alle Priester ab 20, Segen der Könige (20) sowie Göttlicher Willen (30) ohne Talent, kein Stich des Flügeldrachen. Rettung wird im Launch-Client nicht mehr gelehrt (Server-Hotfixes vom 30./31.10.2026, per Datamining), deshalb ist ihr Chip seit 1.0.0 weg. Neue Gruppen-Buffs per Talent: Mondkingestalt (Gleichgewicht, 40) und Rudelführer (Wilder Kampf, 30), +3 % Krit, als Chip *Krit-Buff* („evtl.“). Untote vertreiben wirkt mit dem Vergeltungs-Talent „Böses vertreiben“ auch auf Dämonen.
   - Nach Klassenpatches muss die Tabelle eventuell angepasst werden.
 - **Schlachtzüge** gibt es in der Beta noch nicht; die Schlachtzug-Logik ist nur offline getestet.
 - **Karten-IDs:** Forever nutzt die Classic-IDs (geprüft: Burg Shadowfang 33, Todesminen 36, Höhlen des Wehklagens 43); Ruinen von Lordaeron hat 2999. Instanz-Hinweise und Namenstabelle bauen darauf auf. Flügel werden nur aus dem Deutschen übersetzt.
@@ -234,7 +234,7 @@ Bei Lua-Fehlern bitte einen Screenshot oder den Text aus BugSack mitschicken. Te
 - Einführungs-Tour: Ein kleines Fenster mit sechs Seiten erklärt Punkte, Chips, den Tooltip mit Umschalt, die Filterleiste mit eigenem Standard, Nachrichtenvorlagen und die Optionen (mit Discord-Link). Neuinstallationen bekommen sie beim ersten Login statt „Neu in BGF“; mit 1.0.0 sehen sie alle bisherigen Nutzer einmal. Neu starten über die Optionen-Hauptseite.
 - Neuer Chip *Krit-Buff*: Mondkingestalt und Rudelführer geben der Gruppe +3 % Krit (Druiden-Talente, daher nur „evtl.“).
 - Rettung wird im Launch-Client nicht mehr gelehrt (Server-Hotfixes vom 30./31.10.2026), der Chip ist deshalb weg; gespeicherte Einstellungen dazu werden aufgeräumt.
-- Untote vertreiben zeigt an, dass es mit dem Vergeltungs-Talent „Turn Evil“ auch auf Dämonen wirkt.
+- Untote vertreiben zeigt an, dass es mit dem Vergeltungs-Talent „Böses vertreiben“ auch auf Dämonen wirkt.
 
 **0.10.2**
 - Discord: Der Einladungslink (discord.gg/4nPNJMYetV) steht zum Kopieren ganz unten auf der Optionen-Hauptseite; Hinweis auf der „Neu in BGF“-Seite 0.10.2 und auf der Willkommensseite.

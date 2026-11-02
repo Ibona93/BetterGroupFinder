@@ -60,7 +60,7 @@ ns.NEWS = {
 			{ icon = ICON.crit, title = "Neuer Chip: Krit-Buff",
 				text = "Mondkingestalt und Rudelführer geben der ganzen Gruppe +3 % Krit. Beides sind Druiden-Talente, BGF kann deshalb nur „evtl.“ sagen." },
 			{ icon = ICON.launch, title = "Angepasst an den Launch-Client",
-				text = "Rettung wird nicht mehr gelehrt, deshalb ist ihr Chip weg; gespeicherte Einstellungen dazu werden aufgeräumt. Untote vertreiben zeigt jetzt an, dass es mit dem Talent „Turn Evil“ auch auf Dämonen wirkt." },
+				text = "Rettung wird nicht mehr gelehrt, deshalb ist ihr Chip weg; gespeicherte Einstellungen dazu werden aufgeräumt. Untote vertreiben zeigt jetzt an, dass es mit dem Talent „Böses vertreiben“ auch auf Dämonen wirkt." },
 		} },
 	},
 	["0.10.2"] = {
