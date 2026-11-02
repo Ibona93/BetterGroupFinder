@@ -382,6 +382,10 @@ local function buildMainPage(p, title)
 	local whatsNew = createCheck(p, L.OPT_WHATSNEW,
 		function() return ns.db.showWhatsNew ~= false end, function(v) ns.db.showWhatsNew = v end)
 	whatsNew:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", -2, -12)
+	-- 1.0.0: the intro tour can be started again any time
+	local tour = button(p, L.OPT_TOUR_BUTTON, function() if ns.Tour then ns.Tour.Show() end end)
+	tour:SetPoint("LEFT", whatsNew.Label, "RIGHT", 16, 0)
+	p.TourButton = tour
 
 	local newsTitle = p:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	newsTitle:SetPoint("TOPLEFT", whatsNew, "BOTTOMLEFT", 2, -22)

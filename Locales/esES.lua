@@ -115,6 +115,7 @@ local strings = {
 	OPT_PAGE_chips = "Filtros y botones",
 	OPT_PAGE_templates = "Plantillas de mensajes",
 	OPT_WHATSNEW = "Mostrar «Novedades» tras actualizar",
+	OPT_TOUR_BUTTON = "Repetir la guía",
 	OPT_WHATSNEW_BUTTON = "Novedades",
 	AB_loot = "Botín",
 	CAT_loot = "Botín",

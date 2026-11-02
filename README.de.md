@@ -48,6 +48,7 @@ Falls das Spiel das Addon als „veraltet“ markiert, hat sich nach einem Patch
 | Tooltip | Blizzards Tooltip (Mitglieder, Voicechat, Aktivität) plus darunter die BGF-Begründung: grün = Vorteil, rot = Abzug, grau = Lücke, orange = Ausschlussgrund. |
 | Vorlagen-Button | Im Footer zwischen „Nachricht senden“ und „Gruppeneinladung“. Öffnet das Vorlagen-Menü; ein Klick auf eine Vorlage **sendet sofort**. |
 | Rechtsklick auf Eintrag | Eigenes Kontextmenü: Nachricht senden, Einladen (wenn möglich), Vorlagen …, dazu „Melden …“ als Hinweis: Melden erlaubt Blizzard Addons nicht (`C_ReportSystem.SendReport` „Not allowed to be called by addons“), es geht in Blizzards Liste nach `/bgf off`. |
+| Einführungs-Tour | Seit 1.0.0: Neue Spieler bekommen beim ersten Login statt „Neu in BGF“ eine kurze Tour (6 Seiten): Punkte, Chips, Tooltip mit Umschalt, Filterleiste, Vorlagen, Optionen und Discord. Alle bisherigen Nutzer sehen sie mit 1.0.0 einmal. Neu starten über Optionen › „Tour erneut starten“. |
 | Neu in BGF | Nach einem Update erscheint beim Einloggen einmal ein kurzes Fenster „Neu in BGF“. Abschaltbar; die Hauptseite der Optionen zeigt dieselben Inhalte. |
 | Sprachen | Oberfläche in allen Clientsprachen (10 Übersetzungen). Vorlagen: deine Spielsprache plus Englisch. |
 
@@ -86,7 +87,7 @@ Aufbau des Menüs: weiße Überschrift (was passiert), darunter die Sprachen in 
 | `/bgf debug` | Debug-Ausgabe an/aus. Beim Hovern über einen Eintrag werden dessen Rohdaten (inkl. `mapID`, Spezialisierung) in den Chat geschrieben. |
 
 ### Optionen (`/bgf` oder Optionen → AddOns → BGF - Better Group Finder Forever)
-- **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen, darunter die Neuerungen der aktuellen Version direkt auf der Seite (Versionsabzeichen öffnet frühere Releases), Befehle, ganz unten der Discord-Link zum Kopieren (Feld anklicken, Strg+C).
+- **Hauptseite:** Version, kurze Beschreibung, „Neu in BGF“ nach Updates anzeigen mit Knopf „Tour erneut starten“, darunter die Neuerungen der aktuellen Version direkt auf der Seite (Versionsabzeichen öffnet frühere Releases), Befehle, ganz unten der Discord-Link zum Kopieren (Feld anklicken, Strg+C).
 - **Anzeige:** **Punkte anzeigen** (mit Button „Wie entstehen die Punkte?“), BGF-Bewertung im Tooltip, **Rollensymbole in Klassenfarbe umranden** (aus = kein Ring, wie bei Blizzard), Schriftart.
 - **Filter & Chips:** BGF-Filter aktiv, angezeigte Zeilen/Kategorien/Chips, „Alle anzeigen“, „Filter zurücksetzen“, „Standards wiederherstellen“.
 - **Nachrichtenvorlagen:** Sofort senden, Vorlagen je Sprache (die eigene Sprache ist vorausgewählt und hervorgehoben), „Vorlagen dieser Sprache zurücksetzen“.
@@ -228,6 +229,12 @@ Bei Lua-Fehlern bitte einen Screenshot oder den Text aus BugSack mitschicken. Te
 ---
 
 ## 7. Änderungen
+
+**1.0.0** (Start von WoW Forever)
+- Einführungs-Tour: Ein kleines Fenster mit sechs Seiten erklärt Punkte, Chips, den Tooltip mit Umschalt, die Filterleiste mit eigenem Standard, Nachrichtenvorlagen und die Optionen (mit Discord-Link). Neuinstallationen bekommen sie beim ersten Login statt „Neu in BGF“; mit 1.0.0 sehen sie alle bisherigen Nutzer einmal. Neu starten über die Optionen-Hauptseite.
+- Neuer Chip *Krit-Buff*: Mondkingestalt und Rudelführer geben der Gruppe +3 % Krit (Druiden-Talente, daher nur „evtl.“).
+- Rettung wird im Launch-Client nicht mehr gelehrt (Server-Hotfixes vom 30./31.10.2026), der Chip ist deshalb weg; gespeicherte Einstellungen dazu werden aufgeräumt.
+- Untote vertreiben zeigt an, dass es mit dem Vergeltungs-Talent „Turn Evil“ auch auf Dämonen wirkt.
 
 **0.10.2**
 - Discord: Der Einladungslink (discord.gg/4nPNJMYetV) steht zum Kopieren ganz unten auf der Optionen-Hauptseite; Hinweis auf der „Neu in BGF“-Seite 0.10.2 und auf der Willkommensseite.

@@ -329,15 +329,82 @@ local ok, err = pcall(fire, "ADDON_LOADED", "BetterGroupFinder")
 check("ADDON_LOADED creates the saved variables and attaches the UI", ok and BetterGroupFinderDB ~= nil and ns.UI.attached, err)
 ok, err = pcall(fire, "PLAYER_LOGIN")
 check("PLAYER_LOGIN builds the options", ok, err)
--- "What's new": new users get the welcome page at login, once; not on instance loading screens
+-- 1.0.0: new users get the intro tour at login instead of "What's new" (news marked as seen)
 ok, err = pcall(fire, "PLAYER_ENTERING_WORLD", true, false)
-local newsWin = _G.BGFWhatsNew or (ns.WhatsNew and ns.WhatsNew.ShowPage and nil)
-check("login shows the welcome page for new users", ok and ns.db.lastSeenVersion == ns.VERSION, err)
-local shownPage = newsWin and newsWin.version
-check("... page 0.8.0 (welcome)", shownPage == "0.8.0", tostring(shownPage))
-if newsWin then newsWin:Hide() end
+local tourWin = _G.BGFTour
+check("login shows the intro tour for new users", ok and tourWin and tourWin.__shown and tourWin.page == 1, err)
+check("... marks the tour and this version's news as seen, no news window",
+	ns.db.tourSeen == true and ns.db.lastSeenVersion == ns.VERSION and not (_G.BGFWhatsNew and _G.BGFWhatsNew.__shown))
+check("... page 1: no 'Back', no 'What's new' / 'Open options'", not tourWin.Back.__shown
+	and not tourWin.WhatsNew.__shown and not tourWin.Options.__shown)
+do
+	local before = #ns.debugLog
+	local pagesOK = true
+	for i = 2, #ns.TourPages() do
+		local f = ns.Tour.Go(i)
+		if not (f and f.page == i and f.Counter.__text == (i .. " / " .. #ns.TourPages())) then pagesOK = false end
+	end
+	check("tour: all 6 pages draw their pictures without errors", pagesOK and #ns.TourPages() == 6
+		and #ns.debugLog == before, ns.debugLog[#ns.debugLog])
+	local de = ns.Locales and ns.TOUR.deDE
+	local same = #ns.TOUR.deDE == #ns.TOUR.enUS
+	for i, page in ipairs(ns.TOUR.enUS) do
+		local g = de[i]
+		if not (g and g.ill == page.ill and g.title and g.text and (g.tip == nil) == (page.tip == nil)) then same = false end
+	end
+	check("tour: German and English pages match (same pictures, titles, texts, tips)", same)
+	check("tour: last page shows 'Done', 'What's new?', 'Open options'", tourWin.Next.__text == ns.TourUI().done
+		and tourWin.WhatsNew.__shown and tourWin.Options.__shown and tourWin.Back.__shown)
+	_G.InCombatLockdown = function() return true end
+	ns.Tour.OpenOptions()
+	check("tour: 'Open options' in combat only prints a hint, the tour stays open",
+		tourWin.__shown and _G.__lastPrint and _G.__lastPrint:find(ns.TourUI().combat, 1, true))
+	_G.InCombatLockdown = function() return false end
+	ok, err = pcall(ns.Tour.OpenOptions)
+	check("tour: 'Open options' closes the tour", ok and not tourWin.__shown, err)
+	ns.Tour.Go(#ns.TourPages())
+	tourWin:Show()
+	ok, err = pcall(tourWin.Next.__scripts.OnClick)
+	check("tour: 'Done' closes the window", ok and not tourWin.__shown, err)
+	ns.Tour.Show()
+	ok, err = pcall(tourWin.Next.__scripts.OnClick)
+	check("tour: 'Next' goes to page 2", ok and tourWin.page == 2, err)
+	ns.Tour.Go(#ns.TourPages())
+	ok, err = pcall(tourWin.WhatsNew.__scripts.OnClick)
+	check("tour: 'What's new?' opens this version's news page", ok and not tourWin.__shown
+		and _G.BGFWhatsNew and _G.BGFWhatsNew.__shown and _G.BGFWhatsNew.version == ns.VERSION, err)
+	_G.BGFWhatsNew:Hide()
+	local last = ns.Tour.pictures[#ns.TourPages()]
+	check("tour: Discord field on the last page holds the invite link", last and last.Edit
+		and last.Edit.__text == ns.DISCORD_URL)
+	if last and last.Edit then last.Edit.__scripts.OnTextChanged(last.Edit, true) end
+	check("tour: typing into the Discord field puts the link back", last and last.Edit.__text == ns.DISCORD_URL)
+end
+local newsWin = _G.BGFWhatsNew
+ok, err = pcall(fire, "PLAYER_ENTERING_WORLD", true, false)
+check("tour seen: the next login shows nothing (same version)", ok and not tourWin.__shown and not newsWin.__shown, err)
+-- an existing user updating to 1.0.0 (no tourSeen yet) gets the tour, not the news
+ns.isNewInstall = false
+ns.db.tourSeen, ns.db.lastSeenVersion = nil, "0.10.2"
+pcall(fire, "PLAYER_ENTERING_WORLD", false, true)
+check("update to 1.0.0: existing users see the tour instead of 'What's new'", tourWin.__shown
+	and not newsWin.__shown and ns.db.tourSeen and ns.db.lastSeenVersion == ns.VERSION)
+tourWin:Hide()
+-- tour due during combat: shown after combat
+ns.db.tourSeen = false
+_G.InCombatLockdown = function() return true end
+pcall(fire, "PLAYER_ENTERING_WORLD", true, false)
+check("tour at login in combat waits ...", not tourWin.__shown)
+_G.InCombatLockdown = function() return false end
+pcall(fire, "PLAYER_REGEN_ENABLED")
+check("... and opens after combat", tourWin.__shown)
+tourWin:Hide()
+-- without the tour (already seen): new users would still get the welcome page as news
+ns.isNewInstall = true
+ns.db.lastSeenVersion = nil
+check("news for a new install without tour: welcome page 0.8.0", ns.WhatsNew.NewsPageForLogin() == "0.8.0")
 ok, err = pcall(fire, "PLAYER_ENTERING_WORLD", false, false)
-check("instance loading screen shows nothing", ok and not (newsWin and newsWin.__shown), err)
+check("instance loading screen shows nothing", ok and not newsWin.__shown and not tourWin.__shown, err)
 -- after an update: page of the current version, unless switched off
 ns.isNewInstall = false
 ns.db.lastSeenVersion = "0.8.2"
@@ -1013,6 +1080,20 @@ do
 	ok, err = pcall(SlashCmdList.BETTERGROUPFINDER, "check")
 	check("/bgf check prints without errors", ok, err)
 	_G.C_Spell, _G.GetBuildInfo = oldSpell, oldBuild
+end
+do
+	local mainOpt = ns.Options.Pages.main
+	local tb = mainOpt and mainOpt.TourButton
+	_G.BGFTour:Hide()
+	ok, err = pcall(tb and tb.__scripts.OnClick or error)
+	check("options: 'Restart tour' opens the tour on page 1", ok and _G.BGFTour.__shown and _G.BGFTour.page == 1
+		and tb.__text == ns.L.OPT_TOUR_BUTTON, err)
+	_G.BGFTour:Hide()
+	local allLang = true
+	for _, lang in ipairs({ "enUS", "deDE", "frFR", "esES", "ptBR", "itIT", "ruRU", "koKR", "zhCN", "zhTW" }) do
+		if not ns.Locales[lang].OPT_TOUR_BUTTON then allLang = false end
+	end
+	check("options: 'Restart tour' text in all 10 languages", allLang)
 end
 
 print(failures == 0 and "\nall smoke checks passed" or ("\n" .. failures .. " smoke checks failed"))

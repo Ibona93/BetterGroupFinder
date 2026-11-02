@@ -119,6 +119,7 @@ ns.RegisterLocale("enUS", {
 	OPT_PAGE_chips = "Filter & Chips",
 	OPT_PAGE_templates = "Message templates",
 	OPT_WHATSNEW = "Show \"What's new\" after updates",
+	OPT_TOUR_BUTTON = "Restart tour",
 	OPT_WHATSNEW_BUTTON = "What's new",
 	AB_loot = "Loot",
 	CAT_loot = "Loot",

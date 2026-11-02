@@ -197,6 +197,17 @@ function Bar.StyleChip(chip)
 	setMarker(chip.Marker, chip.markerState, s.text, s.bg)
 end
 
+-- A chip for pictures (the intro tour): same look as in the filter bar, no clicks or tooltip.
+-- state: "ignore", "pref" or "need".
+function Bar.PreviewChip(parent, label, state, favorite)
+	local chip = createChip(parent, function() end)
+	chip:EnableMouse(false)
+	chip.label, chip.state, chip.favorite = label, state, favorite
+	chip.markerState = (state == "need" or state == "pref") and state or nil
+	Bar.StyleChip(chip)
+	return chip
+end
+
 local function text(parent, color, sizeOffset)
 	local fs = parent:CreateFontString(nil, "ARTWORK")
 	fs:SetFontObject(font(sizeOffset))

@@ -5,7 +5,7 @@
 ## Notes-deDE: Intelligente Filter, Bewertung der Gruppenzusammensetzung, Favoriten und Nachrichtenvorlagen für den Gruppenfinder von WoW Forever.
 ## Author: Ibona93
 ## X-License: MIT
-## Version: 0.10.2
+## Version: 1.0.0
 ## IconTexture: Interface\AddOns\BetterGroupFinder\Media\Logo
 ## SavedVariables: BetterGroupFinderDB
 ## Category: Group Finder
@@ -28,6 +28,7 @@ Data\Profiles.lua
 Data\Abbreviations.lua
 Data\Instances.lua
 Data\News.lua
+Data\Tour.lua
 
 Logic\Scoring.lua
 Logic\Engine.lua
@@ -43,4 +44,5 @@ UI\Popup.lua
 UI\Contact.lua
 UI\Options.lua
 UI\WhatsNew.lua
+UI\Tour.lua
 UI\Main.lua

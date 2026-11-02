@@ -48,6 +48,11 @@ Offline tests can't replace the game. Before testing, enter `/console taintLog 1
 | 13 | Afterwards: enter a dungeon, fight, use action bars | no taint log entries for BetterGroupFinder (passed with 0.7.8, 10 Oct 2026) |
 | 14 | `/bgf debug`, hover listings | raw data appears; check whether `spec` is filled and which `mapID` the Forever instances have |
 | 15 | Options main page, at the bottom: click the Discord field, Ctrl+C, then type | link gets highlighted and can be copied; typing does not change it |
+| 16 | Update from 0.10.2 to 1.0.0, log in | intro tour on page 1 instead of "What's new"; after /reload nothing appears again |
+| 17 | Click through the tour (Next/Back, ✕, Escape) | six pictures, chips look like in the filter bar, texts not cut off, counter and dots follow the page |
+| 18 | Last tour page: "What's new?", "Open options", Discord field | news page 1.0.0 opens; options main page opens; link can be copied. In combat "Open options" only prints a hint |
+| 19 | Options main page → "Restart tour" | tour opens on page 1 above the settings window |
+| 20 | `/bgf check` after a game patch | prints client build, interface number and only the spell IDs the client does not know |
 
 ## Files
 
@@ -60,6 +65,7 @@ Data/Profiles.lua       role targets, default filters per profile, instance hint
 Data/Abbreviations.lua  abbreviation rules per language
 Data/Instances.lua      instance names English/German by map ID (for {instance})
 Data/News.lua           pages of the "What's new" window (German and English)
+Data/Tour.lua           pages of the intro tour (German and English)
 Logic/Scoring.lua       rating (no game API)
 Logic/Engine.lua        reads Group Finder data, perspective, spellbook check
 Core.lua                settings, events, /bgf, language, templates
@@ -71,7 +77,8 @@ UI/FilterBar.lua        filter bar
 UI/Popup.lua            own small menu (templates, fonts, context menu)
 UI/Contact.lua          templates button and menu, placeholders, sending
 UI/Options.lua          options and template editor
-UI/WhatsNew.lua         "What's new" window
+UI/WhatsNew.lua         "What's new" window, what to show at login (tour or news)
+UI/Tour.lua             intro tour window, pictures built from frames and real chips
 UI/Main.lua             integration into Blizzard's window, header buttons, window height
 Media/Circle.tga        circle texture for chips and icons
 Media/Logo.tga          logo for the addon list (64x64), source: Media/bgf_logo.svg

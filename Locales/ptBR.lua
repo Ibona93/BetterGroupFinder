@@ -115,6 +115,7 @@ ns.RegisterLocale("ptBR", {
 	OPT_PAGE_chips = "Filtros e botões",
 	OPT_PAGE_templates = "Modelos de mensagem",
 	OPT_WHATSNEW = "Mostrar \"Novidades\" após atualizações",
+	OPT_TOUR_BUTTON = "Repetir o tour",
 	OPT_WHATSNEW_BUTTON = "Novidades",
 	AB_loot = "Saque",
 	CAT_loot = "Saque",

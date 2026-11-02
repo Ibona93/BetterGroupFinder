@@ -115,6 +115,7 @@ ns.RegisterLocale("ruRU", {
 	OPT_PAGE_chips = "Фильтры и кнопки",
 	OPT_PAGE_templates = "Шаблоны сообщений",
 	OPT_WHATSNEW = "Показывать «Что нового» после обновлений",
+	OPT_TOUR_BUTTON = "Пройти обзор заново",
 	OPT_WHATSNEW_BUTTON = "Что нового",
 	AB_loot = "Добыча",
 	CAT_loot = "Добыча",

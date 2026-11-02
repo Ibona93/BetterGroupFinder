@@ -48,6 +48,7 @@ If the game marks the addon as "out of date", the interface number changed with 
 | Tooltip | Blizzard's tooltip (members, voice chat, activity) plus the BGF reasoning below it: green = advantage, red = penalty, grey = gap, orange = reason for sorting out. |
 | Templates button | In the footer between "Send message" and "Group invite". Opens the template menu; clicking a template **sends it right away**. |
 | Right-click on a listing | Own context menu: send message, invite (if possible), templates…, plus "Report…" as a note: Blizzard does not allow addons to report (`C_ReportSystem.SendReport`), so reporting works in Blizzard's list after `/bgf off`. |
+| Intro tour | Since 1.0.0: new players get a short tour (6 pages) at their first login instead of "What's new": points, chips, Shift tooltip, filter bar, templates, options and Discord. Every existing user sees it once with 1.0.0. Restart it under Options › "Restart tour". |
 | What's new | After an update, a short "What's new in BGF" window appears once at login. Can be switched off; the options main page shows the same content. |
 | Languages | Interface in all WoW client languages (10 translations). Templates: your game language plus English. |
 
@@ -86,7 +87,7 @@ Menu layout: white heading (what happens), below it the languages in gold (your 
 | `/bgf debug` | Debug output on/off. Hovering a listing prints its raw data (incl. `mapID`, specialisation) to the chat. |
 
 ### Options (`/bgf` or Options › AddOns › BGF - Better Group Finder Forever)
-- **Main page:** version, short description, "Show what's new after updates", the news of the current version (the version badge opens earlier releases), commands, and at the very bottom the Discord link to copy (click the field, Ctrl+C).
+- **Main page:** version, short description, "Show what's new after updates" with the button "Restart tour", the news of the current version (the version badge opens earlier releases), commands, and at the very bottom the Discord link to copy (click the field, Ctrl+C).
 - **Display:** **Show points** (with the button "How are points calculated?"), BGF rating in the tooltip, **class colour ring around the role icons** (off = no ring, like Blizzard's), font.
 - **Filter & Chips:** BGF filter active, shown rows/categories/chips, "Show all", "Reset filters", "Restore defaults".
 - **Message templates:** send immediately, templates per language (your own language is preselected and highlighted), "Reset templates of this language".
@@ -226,6 +227,12 @@ For Lua errors, please include a screenshot or the text from BugSack. Tests, fil
 ---
 
 ## 7. Changelog
+
+**1.0.0** (launch of WoW Forever)
+- Intro tour: a short window with six pages explains points, chips, the Shift tooltip, the filter bar with your own default, message templates and the options (with the Discord link). New installs get it at their first login instead of "What's new"; with 1.0.0 every existing user sees it once. Restart it from the options main page.
+- New chip *crit buff*: Moonkin Form and Leader of the Pack give the party +3 % crit (druid talents, so "may bring" only).
+- Salvation is no longer taught in the launch client (server hotfixes of 30/31 Oct 2026), so its chip is gone; saved settings for it are cleaned up.
+- Turn Undead notes that the Retribution talent Turn Evil makes it work on demons too.
 
 **0.10.2**
 - Discord: the invite link (discord.gg/4nPNJMYetV) can be copied from the bottom of the options main page; mentioned on the "What's new" page 0.10.2 and on the welcome page.

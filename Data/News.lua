@@ -20,9 +20,11 @@ local ICON = {
 	colors = "Interface\\Icons\\INV_Misc_Gem_Variety_01",
 	discord = "Interface\\Icons\\INV_Letter_15",
 	blessing = "Interface\\Icons\\Spell_Holy_SealOfSalvation",
+	crit = "Interface\\Icons\\Spell_Nature_UnyeldingStamina",
+	launch = "Interface\\Icons\\Spell_Holy_TurnUndead",
 }
 
-ns.NEWS_ORDER = { "0.10.2", "0.10.1", "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
+ns.NEWS_ORDER = { "1.0.0", "0.10.2", "0.10.1", "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
 ns.NEWS_FIRST = "0.8.0"   -- welcome page for new users
 
 ns.NEWS_UI = {
@@ -41,6 +43,26 @@ ns.NEWS_UI = {
 }
 
 ns.NEWS = {
+	["1.0.0"] = {
+		enUS = { title = "What's new in BGF", items = {
+			{ icon = ICON.name, title = "BGF 1.0 for the launch of WoW Forever",
+				text = "A short tour now shows new players the most important features. You saw it at login, and you can start it again any time.",
+				tip = "Options › Restart tour" },
+			{ icon = ICON.crit, title = "New chip: crit buff",
+				text = "Moonkin Form and Leader of the Pack give the whole party +3 % crit. Both are druid talents, so BGF can only say \"may bring\"." },
+			{ icon = ICON.launch, title = "Updated for the launch client",
+				text = "Salvation is no longer taught, so its chip is gone; saved settings for it are cleaned up. Turn Undead notes that the Turn Evil talent makes it work on demons too." },
+		} },
+		deDE = { title = "Neu in BGF", items = {
+			{ icon = ICON.name, title = "BGF 1.0 zum Start von WoW Forever",
+				text = "Eine kurze Tour zeigt neuen Spielern jetzt die wichtigsten Funktionen. Du hast sie beim Login gesehen und kannst sie jederzeit neu starten.",
+				tip = "Optionen › Tour erneut starten" },
+			{ icon = ICON.crit, title = "Neuer Chip: Krit-Buff",
+				text = "Mondkingestalt und Rudelführer geben der ganzen Gruppe +3 % Krit. Beides sind Druiden-Talente, BGF kann deshalb nur „evtl.“ sagen." },
+			{ icon = ICON.launch, title = "Angepasst an den Launch-Client",
+				text = "Rettung wird nicht mehr gelehrt, deshalb ist ihr Chip weg; gespeicherte Einstellungen dazu werden aufgeräumt. Untote vertreiben zeigt jetzt an, dass es mit dem Talent „Turn Evil“ auch auf Dämonen wirkt." },
+		} },
+	},
 	["0.10.2"] = {
 		enUS = { title = "What's new in BGF", items = {
 			{ icon = ICON.discord, title = "BGF is on Discord",

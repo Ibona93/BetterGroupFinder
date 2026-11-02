@@ -115,6 +115,7 @@ ns.RegisterLocale("zhTW", {
 	OPT_PAGE_chips = "篩選與按鈕",
 	OPT_PAGE_templates = "訊息範本",
 	OPT_WHATSNEW = "更新後顯示「新功能」",
+	OPT_TOUR_BUTTON = "重新開始導覽",
 	OPT_WHATSNEW_BUTTON = "新功能",
 	AB_loot = "戰利品",
 	CAT_loot = "戰利品",

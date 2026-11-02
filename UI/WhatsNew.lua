@@ -255,9 +255,19 @@ function News.OpenVersionMenu(owner, current, onPick)
 	ns.Popup.Open(owner, items)
 end
 
--- Which page belongs to this login: welcome for new users, the current version after an
--- update (once), nothing when switched off or already seen.
+-- What belongs to this login: the intro tour (once: new installs, and with 1.0.0 everybody,
+-- it replaces the news and marks them seen), else the welcome page for new users, the current
+-- version after an update (once), nothing when switched off or already seen.
+-- Returns "tour", a news version or nil.
 function News.PageForLogin()
+	if ns.Tour and ns.Tour.Due() then
+		if ns.db then ns.db.lastSeenVersion = ns.VERSION end
+		return "tour"
+	end
+	return News.NewsPageForLogin()
+end
+
+function News.NewsPageForLogin()
 	local db = ns.db
 	if not db then return nil end
 	local current = ns.VERSION
@@ -270,6 +280,10 @@ function News.PageForLogin()
 	end
 	db.lastSeenVersion = current
 	return page
+end
+
+local function showForLogin(page)
+	if page == "tour" then ns.Tour.Show() else News.ShowPage(page) end
 end
 
 local pending
@@ -285,11 +299,11 @@ watcher:SetScript("OnEvent", function(_, event, isLogin, isReload)
 		if InCombatLockdown and InCombatLockdown() then
 			pending = page
 		else
-			News.ShowPage(page)
+			showForLogin(page)
 		end
 	elseif pending then
 		local page = pending
 		pending = nil
-		News.ShowPage(page)
+		showForLogin(page)
 	end
 end)

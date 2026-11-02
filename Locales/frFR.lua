@@ -115,6 +115,7 @@ ns.RegisterLocale("frFR", {
 	OPT_PAGE_chips = "Filtres et puces",
 	OPT_PAGE_templates = "Modèles de messages",
 	OPT_WHATSNEW = "Afficher « Nouveautés » après les mises à jour",
+	OPT_TOUR_BUTTON = "Relancer la visite",
 	OPT_WHATSNEW_BUTTON = "Nouveautés",
 	AB_loot = "Butin",
 	CAT_loot = "Butin",

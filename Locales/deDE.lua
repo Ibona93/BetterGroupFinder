@@ -115,6 +115,7 @@ ns.RegisterLocale("deDE", {
 	OPT_PAGE_chips = "Filter & Chips",
 	OPT_PAGE_templates = "Nachrichtenvorlagen",
 	OPT_WHATSNEW = "„Neu in BGF“ nach Updates anzeigen",
+	OPT_TOUR_BUTTON = "Tour erneut starten",
 	OPT_WHATSNEW_BUTTON = "Neu in BGF",
 	AB_loot = "Loot",
 	CAT_loot = "Loot",

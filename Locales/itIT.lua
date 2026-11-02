@@ -115,6 +115,7 @@ ns.RegisterLocale("itIT", {
 	OPT_PAGE_chips = "Filtri e pulsanti",
 	OPT_PAGE_templates = "Modelli di messaggio",
 	OPT_WHATSNEW = "Mostra «Novità» dopo gli aggiornamenti",
+	OPT_TOUR_BUTTON = "Riavvia il tour",
 	OPT_WHATSNEW_BUTTON = "Novità",
 	AB_loot = "Bottino",
 	CAT_loot = "Bottino",

@@ -115,6 +115,7 @@ ns.RegisterLocale("koKR", {
 	OPT_PAGE_chips = "필터 및 버튼",
 	OPT_PAGE_templates = "메시지 템플릿",
 	OPT_WHATSNEW = "업데이트 후 \"새 기능\" 표시",
+	OPT_TOUR_BUTTON = "둘러보기 다시 시작",
 	OPT_WHATSNEW_BUTTON = "새 기능",
 	AB_loot = "전리품",
 	CAT_loot = "전리품",

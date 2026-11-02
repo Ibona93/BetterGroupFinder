@@ -19,6 +19,7 @@ ns.DEFAULTS = {
 	openCategories = {},               -- expanded chip categories in the filter bar
 	linkOverrides = {},                -- [profile][chip] = true: switched off despite a link
 	userDefaults = {},                 -- [profile] = { states, overrides }: own default for "Reset"
+	tourSeen = false,                  -- 1.0.0: intro tour shown once (instead of "What's new")
 	showWhatsNew = true,               -- "What's new" window after updates (lastSeenVersion: last shown)
 	lootFor = {},                      -- loot competition checked for: ["@self"] = false, [name] = true
 	showFavRow = true,                 -- options "Shown chips": favourites row
