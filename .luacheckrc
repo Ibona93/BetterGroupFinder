@@ -8,7 +8,7 @@ globals = {
 }
 read_globals = {
 	"C_LFGList", "C_LFGListRoles", "C_ChatInfo", "C_PartyInfo", "C_SpellBook", "C_AddOns", "C_Timer",
-	"CreateFrame", "UIParent", "GameTooltip", "DEFAULT_CHAT_FRAME", "GetLocale", "GetCurrentRegion",
+	"CreateFrame", "UIParent", "GameTooltip", "DEFAULT_CHAT_FRAME", "GetLocale", "GetBuildInfo", "GetCurrentRegion",
 	"IsBetaBuild", "IsShiftKeyDown", "CreateColor", "GetRealZoneText", "GetZoneText", "GetSubZoneText", "InCombatLockdown", "IsInGroup", "IsInRaid", "GetNumGroupMembers", "GetNumSubgroupMembers",
 	"UnitExists", "UnitClass", "UnitLevel", "UnitName", "UnitIsUnit", "UnitGroupRolesAssigned",
 	"UnitIsGroupLeader", "UnitIsGroupAssistant", "IsPlayerSpell", "GetCursorPosition", "Ambiguate",

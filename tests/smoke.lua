@@ -1002,6 +1002,18 @@ ok, err = pcall(SlashCmdList.BETTERGROUPFINDER, "debug")
 check("/bgf debug", ok, err)
 ok, err = pcall(SlashCmdList.BETTERGROUPFINDER, "")
 check("/bgf opens options", ok, err)
+do
+	-- 1.0.0: hidden "/bgf check" lists spell IDs the client does not know
+	local oldSpell, oldBuild = _G.C_Spell, _G.GetBuildInfo
+	_G.C_Spell = { GetSpellName = function(id) if id ~= 24858 and id ~= 2878 then return "x" end end }
+	_G.GetBuildInfo = function() return "1.60.1", "70707", "Nov 4 2026", 16001 end
+	local missing, total = ns.CheckSpells(false)
+	check("/bgf check finds exactly the unknown spell IDs", #missing == 2 and missing[1].id == 2878
+		and missing[2].id == 24858 and total >= 50, #missing .. "/" .. tostring(total))
+	ok, err = pcall(SlashCmdList.BETTERGROUPFINDER, "check")
+	check("/bgf check prints without errors", ok, err)
+	_G.C_Spell, _G.GetBuildInfo = oldSpell, oldBuild
+end
 
 print(failures == 0 and "\nall smoke checks passed" or ("\n" .. failures .. " smoke checks failed"))
 os.exit(failures == 0 and 0 or 1)

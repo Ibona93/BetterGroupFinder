@@ -261,6 +261,38 @@ end
 -- Slash command
 -------------------------------------------------------------------------------
 
+-- Hidden "/bgf check" (1.0.0): after a game patch, lists every spell ID from Data/Abilities.lua
+-- the client does not know, plus build and interface number. Only reads spell data.
+function ns.CheckSpells(verbose)
+	local ids, missing = {}, {}
+	for key, spell in pairs(ns.SPELLS) do ids[spell.id] = ids[spell.id] or key end
+	for class, list in pairs(ns.CLASS_ABILITIES) do
+		for _, e in ipairs(list) do
+			for _, id in ipairs(e.spells or {}) do ids[id] = ids[id] or (class .. " " .. (e.sp or e.a)) end
+		end
+	end
+	local api, total = _G.C_Spell, 0
+	for id, label in pairs(ids) do
+		total = total + 1
+		local name
+		if api and api.GetSpellName then
+			local ok, n = pcall(api.GetSpellName, id)
+			if ok then name = n end
+		end
+		if type(name) ~= "string" or name == "" then missing[#missing + 1] = { id = id, label = label } end
+	end
+	table.sort(missing, function(a, b) return a.id < b.id end)
+	if verbose then
+		local version, build, _, interface = "?", "?", nil, "?"
+		if GetBuildInfo then version, build, _, interface = GetBuildInfo() end
+		ns.Print(("check: client %s.%s, interface %s, BGF %s"):format(tostring(version), tostring(build),
+			tostring(interface), ns.VERSION))
+		for _, m in ipairs(missing) do ns.Print(("  missing spell %d (%s)"):format(m.id, m.label)) end
+		ns.Print(("check: %d of %d spell IDs found"):format(total - #missing, total))
+	end
+	return missing, total
+end
+
 SLASH_BETTERGROUPFINDER1 = "/bgf"
 SlashCmdList.BETTERGROUPFINDER = function(msg)
 	msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
@@ -280,6 +312,8 @@ SlashCmdList.BETTERGROUPFINDER = function(msg)
 			ns.Print(("version %s, client %s, lockdown %s"):format(ns.VERSION, ns.clientLocale,
 				tostring(ns.Engine.IsLockedDown())))
 		end
+	elseif msg == "check" then
+		ns.CheckSpells(true)
 	elseif msg == "help" or msg == "?" then
 		ns.Print(L.SLASH_HELP)
 	else
