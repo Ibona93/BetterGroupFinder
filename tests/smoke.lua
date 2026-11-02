@@ -932,8 +932,45 @@ check("release notes 0.10.2 and the welcome page mention the Discord link", (fun
 	end
 	return true
 end)())
-check("Salvation chip uses the new name (Rettung / Salvation)", ns.Locales.deDE.AB_buff_salvation == "Rettung"
-	and ns.Locales.enUS.AB_buff_salvation == "Salvation" and ns.SPELLS.blessing_salvation.id == 1038)
+check("1.0.0: Salvation chip removed (no longer taught in the launch client)",
+	ns.ABILITY_BY_ID.buff_salvation == nil and ns.SPELLS.blessing_salvation == nil)
+check("1.0.0: a stale Salvation setting from 0.10.x is dropped on load", (function()
+	local states = { custom = { buff_salvation = 2, buff_kings = 1 } }
+	ns.CleanAbilityStates(states)
+	return states.custom.buff_salvation == nil and states.custom.buff_kings == 1
+end)())
+check("1.0.0: crit buff chip is druid-only and 'may bring' (Moonkin 40, Leader of the Pack 30)", (function()
+	local chip = ns.ABILITY_BY_ID.buff_crit
+	if not (chip and chip.category == "buff" and chip.sole == "DRUID") then return false end
+	local levels = {}
+	for _, e in ipairs(ns.CLASS_ABILITIES.DRUID) do
+		if e.a == "buff_crit" then
+			if not e.possible or e.cond ~= "TALENT" then return false end
+			levels[e.sp] = e.level
+		end
+	end
+	return levels.moonkin_form == 40 and levels.leader_pack == 30
+end)())
+check("1.0.0: crit buff selects the druid, the druid chip does not select the crit buff", (function()
+	local toDruid, fromDruid = false, false
+	for _, v in ipairs(ns.LINKS.buff_crit or {}) do if v == "class_DRUID" then toDruid = true end end
+	for _, v in ipairs(ns.LINKS.class_DRUID or {}) do if v == "buff_crit" then fromDruid = true end end
+	return toDruid and not fromDruid
+end)())
+check("1.0.0: new texts in all 10 languages (crit buff, Turn Evil)", (function()
+	for _, lang in ipairs({ "enUS", "deDE", "frFR", "esES", "ptBR", "itIT", "ruRU", "koKR", "zhCN", "zhTW" }) do
+		local t = ns.Locales[lang]
+		if not (t and t.AB_buff_crit and t.FX_SPELLCRIT and t.FX_MELEECRIT and t.COND_UNDEAD_EVIL) then return false end
+		if t.AB_buff_salvation or t.FX_SALVATION then return false end
+	end
+	return ns.Locales.deDE.COND_UNDEAD_EVIL == "nur Untote (mit Talent auch Dämonen)"
+end)())
+check("1.0.0: Turn Undead notes the Turn Evil talent (demons too)", (function()
+	for _, e in ipairs(ns.CLASS_ABILITIES.PALADIN) do
+		if e.sp == "turn_undead" then return e.cond == "UNDEAD_EVIL" end
+	end
+	return false
+end)())
 pcall(mainPage.RenderNews, "0.8.0")
 check("... the version badge switches to earlier releases", mainPage.newsVersion == "0.8.0" and mainPage.Badge.version == "0.8.0")
 local langs = ns.Options.Pages.templates.LangButtons

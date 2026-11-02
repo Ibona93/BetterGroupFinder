@@ -13,9 +13,13 @@ Source status (October 2026, beta build 1.60.1):
     in the Forever client. If a spell ID does not exist in Forever, BGF notices that
     your own spellbook check fails and falls back to class + level.
   * Verified Forever changes: no Bloodlust/Heroism for shamans (only a personal
-    talent), Fear Ward for all priests at level 20, Blessing of Kings/Salvation and Divine
-    Spirit baseline, no Wyvern Sting. Blessing of Salvation is called "Salvation" since the
-    beta build of 16 October 2026 (same spell ID 1038, no longer exclusive with other blessings).
+    talent), Fear Ward for all priests at level 20, Blessing of Kings and Divine Spirit
+    baseline, no Wyvern Sting. Salvation (formerly Blessing of Salvation, ID 1038) is no longer
+    taught since the server hotfixes of 30/31 October 2026 (launch client 1.60.1.70685/70707,
+    datamined, not announced by Blizzard), so its chip was removed in 1.0.0.
+  * Crit buff (1.0.0): Moonkin Form (Balance row 7) and Leader of the Pack (Feral row 5) give
+    the party +3 % crit since the launch client; both are talents, so "may bring" only.
+  * Turn Evil (Retribution talent, 30/31 October 2026): Turn Undead also works on demons.
   * Chips (0.7.0) in four categories: classes ("this class in the group"), buffs,
     dispels, combat & utility. Class chips select their buffs; chips only one class brings
     select that class (ns.LINKS at the end of this file).
@@ -42,7 +46,7 @@ for _, a in ipairs({
 	{ id = "buff_int",       weight = 2, category = "buff", sole = "MAGE" },    -- Arcane Intellect
 	{ id = "buff_wild",      weight = 3, category = "buff", sole = "DRUID" },   -- Mark of the Wild
 	{ id = "buff_kings",     weight = 3, category = "buff", sole = "PALADIN" },
-	{ id = "buff_salvation", weight = 2, category = "buff", sole = "PALADIN" },
+	{ id = "buff_crit",      weight = 2, category = "buff", sole = "DRUID" },    -- Moonkin Form / Leader of the Pack (talents)
 	{ id = "buff_spirit",    weight = 2, category = "buff", sole = "PRIEST" },  -- Divine Spirit
 	{ id = "buff_fearward",  weight = 4, category = "buff", sole = "PRIEST" },
 	{ id = "curse",          weight = 6, category = "dispel" },
@@ -123,7 +127,6 @@ ns.SPELLS = {
 	blessing_might   = { id = 19740, enUS = "Blessing of Might",     deDE = "Segen der Macht" },
 	blessing_wisdom  = { id = 19742, enUS = "Blessing of Wisdom",    deDE = "Segen der Weisheit" },
 	blessing_kings   = { id = 20217, enUS = "Blessing of Kings",     deDE = "Segen der Könige" },
-	blessing_salvation = { id = 1038, enUS = "Salvation",       deDE = "Rettung" },  -- renamed in Forever (Oct 2026), same ID
 	purify           = { id = 1152,  enUS = "Purify",                deDE = "Läutern" },
 	hammer_justice   = { id = 853,   enUS = "Hammer of Justice",     deDE = "Hammer der Gerechtigkeit" },
 	turn_undead      = { id = 2878,  enUS = "Turn Undead",           deDE = "Untote vertreiben" },
@@ -167,6 +170,8 @@ ns.SPELLS = {
 	feral_charge     = { id = 16979, enUS = "Feral Charge",          deDE = "Wilde Attacke" },
 	cure_poison_druid = { id = 8946, enUS = "Cure Poison",           deDE = "Vergiftung heilen" },
 	rebirth          = { id = 20484, enUS = "Rebirth",               deDE = "Wiedergeburt" },
+	moonkin_form     = { id = 24858, enUS = "Moonkin Form",          deDE = "Mondkingestalt" },
+	leader_pack      = { id = 17007, enUS = "Leader of the Pack",    deDE = "Rudelführer" },
 	remove_curse     = { id = 2782,  enUS = "Remove Curse",          deDE = "Fluch aufheben" },
 }
 
@@ -194,8 +199,7 @@ ns.CLASS_ABILITIES = {
 		{ a = "interrupt", level = 8,  sp = "hammer_justice", spells = { 853 }, cond = "STUN" },
 		{ a = "buff_mana", level = 14, sp = "blessing_wisdom", spells = { 19742 }, fx = "MANAREGEN" },
 		{ a = "buff_kings", level = 20, sp = "blessing_kings", spells = { 20217 }, fx = "KINGS" },     -- baseline in Forever
-		{ a = "buff_salvation", level = 26, sp = "blessing_salvation", spells = { 1038 }, fx = "SALVATION" },  -- baseline in Forever
-		{ a = "cc",        level = 24, sp = "turn_undead", spells = { 2878 }, possible = true, cond = "UNDEAD" },
+		{ a = "cc",        level = 24, sp = "turn_undead", spells = { 2878 }, possible = true, cond = "UNDEAD_EVIL" },  -- Turn Evil talent: demons too
 		{ a = "cc",        level = 30, sp = "repentance", spells = { 20066 }, possible = true, cond = { "TALENT", "HUMANOID" } },
 		{ a = "magic",     level = 42, sp = "cleanse", spells = { 4987 } },
 	},
@@ -251,6 +255,8 @@ ns.CLASS_ABILITIES = {
 		{ a = "battleres", level = 20, sp = "rebirth", spells = { 20484 } },
 		{ a = "interrupt", level = 20, sp = "feral_charge", spells = { 16979 }, possible = true, cond = { "TALENT", "BEAR" } },
 		{ a = "curse",     level = 24, sp = "remove_curse", spells = { 2782 } },
+		{ a = "buff_crit", level = 30, sp = "leader_pack", spells = { 17007 }, possible = true, cond = "TALENT", fx = "MELEECRIT" },  -- Feral row 5
+		{ a = "buff_crit", level = 40, sp = "moonkin_form", spells = { 24858 }, possible = true, cond = "TALENT", fx = "SPELLCRIT" },  -- Balance row 7
 	},
 }
 
