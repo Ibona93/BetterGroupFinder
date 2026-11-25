@@ -966,8 +966,12 @@ end
 function Bar.ToggleRole(role)
 	local chips = ns.db.roleChips
 	if next(chips) == nil then
+		-- solo without a role in Blizzard's Group Finder, damage is only the fallback:
+		-- clicking tank or healer selects just that role (1.0.1)
+		local fallback = ns.Engine.NoBlizzardRole()
 		local auto = autoRoles()
 		for r, on in pairs(auto) do chips[r] = on and true or false end
+		if fallback and role ~= "DAMAGER" then chips.DAMAGER = false end
 	end
 	chips[role] = not chips[role]
 	ns.UI.ApplyLayout()

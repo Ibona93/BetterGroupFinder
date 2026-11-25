@@ -550,7 +550,23 @@ end
 check("... no group sorted out as 'damage not wanted'", ok and wrongOut == 0, err or wrongOut)
 pcall(ns.UI.ApplyLayout)
 check("... chips set by hand: no hint", not ns.FilterBar.frame.NoRoleHint.__shown)
+-- clicking out of the automatic fallback: tank/healer replace damage, damage switches off
+ns.FilterBar.ResetFilters()
+ns.FilterBar.ToggleRole("HEALER")
+check("fallback damage + click healer: only healer", ns.db.roleChips.HEALER == true
+	and not ns.db.roleChips.DAMAGER and not ns.db.roleChips.TANK)
+ns.FilterBar.ResetFilters()
+ns.FilterBar.ToggleRole("TANK")
+check("fallback damage + click tank: only tank", ns.db.roleChips.TANK == true
+	and not ns.db.roleChips.DAMAGER and not ns.db.roleChips.HEALER)
+ns.FilterBar.ResetFilters()
+ns.FilterBar.ToggleRole("DAMAGER")
+check("fallback damage + click damage: all off ('no role chosen')", ns.Engine.NoRoleChosen())
 C_LFGListRoles.GetRoles = realGetRoles
+ns.FilterBar.ResetFilters()
+ns.FilterBar.ToggleRole("HEALER")
+check("Blizzard damage chosen + click healer: damage stays, healer added", ns.db.roleChips.HEALER == true
+	and ns.db.roleChips.DAMAGER == true)
 ns.FilterBar.ResetFilters()
 pcall(ns.UI.ApplyLayout)
 check("Blizzard role chosen again: no hint", not ns.FilterBar.frame.NoRoleHint.__shown)
