@@ -164,6 +164,7 @@ ns.RegisterLocale("koKR", {
 	CAT_combat = "전투 및 보조",
 	FAV_EMPTY = "버튼을 오른쪽 클릭하면 여기에 추가됩니다",
 	ROLES_NONE_HINT = "선택한 역할 없음: 역할로 거르지 않음",
+	ROLES_BLIZZ_NONE_HINT = "파티 찾기에서 역할을 선택하지 않음: BGF는 공격 담당으로 계산합니다",
 	FAV_ADD = "오른쪽 클릭: 즐겨찾기에 추가",
 	FAV_REMOVE = "오른쪽 클릭: 즐겨찾기에서 제거",
 	LINKED_BY = "%s와 함께 선택됨. 클릭: 그래도 끄기.",

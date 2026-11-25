@@ -16,12 +16,25 @@ E.locked = false
 -- Own character and group
 -------------------------------------------------------------------------------
 
+-- Your roles from Blizzard's Group Finder; none chosen there counts as damage.
+-- Second value: false when no role is chosen in Blizzard's Group Finder.
 function E.GetMyRoles()
 	local roles = C_LFGListRoles and ns.TryCall(C_LFGListRoles.GetRoles)
 	if type(roles) == "table" and (roles.tank or roles.healer or roles.dps) then
-		return { tank = roles.tank, healer = roles.healer, dps = roles.dps }
+		return { tank = roles.tank, healer = roles.healer, dps = roles.dps }, true
 	end
-	return { dps = true }
+	return { dps = true }, false
+end
+
+-- Your roles when solo (1.0.1): role chips set by hand (at least one on) replace the roles
+-- from Blizzard's Group Finder; otherwise Blizzard's roles. Before, both had to match, so
+-- e.g. no Blizzard role (= damage) plus the healer chip sorted out every group.
+function E.SoloRoles(blizzardRoles, chips)
+	if chips and (chips.TANK or chips.HEALER or chips.DAMAGER) then
+		return { tank = chips.TANK and true or nil, healer = chips.HEALER and true or nil,
+			dps = chips.DAMAGER and true or nil }
+	end
+	return blizzardRoles
 end
 
 local function unitRole(unit)
@@ -44,6 +57,7 @@ function E.GetMySide()
 	me.lfgRoles = E.GetMyRoles()
 	if not IsInGroup() then
 		me.role = nil
+		me.lfgRoles = E.SoloRoles(me.lfgRoles, ns.db and ns.db.roleChips)
 	end
 	local members = { me }
 	if IsInRaid() then
@@ -229,6 +243,16 @@ function E.AllowedRoles()
 		if chips[role] then allowed[role] = true any = true end
 	end
 	return any and allowed or nil
+end
+
+-- True when you are solo, the role chips are automatic and no role is chosen in Blizzard's
+-- Group Finder (BGF then counts you as damage).
+function E.NoBlizzardRole()
+	local chips = ns.db and ns.db.roleChips
+	if chips and next(chips) ~= nil then return false end
+	if IsInGroup and IsInGroup() then return false end
+	local _, chosen = E.GetMyRoles()
+	return not chosen
 end
 
 -- True when the role chips are set by hand and all of them are switched off.

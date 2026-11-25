@@ -652,9 +652,8 @@ function Bar.Create(parent)
 		chip.label = words.roles[role]:gsub("^%l", string.upper)
 		f.RoleChips[#f.RoleChips + 1] = chip
 	end
-	-- All role chips switched off by hand: short hint next to them (1.0.1)
+	-- Hint next to the role chips (1.0.1): all switched off, or no role in Blizzard's Group Finder
 	f.NoRoleHint = text(f, C.orange)
-	f.NoRoleHint:SetText(L.ROLES_NONE_HINT)
 	f.NoRoleHint:Hide()
 
 	-- Row 3: abilities
@@ -803,7 +802,9 @@ function Bar.Layout()
 	end
 	-- "No role chosen" hint: next to the chips, or in its own line when it does not fit.
 	f.NoRoleHint:ClearAllPoints()
-	if Bar.ShowNoRoleHint() then
+	local hint = Bar.NoRoleHintText()
+	if hint then
+		f.NoRoleHint:SetText(hint)
 		f.NoRoleHint:Show()
 		if x + 4 + f.NoRoleHint:GetStringWidth() + PADDING <= width then
 			f.NoRoleHint:SetPoint("LEFT", f, "TOPLEFT", x + 4, y - CHIP_HEIGHT / 2)
@@ -946,9 +947,13 @@ local function autoRoles()
 	return out, #mySide > 1
 end
 
--- Hint "no role chosen": all role chips off by hand, in a category with role distribution.
-function Bar.ShowNoRoleHint()
-	return ns.Engine.NoRoleChosen() and Bar.CurrentProfile() ~= "other"
+-- Hint next to the role chips (nil = none), only in categories with role distribution:
+-- all role chips off by hand, or solo with automatic roles and no role in Blizzard's Group Finder.
+function Bar.NoRoleHintText()
+	if Bar.CurrentProfile() == "other" then return nil end
+	if ns.Engine.NoRoleChosen() then return ns.L.ROLES_NONE_HINT end
+	if ns.Engine.NoBlizzardRole() then return ns.L.ROLES_BLIZZ_NONE_HINT end
+	return nil
 end
 
 function Bar.ToggleRole(role)

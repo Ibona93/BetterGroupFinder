@@ -532,6 +532,28 @@ check("all role chips off: hint 'no role chosen' shows", ns.FilterBar.frame.NoRo
 ns.FilterBar.ResetFilters()
 pcall(ns.UI.ApplyLayout)
 check("reset: roles automatic again, hint gone", next(ns.db.roleChips) == nil and not ns.FilterBar.frame.NoRoleHint.__shown)
+-- 1.0.1, the actual report: no role in Blizzard's Group Finder, healer chip on
+local realGetRoles = C_LFGListRoles.GetRoles
+C_LFGListRoles.GetRoles = function() return { tank = false, healer = false, dps = false } end
+pcall(ns.UI.ApplyLayout)
+check("no Blizzard role, automatic chips: hint 'counts you as damage' shows", ns.FilterBar.frame.NoRoleHint.__shown
+	and ns.FilterBar.frame.NoRoleHint.__text == ns.L.ROLES_BLIZZ_NONE_HINT)
+ns.db.roleChips = { TANK = false, HEALER = true, DAMAGER = false }
+check("... healer chip on: you count as healer", ns.Engine.GetMySide()[1].lfgRoles.healer
+	and not ns.Engine.GetMySide()[1].lfgRoles.dps)
+ok, err = pcall(ns.UI.Refresh)
+local wrongOut = 0
+for _, e in ipairs(ns.List.sections.excluded) do
+	local why = e.result.excludeReason
+	if why and why[2] == "R_ROLE_NOT_WANTED" and why[3] == "DAMAGER" then wrongOut = wrongOut + 1 end
+end
+check("... no group sorted out as 'damage not wanted'", ok and wrongOut == 0, err or wrongOut)
+pcall(ns.UI.ApplyLayout)
+check("... chips set by hand: no hint", not ns.FilterBar.frame.NoRoleHint.__shown)
+C_LFGListRoles.GetRoles = realGetRoles
+ns.FilterBar.ResetFilters()
+pcall(ns.UI.ApplyLayout)
+check("Blizzard role chosen again: no hint", not ns.FilterBar.frame.NoRoleHint.__shown)
 local enableBox = ns.FilterBar.frame.Enable
 enableBox.__checked = false
 ok, err = pcall(enableBox.__scripts.OnClick, enableBox)

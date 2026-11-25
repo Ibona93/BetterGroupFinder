@@ -45,12 +45,18 @@ ns.NEWS_UI = {
 ns.NEWS = {
 	["1.0.1"] = {
 		enUS = { title = "What's new in BGF", items = {
-			{ icon = ICON.reason, title = "Fix: no role chosen",
-				text = "With all role chips switched off, BGF sorted out every group. Now no role chosen means: roles are not filtered. A short hint next to the role chips tells you." },
+			{ icon = ICON.reason, title = "Fix: role chips count",
+				text = "Solo, the role chips you set by hand are now your roles. Before, the role in Blizzard's Group Finder had to match too: with no role there and the healer chip on, BGF sorted out every group. All chips off now simply means roles are not filtered." },
+			{ icon = ICON.tooltip, title = "Hint when no role is chosen",
+				text = "No role in Blizzard's Group Finder? BGF counts you as damage and says so next to the role chips.",
+				tip = "Pick your roles in the Group Finder or with the role chips" },
 		} },
 		deDE = { title = "Neu in BGF", items = {
-			{ icon = ICON.reason, title = "Behoben: keine Rolle gewählt",
-				text = "Waren alle Rollen-Chips aus, hat BGF jede Gruppe aussortiert. Jetzt heißt keine Rolle: Es wird nicht nach Rollen gefiltert. Ein kurzer Hinweis neben den Rollen-Chips sagt das." },
+			{ icon = ICON.reason, title = "Behoben: Rollen-Chips zählen",
+				text = "Solo gelten die von Hand gesetzten Rollen-Chips jetzt als deine Rollen. Vorher musste auch die Rolle im Blizzard-Gruppenfinder passen: Ohne Rolle dort und mit Chip „Heiler“ hat BGF jede Gruppe aussortiert. Alle Chips aus heißt jetzt einfach: Es wird nicht nach Rollen gefiltert." },
+			{ icon = ICON.tooltip, title = "Hinweis, wenn keine Rolle gewählt ist",
+				text = "Keine Rolle im Blizzard-Gruppenfinder? BGF rechnet dann mit Schaden und sagt das neben den Rollen-Chips.",
+				tip = "Rollen im Gruppenfinder oder über die Rollen-Chips wählen" },
 		} },
 	},
 	["1.0.0"] = {

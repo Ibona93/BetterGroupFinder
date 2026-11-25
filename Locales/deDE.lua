@@ -164,6 +164,7 @@ ns.RegisterLocale("deDE", {
 	CAT_combat = "Kampf & Hilfsmittel",
 	FAV_EMPTY = "Rechtsklick auf einen Chip: hier als Favorit",
 	ROLES_NONE_HINT = "Keine Rolle gewählt: Rollen werden nicht gefiltert",
+	ROLES_BLIZZ_NONE_HINT = "Keine Rolle im Gruppenfinder gewählt: BGF rechnet mit Schaden",
 	FAV_ADD = "Rechtsklick: zu den Favoriten",
 	FAV_REMOVE = "Rechtsklick: aus den Favoriten entfernen",
 	LINKED_BY = "Mit ausgewählt durch %s. Klick: trotzdem abwählen.",

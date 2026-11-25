@@ -164,6 +164,7 @@ ns.RegisterLocale("zhTW", {
 	CAT_combat = "戰鬥與輔助",
 	FAV_EMPTY = "右鍵點擊按鈕即可加入此處",
 	ROLES_NONE_HINT = "未選擇職責：不依職責篩選",
+	ROLES_BLIZZ_NONE_HINT = "隊伍搜尋器中未選擇職責：BGF以傷害輸出計算",
 	FAV_ADD = "右鍵：加入收藏",
 	FAV_REMOVE = "右鍵：移出收藏",
 	LINKED_BY = "隨%s一同選取。點擊：仍然關閉。",

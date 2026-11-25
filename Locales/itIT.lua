@@ -164,6 +164,7 @@ ns.RegisterLocale("itIT", {
 	CAT_combat = "Combattimento e utilità",
 	FAV_EMPTY = "Clic destro su un pulsante per aggiungerlo qui",
 	ROLES_NONE_HINT = "Nessun ruolo scelto: nessun filtro per ruolo",
+	ROLES_BLIZZ_NONE_HINT = "Nessun ruolo scelto nella ricerca gruppi: BGF ti conta come danni",
 	FAV_ADD = "Clic destro: aggiungi ai preferiti",
 	FAV_REMOVE = "Clic destro: rimuovi dai preferiti",
 	LINKED_BY = "Selezionato insieme a %s. Clic: disattiva comunque.",

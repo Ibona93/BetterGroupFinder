@@ -168,6 +168,7 @@ ns.RegisterLocale("enUS", {
 	CAT_combat = "Combat & utility",
 	FAV_EMPTY = "Right-click a chip to add it here",
 	ROLES_NONE_HINT = "No role chosen: roles are not filtered",
+	ROLES_BLIZZ_NONE_HINT = "No role chosen in the Group Finder: BGF counts you as damage",
 	FAV_ADD = "Right-click: add to favorites",
 	FAV_REMOVE = "Right-click: remove from favorites",
 	LINKED_BY = "Selected along with %s. Click to switch it off anyway.",

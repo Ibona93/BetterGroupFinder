@@ -401,6 +401,26 @@ do
 	check("17e one role chip on: not 'no role chosen'", ns.Engine.NoRoleChosen() == false)
 	ns.db.roleChips = {}
 	check("17f automatic roles: not 'no role chosen'", ns.Engine.NoRoleChosen() == false)
+
+	-- the actual report: no role in Blizzard's Group Finder (= damage), healer chip on
+	local chips = { TANK = false, HEALER = true, DAMAGER = false }
+	local blizzard = { dps = true }
+	local mine = ns.Engine.SoloRoles(blizzard, chips)
+	check("17g solo: role chips set by hand replace Blizzard's roles", mine.healer and not mine.dps and not mine.tank)
+	check("17h solo: automatic or all-off chips keep Blizzard's roles",
+		ns.Engine.SoloRoles(blizzard, {}) == blizzard and ns.Engine.SoloRoles(blizzard, { TANK = false, HEALER = false, DAMAGER = false }) == blizzard)
+	ns.db.roleChips = chips
+	ctx = dungeonCtx({ M("WARRIOR", 22, "TANK"), M("MAGE", 22, "DAMAGER") }, { M("PRIEST", 22, nil, mine) })
+	ctx.selfIsGuest = true
+	ctx.allowedGuestRoles = ns.Engine.AllowedRolesFor(true, 1)
+	r = S.Evaluate(ctx)
+	check("17i no Blizzard role + healer chip: group with a healer slot stays, you fill it", not r.excluded and hasReason(r, "R_SLOT_FREE", "HEALER"), reasonsText(r))
+	ctx = dungeonCtx({ M("WARRIOR", 22, "TANK"), M("MAGE", 22, "DAMAGER") }, { M("PRIEST", 22, nil, blizzard) })
+	ctx.selfIsGuest = true
+	ctx.allowedGuestRoles = ns.Engine.AllowedRolesFor(true, 1)
+	r = S.Evaluate(ctx)
+	check("17j (old behaviour without the fix: sorted out as 'damage not wanted')", r.excluded and hasReason(r, "R_ROLE_NOT_WANTED", "DAMAGER") or (r.excludeReason and r.excludeReason[2] == "R_ROLE_NOT_WANTED"), reasonsText(r))
+	ns.db.roleChips = {}
 end
 
 print("Abbreviations and template languages")

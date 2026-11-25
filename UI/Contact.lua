@@ -42,7 +42,9 @@ local function myRole(entry)
 	if entry and entry.myRole then return entry.myRole end
 	local assigned = UnitGroupRolesAssigned and UnitGroupRolesAssigned("player")
 	if assigned == "TANK" or assigned == "HEALER" or assigned == "DAMAGER" then return assigned end
-	local r = ns.Engine.GetMyRoles()
+	-- solo: role chips set by hand come first (1.0.1), then Blizzard's roles
+	local me = ns.Engine.GetMySide()[1]
+	local r = me and me.lfgRoles or ns.Engine.GetMyRoles()
 	if r.healer then return "HEALER" end
 	if r.tank then return "TANK" end
 	return "DAMAGER"

@@ -53,9 +53,11 @@ Offline tests can't replace the game. Before testing, enter `/console taintLog 1
 | 18 | Last tour page: "What's new?", "Open options", Discord field | news page 1.0.0 opens; options main page opens; link can be copied. In combat "Open options" only prints a hint |
 | 19 | Options main page → "Restart tour" | tour opens on page 1 above the settings window |
 | 20 | `/bgf check` after a game patch | prints client build, interface number and only the spell IDs the client does not know |
-| 21 | Solo, dungeons: switch off all three role chips | groups stay in the list (none sorted out as "… not wanted"); orange hint "No role chosen: roles are not filtered" next to the chips or in its own line, text not cut off |
-| 22 | Then switch one role chip on again / Reset | hint disappears; with one role on, groups without a slot for it are sorted out as before |
-| 23 | Category "Quests & zones" with all role chips off | no hint (role chips do nothing there) |
+| 21 | Solo, dungeons: untick every role in Blizzard's Group Finder, BGF role chips on automatic | orange hint "No role chosen in the Group Finder: BGF counts you as damage" next to the chips or in its own line, text not cut off; "Damage" chip lit |
+| 22 | Then switch the BGF chips to only "Healer" (as a class that can heal) | hint gone; groups with a free healer slot stay ("healer slot free"), none sorted out as "damage not wanted"; rating line in the bar shows "Healer"; template {role} says healer |
+| 23 | Switch off all three role chips | groups stay; hint "No role chosen: roles are not filtered" |
+| 24 | Reset / choose a role in Blizzard's Group Finder again | hint disappears, roles automatic as before |
+| 25 | Category "Quests & zones" in the cases above | no hint (role chips do nothing there) |
 
 ## Files
 
