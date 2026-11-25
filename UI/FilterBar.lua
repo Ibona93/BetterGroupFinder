@@ -806,11 +806,18 @@ function Bar.Layout()
 	if hint then
 		f.NoRoleHint:SetText(hint)
 		f.NoRoleHint:Show()
+		f.NoRoleHint:SetWordWrap(false)
+		f.NoRoleHint:SetWidth(0)
 		if x + 4 + f.NoRoleHint:GetStringWidth() + PADDING <= width then
 			f.NoRoleHint:SetPoint("LEFT", f, "TOPLEFT", x + 4, y - CHIP_HEIGHT / 2)
 		else
+			-- own line(s) under the chips, wrapped to the width of the bar
+			f.NoRoleHint:SetWordWrap(true)
+			f.NoRoleHint:SetWidth(width - LABEL_WIDTH - 2 - PADDING)
 			f.NoRoleHint:SetPoint("TOPLEFT", f, "TOPLEFT", LABEL_WIDTH + 2, y - CHIP_HEIGHT - 3)
-			y = y - 16
+			local h = f.NoRoleHint:GetStringHeight()
+			if type(h) ~= "number" or h <= 0 then h = 14 end
+			y = y - math.ceil(h) - 3
 		end
 	else
 		f.NoRoleHint:Hide()
