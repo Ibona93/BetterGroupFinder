@@ -167,6 +167,7 @@ ns.RegisterLocale("enUS", {
 	CAT_dispel = "Dispels",
 	CAT_combat = "Combat & utility",
 	FAV_EMPTY = "Right-click a chip to add it here",
+	ROLES_NONE_HINT = "No role chosen: roles are not filtered",
 	FAV_ADD = "Right-click: add to favorites",
 	FAV_REMOVE = "Right-click: remove from favorites",
 	LINKED_BY = "Selected along with %s. Click to switch it off anyway.",

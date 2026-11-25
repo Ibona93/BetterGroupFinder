@@ -53,6 +53,9 @@ Offline tests can't replace the game. Before testing, enter `/console taintLog 1
 | 18 | Last tour page: "What's new?", "Open options", Discord field | news page 1.0.0 opens; options main page opens; link can be copied. In combat "Open options" only prints a hint |
 | 19 | Options main page → "Restart tour" | tour opens on page 1 above the settings window |
 | 20 | `/bgf check` after a game patch | prints client build, interface number and only the spell IDs the client does not know |
+| 21 | Solo, dungeons: switch off all three role chips | groups stay in the list (none sorted out as "… not wanted"); orange hint "No role chosen: roles are not filtered" next to the chips or in its own line, text not cut off |
+| 22 | Then switch one role chip on again / Reset | hint disappears; with one role on, groups without a slot for it are sorted out as before |
+| 23 | Category "Quests & zones" with all role chips off | no hint (role chips do nothing there) |
 
 ## Files
 

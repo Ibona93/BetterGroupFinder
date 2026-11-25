@@ -163,6 +163,7 @@ local strings = {
 	CAT_dispel = "Disipaciones",
 	CAT_combat = "Combate y utilidades",
 	FAV_EMPTY = "Clic derecho en un botón para añadirlo aquí",
+	ROLES_NONE_HINT = "Ningún rol elegido: no se filtra por rol",
 	FAV_ADD = "Clic derecho: añadir a favoritos",
 	FAV_REMOVE = "Clic derecho: quitar de favoritos",
 	LINKED_BY = "Seleccionado junto con %s. Clic: desactivar de todos modos.",

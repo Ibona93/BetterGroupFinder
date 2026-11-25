@@ -218,7 +218,9 @@ local function matchesActivityFilter(info)
 	return false
 end
 
--- Roles the filter chips allow for the joining side (nil = automatic).
+-- Roles the filter chips allow for the joining side (nil = automatic / no restriction).
+-- All role chips switched off means "no role chosen": no role restriction at all (1.0.1).
+-- Before, it allowed no role, so every group was sorted out.
 function E.AllowedRoles()
 	local chips = ns.db and ns.db.roleChips
 	if not chips or next(chips) == nil then return nil end
@@ -226,7 +228,14 @@ function E.AllowedRoles()
 	for _, role in ipairs({ "TANK", "HEALER", "DAMAGER" }) do
 		if chips[role] then allowed[role] = true any = true end
 	end
-	return any and allowed or { NONE = true }
+	return any and allowed or nil
+end
+
+-- True when the role chips are set by hand and all of them are switched off.
+function E.NoRoleChosen()
+	local chips = ns.db and ns.db.roleChips
+	if not chips or next(chips) == nil then return false end
+	return not (chips.TANK or chips.HEALER or chips.DAMAGER)
 end
 
 -- Role chips depend on the point of view: solo and joining a group they are your own

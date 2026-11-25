@@ -29,6 +29,7 @@ local C = {
 	grey = { 0.6, 0.57, 0.52 },
 	dim = { 0.45, 0.42, 0.38 },
 	green = { 0.67, 0.83, 0.45 },
+	orange = { 1, 0.6, 0.2 },
 }
 local STYLES = {
 	need   = { bg = { 0.17, 0.13, 0.05, 1 }, border = { 0.79, 0.64, 0.29, 1 }, text = C.gold },
@@ -651,6 +652,10 @@ function Bar.Create(parent)
 		chip.label = words.roles[role]:gsub("^%l", string.upper)
 		f.RoleChips[#f.RoleChips + 1] = chip
 	end
+	-- All role chips switched off by hand: short hint next to them (1.0.1)
+	f.NoRoleHint = text(f, C.orange)
+	f.NoRoleHint:SetText(L.ROLES_NONE_HINT)
+	f.NoRoleHint:Hide()
 
 	-- Row 3: abilities
 	f.AbilitiesLabel = text(f, C.white)
@@ -712,7 +717,7 @@ function Bar.ApplyFonts()
 	local f = Bar.frame
 	if not f then return end
 	for _, fs in ipairs({ f.EnableText, f.Separator, f.RatingLabel, f.RatingValue,
-		f.RolesLabel, f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.Reset.Text, f.Save.Text, f.SaveDot, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
+		f.RolesLabel, f.NoRoleHint, f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.Reset.Text, f.Save.Text, f.SaveDot, f.LegendNeedText, f.LegendDot, f.LegendPrefText }) do
 		fs:SetFontObject(font())
 	end
 end
@@ -795,6 +800,19 @@ function Bar.Layout()
 		chip:ClearAllPoints()
 		chip:SetPoint("TOPLEFT", x, y)
 		x = x + chip:GetWidth() + CHIP_GAP
+	end
+	-- "No role chosen" hint: next to the chips, or in its own line when it does not fit.
+	f.NoRoleHint:ClearAllPoints()
+	if Bar.ShowNoRoleHint() then
+		f.NoRoleHint:Show()
+		if x + 4 + f.NoRoleHint:GetStringWidth() + PADDING <= width then
+			f.NoRoleHint:SetPoint("LEFT", f, "TOPLEFT", x + 4, y - CHIP_HEIGHT / 2)
+		else
+			f.NoRoleHint:SetPoint("TOPLEFT", f, "TOPLEFT", LABEL_WIDTH + 2, y - CHIP_HEIGHT - 3)
+			y = y - 16
+		end
+	else
+		f.NoRoleHint:Hide()
 	end
 	y = y - CHIP_HEIGHT - ROW_GAP
 
@@ -928,6 +946,11 @@ local function autoRoles()
 	return out, #mySide > 1
 end
 
+-- Hint "no role chosen": all role chips off by hand, in a category with role distribution.
+function Bar.ShowNoRoleHint()
+	return ns.Engine.NoRoleChosen() and Bar.CurrentProfile() ~= "other"
+end
+
 function Bar.ToggleRole(role)
 	local chips = ns.db.roleChips
 	if next(chips) == nil then
@@ -1040,7 +1063,7 @@ function Bar.Update()
 			chip:SetEnabled(enabled)
 		end
 	end
-	for _, region in ipairs({ f.Separator, f.RatingLabel, f.RatingValue, f.RolesLabel,
+	for _, region in ipairs({ f.Separator, f.RatingLabel, f.RatingValue, f.RolesLabel, f.NoRoleHint,
 		f.AbilitiesLabel, f.FavLabel, f.FavEmpty, f.LegendNeed, f.LegendNeedText, f.LegendDot, f.LegendPref, f.LegendPrefText }) do
 		region:SetAlpha(alpha)
 	end

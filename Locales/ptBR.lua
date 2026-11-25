@@ -163,6 +163,7 @@ ns.RegisterLocale("ptBR", {
 	CAT_dispel = "Dissipações",
 	CAT_combat = "Combate e utilidades",
 	FAV_EMPTY = "Clique com o botão direito em um botão para adicioná-lo aqui",
+	ROLES_NONE_HINT = "Nenhuma função escolhida: sem filtro por função",
 	FAV_ADD = "Botão direito: adicionar aos favoritos",
 	FAV_REMOVE = "Botão direito: remover dos favoritos",
 	LINKED_BY = "Selecionado junto com %s. Clique: desativar mesmo assim.",

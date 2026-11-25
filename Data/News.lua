@@ -24,7 +24,7 @@ local ICON = {
 	launch = "Interface\\Icons\\Spell_Holy_TurnUndead",
 }
 
-ns.NEWS_ORDER = { "1.0.0", "0.10.2", "0.10.1", "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
+ns.NEWS_ORDER = { "1.0.1", "1.0.0", "0.10.2", "0.10.1", "0.10.0", "0.9.0", "0.8.2", "0.8.1", "0.8.0" }
 ns.NEWS_FIRST = "0.8.0"   -- welcome page for new users
 
 ns.NEWS_UI = {
@@ -43,6 +43,16 @@ ns.NEWS_UI = {
 }
 
 ns.NEWS = {
+	["1.0.1"] = {
+		enUS = { title = "What's new in BGF", items = {
+			{ icon = ICON.reason, title = "Fix: no role chosen",
+				text = "With all role chips switched off, BGF sorted out every group. Now no role chosen means: roles are not filtered. A short hint next to the role chips tells you." },
+		} },
+		deDE = { title = "Neu in BGF", items = {
+			{ icon = ICON.reason, title = "Behoben: keine Rolle gewählt",
+				text = "Waren alle Rollen-Chips aus, hat BGF jede Gruppe aussortiert. Jetzt heißt keine Rolle: Es wird nicht nach Rollen gefiltert. Ein kurzer Hinweis neben den Rollen-Chips sagt das." },
+		} },
+	},
 	["1.0.0"] = {
 		enUS = { title = "What's new in BGF", items = {
 			{ icon = ICON.name, title = "BGF 1.0 for the launch of WoW Forever",

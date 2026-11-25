@@ -163,6 +163,7 @@ ns.RegisterLocale("frFR", {
 	CAT_dispel = "Dissipations",
 	CAT_combat = "Combat et utilitaires",
 	FAV_EMPTY = "Clic droit sur une puce pour l'ajouter ici",
+	ROLES_NONE_HINT = "Aucun rôle choisi : pas de filtre par rôle",
 	FAV_ADD = "Clic droit : ajouter aux favoris",
 	FAV_REMOVE = "Clic droit : retirer des favoris",
 	LINKED_BY = "Sélectionné avec %s. Clic : désactiver quand même.",

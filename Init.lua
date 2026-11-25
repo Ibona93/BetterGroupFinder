@@ -3,7 +3,7 @@
 local ADDON_NAME, ns = ...
 
 ns.ADDON_NAME = ADDON_NAME
-ns.VERSION = "1.0.0"
+ns.VERSION = "1.0.1"
 ns.DISCORD_URL = "https://discord.gg/4nPNJMYetV"   -- invite link that never expires
 
 -- Locale registries, filled by Locales/*.lua.

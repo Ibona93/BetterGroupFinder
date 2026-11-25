@@ -386,6 +386,23 @@ do
 	check("16e screenshot case: solo hunter opening a group gets the healer", not r.excluded and (hasReason(r, "R_FILLS_ROLE", "HEALER") or hasReason(r, "R_SLOT_FREE", "HEALER")), reasonsText(r))
 end
 
+print("No role chosen (1.0.1)")
+do
+	ns.db.roleChips = { TANK = false, HEALER = false, DAMAGER = false }
+	check("17a all role chips off counts as 'no role chosen'", ns.Engine.NoRoleChosen() == true)
+	check("17b all role chips off: no role restriction (joining)", ns.Engine.AllowedRolesFor(true, 1) == nil)
+	check("17c all role chips off: no role restriction (own group)", ns.Engine.AllowedRolesFor(false, 3) == nil)
+	local ctx = dungeonCtx({ M("WARRIOR", 22, "TANK"), M("PRIEST", 22, "HEALER") }, { M("MAGE", 21, nil, { dps = true }) })
+	ctx.selfIsGuest = true
+	ctx.allowedGuestRoles = ns.Engine.AllowedRolesFor(true, 1)
+	local r = S.Evaluate(ctx)
+	check("17d all role chips off: a group with a free slot is not sorted out", not r.excluded and hasReason(r, "R_SLOT_FREE", "DAMAGER"), reasonsText(r))
+	ns.db.roleChips = { TANK = false, HEALER = true, DAMAGER = false }
+	check("17e one role chip on: not 'no role chosen'", ns.Engine.NoRoleChosen() == false)
+	ns.db.roleChips = {}
+	check("17f automatic roles: not 'no role chosen'", ns.Engine.NoRoleChosen() == false)
+end
+
 print("Abbreviations and template languages")
 do
 	local function contains(list, value) for _, v in ipairs(list) do if v == value then return true end end return false end

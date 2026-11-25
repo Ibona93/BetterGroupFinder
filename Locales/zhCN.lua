@@ -163,6 +163,7 @@ ns.RegisterLocale("zhCN", {
 	CAT_dispel = "驱散",
 	CAT_combat = "战斗与辅助",
 	FAV_EMPTY = "右键点击按钮即可加入此处",
+	ROLES_NONE_HINT = "未选择职责：不按职责筛选",
 	FAV_ADD = "右键：加入收藏",
 	FAV_REMOVE = "右键：移出收藏",
 	LINKED_BY = "随%s一同选中。点击：仍然关闭。",

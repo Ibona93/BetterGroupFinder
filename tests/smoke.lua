@@ -515,7 +515,23 @@ check("ability chip cycles state", ok and ns.db.abilityStates.dungeon[chip.abili
 local roleChip = ns.FilterBar.frame.RoleChips[1]
 ok, err = pcall(roleChip.__scripts.OnClick, roleChip)
 check("role chip switches to manual roles", ok and next(ns.db.roleChips) ~= nil, err)
+check("... one role still on: no 'no role chosen' hint", not ns.FilterBar.frame.NoRoleHint.__shown)
+-- 1.0.1: all role chips off must not sort out every group
+ns.db.roleChips = { TANK = false, HEALER = false, DAMAGER = false }
+ok, err = pcall(ns.UI.Refresh)
+local noRole = ns.List.sections
+local noRoleOut = 0
+for _, e in ipairs(noRole and noRole.excluded or {}) do
+	if e.result.excludeReason and e.result.excludeReason[2] == "R_ROLE_NOT_WANTED" then noRoleOut = noRoleOut + 1 end
+end
+check("all role chips off: no group sorted out as 'role not wanted'", ok and noRole and noRoleOut == 0
+	and #noRole.groups > 0, err or noRoleOut)
+pcall(ns.UI.ApplyLayout)
+check("all role chips off: hint 'no role chosen' shows", ns.FilterBar.frame.NoRoleHint.__shown
+	and ns.FilterBar.frame.NoRoleHint.__text == ns.L.ROLES_NONE_HINT)
 ns.FilterBar.ResetFilters()
+pcall(ns.UI.ApplyLayout)
+check("reset: roles automatic again, hint gone", next(ns.db.roleChips) == nil and not ns.FilterBar.frame.NoRoleHint.__shown)
 local enableBox = ns.FilterBar.frame.Enable
 enableBox.__checked = false
 ok, err = pcall(enableBox.__scripts.OnClick, enableBox)
